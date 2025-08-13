@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:video_player_platform_interface/video_player_platform_interface.dart';
-import 'package:video_player_platform_interface/src/fake_video_player_platform.dart';
 import '../../../state/feed_controller.dart';
 import '../../../data/repos/feed_repository.dart';
 import '../../../data/models/post.dart';
@@ -34,10 +31,6 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     Locator.I.put<FeedController>(controller);
     controller.addListener(_onController);
     controller.loadInitial();
-
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      VideoPlayerPlatform.instance = FakeVideoPlayerPlatform();
-    }
 
     pool = ControllerPool<VideoPlayerController>(
       ctor: (url) async {
