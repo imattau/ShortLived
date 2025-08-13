@@ -4,12 +4,18 @@ import 'widgets/overlay_cluster.dart';
 import '../sheets/create_sheet.dart';
 import '../sheets/comments_sheet.dart';
 import '../sheets/zap_sheet.dart';
+import '../sheets/profile_sheet.dart';
+import '../sheets/details_sheet.dart';
+import '../sheets/relays_sheet.dart';
 import '../../core/di/locator.dart';
 import '../../core/config/network.dart';
 import '../../services/nostr/relay_service_ws.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/lightning/lightning_service_lnurl.dart';
+import '../../services/settings/settings_service.dart';
 import '../../state/feed_controller.dart';
+import '../../data/models/post.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class HomeFeedPage extends StatefulWidget {
@@ -23,6 +29,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
   bool pausedBySheet = false;
   late final RelayService relay;
   late final LightningServiceLnurl lightning;
+  late SettingsService settings;
 
   Future<void> _openCreate() async {
     setState(() => pausedBySheet = true);
@@ -30,10 +37,12 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.black,
-      builder: (ctx) => CreateSheet(onCreated: (post) {
-        // TODO: route to controller to insert
-        // We can find the nearest State of VideoPlayerView or keep a scoped controller
-      }),
+      builder: (ctx) => CreateSheet(
+        onCreated: (post) {
+          // TODO: route to controller to insert
+          // We can find the nearest State of VideoPlayerView or keep a scoped controller
+        },
+      ),
     );
     if (mounted) setState(() => pausedBySheet = false);
   }
@@ -45,6 +54,20 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
     relay.init(NetworkConfig.relays);
     Locator.I.put<RelayService>(relay);
     lightning = LightningServiceLnurl(relay);
+    SharedPreferences.getInstance().then((sp) {
+      settings = SettingsService(sp);
+      Locator.I.put<SettingsService>(settings);
+      Locator.I.get<FeedController>().setMuted(settings.muted());
+      setState(() {
+        overlaysVisible = !settings.overlaysDefaultHidden();
+      });
+    });
+  }
+
+  Post? get _currentPost {
+    final c = Locator.I.get<FeedController>();
+    if (c.posts.isEmpty) return null;
+    return c.posts[c.index];
   }
 
   void _like() {
@@ -61,7 +84,56 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       context: context,
       backgroundColor: Colors.black,
       builder: (_) => CommentsSheet(
-          parentEventId: p.id, parentPubkey: p.author.pubkey, relay: relay),
+        parentEventId: p.id,
+        parentPubkey: p.author.pubkey,
+        relay: relay,
+      ),
+    );
+    if (mounted) setState(() => pausedBySheet = false);
+  }
+
+  Future<void> _openRelays() async {
+    setState(() => pausedBySheet = true);
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
+      builder: (_) => RelaysSheet(settings: settings),
+    );
+    if (mounted) setState(() => pausedBySheet = false);
+  }
+
+  Future<void> _openProfile() async {
+    final p = _currentPost;
+    if (p == null) return;
+    setState(() => pausedBySheet = true);
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black,
+      builder: (_) => ProfileSheet(
+        controller: Locator.I.get<FeedController>(),
+        pubkey: p.author.pubkey,
+        displayName: p.author.name,
+      ),
+    );
+    if (mounted) setState(() => pausedBySheet = false);
+  }
+
+  Future<void> _openDetails() async {
+    final p = _currentPost;
+    if (p == null) return;
+    setState(() => pausedBySheet = true);
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black,
+      builder: (_) => DetailsSheet(
+        post: p,
+        settings: settings,
+        onMuted: () {
+          final mut = settings.muted();
+          Locator.I.get<FeedController>().setMuted(mut);
+        },
+      ),
     );
     if (mounted) setState(() => pausedBySheet = false);
   }
@@ -75,7 +147,10 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       context: context,
       backgroundColor: Colors.black,
       builder: (_) => ZapSheet(
-          lud16: 'tips@example.com', eventId: p.id, lightning: lightning),
+        lud16: 'tips@example.com',
+        eventId: p.id,
+        lightning: lightning,
+      ),
     );
     if (mounted) setState(() => pausedBySheet = false);
   }
@@ -99,10 +174,14 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
             child: OverlayCluster(
-                onCreateTap: _openCreate,
-                onLikeTap: _like,
-                onCommentTap: _comment,
-                onZapTap: _zap),
+              onCreateTap: _openCreate,
+              onLikeTap: _like,
+              onCommentTap: _comment,
+              onZapTap: _zap,
+              onProfileTap: _openProfile,
+              onDetailsTap: _openDetails,
+              onRelaysLongPress: _openRelays,
+            ),
           ),
           if (pausedBySheet)
             const Positioned(

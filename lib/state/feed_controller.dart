@@ -11,6 +11,7 @@ class FeedController extends ChangeNotifier {
 
   final List<Post> _posts = [];
   int _index = 0;
+  Set<String> _muted = {};
   void insertOptimistic(Post p) {
     _posts.insert(0, p);
     _index = 0;
@@ -35,6 +36,7 @@ class FeedController extends ChangeNotifier {
       ..clear()
       ..addAll(data);
     _index = 0;
+    _filterMuted();
     notifyListeners();
   }
 
@@ -64,5 +66,27 @@ class FeedController extends ChangeNotifier {
     );
     notifyListeners();
     unawaited(relay.like(eventId: p.id));
+  }
+
+  void setMuted(Set<String> muted) {
+    _muted = muted;
+    _filterMuted();
+  }
+
+  void _filterMuted() {
+    if (_posts.isEmpty) {
+      notifyListeners();
+      return;
+    }
+    final keep = _posts
+        .where((p) => !_muted.contains(p.author.pubkey))
+        .toList();
+    _posts
+      ..clear()
+      ..addAll(keep);
+    if (_index >= _posts.length) {
+      _index = _posts.isEmpty ? 0 : _posts.length - 1;
+    }
+    notifyListeners();
   }
 }
