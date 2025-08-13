@@ -4,6 +4,7 @@ import 'package:nostr_video/ui/home/home_feed_page.dart';
 import '../test_utils/fake_video_player_platform.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() {
     FakeVideoPlayerPlatform.register();
   });
@@ -13,7 +14,7 @@ void main() {
     final pv = find.byKey(const Key('feed-pageview'));
     expect(pv, findsOneWidget);
     // Long-press overlays to ensure no rebuild of PageView
-    await tester.longPress(find.byType(GestureDetector));
+    await tester.longPress(find.byKey(const Key('feed-gesture')));
     await tester.pumpAndSettle();
     expect(pv, findsOneWidget);
   });
