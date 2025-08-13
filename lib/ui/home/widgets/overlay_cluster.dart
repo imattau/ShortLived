@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class OverlayCluster extends StatelessWidget {
-  const OverlayCluster({super.key});
+  const OverlayCluster({super.key, required this.onCreateTap});
+  final VoidCallback onCreateTap;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +63,7 @@ class OverlayCluster extends StatelessWidget {
             left: 0, right: 0, bottom: 16,
             child: Center(
               child: FloatingActionButton.large(
-                onPressed: () {},
+                onPressed: onCreateTap,
                 child: const Icon(Icons.add),
               ),
             ),

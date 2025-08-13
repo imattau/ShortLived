@@ -13,6 +13,7 @@ dependencies:
   video_player: any
   chewie: any
   dio: any
+  file_picker: ^8.0.0
   hive: any
   hive_flutter: any
   shared_preferences: any

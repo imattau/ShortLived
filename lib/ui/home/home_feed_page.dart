@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/video_player_view.dart';
 import 'widgets/overlay_cluster.dart';
+import '../sheets/create_sheet.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -10,6 +11,21 @@ class HomeFeedPage extends StatefulWidget {
 
 class _HomeFeedPageState extends State<HomeFeedPage> {
   bool overlaysVisible = true;
+  bool pausedBySheet = false;
+
+  Future<void> _openCreate() async {
+    setState(() => pausedBySheet = true);
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.black,
+      builder: (ctx) => CreateSheet(onCreated: (post) {
+        // TODO: route to controller to insert
+        // We can find the nearest State of VideoPlayerView or keep a scoped controller
+      }),
+    );
+    if (mounted) setState(() => pausedBySheet = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +36,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
             behavior: HitTestBehavior.opaque,
             onTap: () {}, // play/pause will wire later
             onDoubleTap: () {}, // like will wire later
-            onLongPress: () =>
-                setState(() => overlaysVisible = !overlaysVisible),
+            onLongPress: () => setState(() => overlaysVisible = !overlaysVisible),
             child: const VideoPlayerView(),
           ),
           const _GradientScrim(top: true),
@@ -29,8 +44,21 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
           AnimatedOpacity(
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
-            child: const OverlayCluster(),
+            child: OverlayCluster(onCreateTap: _openCreate),
           ),
+          if (pausedBySheet)
+            const Positioned(
+              top: 8,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  key: Key('paused-banner'),
+                  height: 6,
+                  width: 80,
+                ),
+              ),
+            ),
         ],
       ),
     );

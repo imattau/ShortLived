@@ -9,6 +9,11 @@ class FeedController extends ChangeNotifier {
 
   final List<Post> _posts = [];
   int _index = 0;
+  void insertOptimistic(Post p) {
+    _posts.insert(0, p);
+    _index = 0;
+    notifyListeners();
+  }
 
   List<Post> get posts => List.unmodifiable(_posts);
   int get index => _index;
