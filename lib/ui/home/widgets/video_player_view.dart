@@ -3,6 +3,7 @@ import '../../../state/feed_controller.dart';
 import '../../../data/repos/feed_repository.dart';
 import '../../../data/models/post.dart';
 import 'video_card.dart';
+import '../../../core/di/locator.dart';
 
 class VideoPlayerView extends StatefulWidget {
   const VideoPlayerView({super.key});
@@ -19,6 +20,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
   void initState() {
     super.initState();
     controller = FeedController(MockFeedRepository());
+    Locator.I.put<FeedController>(controller);
     controller.addListener(_onController);
     controller.loadInitial();
   }

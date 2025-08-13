@@ -19,6 +19,7 @@ dependencies:
   shared_preferences: any
   collection: any
   equatable: any
+  web_socket_channel: ^2.4.0
 
 dev_dependencies:
   flutter_test:
