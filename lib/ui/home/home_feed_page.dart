@@ -15,6 +15,8 @@ import '../../services/lightning/lightning_service_lnurl.dart';
 import '../../services/settings/settings_service.dart';
 import '../../state/feed_controller.dart';
 import '../../data/models/post.dart';
+import '../../services/queue/action_queue.dart';
+import '../../services/queue/action_queue_hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -24,12 +26,13 @@ class HomeFeedPage extends StatefulWidget {
   State<HomeFeedPage> createState() => _HomeFeedPageState();
 }
 
-class _HomeFeedPageState extends State<HomeFeedPage> {
+class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver {
   bool overlaysVisible = true;
   bool pausedBySheet = false;
   late final RelayService relay;
   late final LightningServiceLnurl lightning;
   late SettingsService settings;
+  late ActionQueue queue;
 
   Future<void> _openCreate() async {
     setState(() => pausedBySheet = true);
@@ -50,10 +53,20 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     relay = RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
     relay.init(NetworkConfig.relays);
     Locator.I.put<RelayService>(relay);
     lightning = LightningServiceLnurl(relay);
+    queue = ActionQueueHive();
+    queue.init();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final c = Locator.I.get<FeedController>();
+        c.bindQueue(queue);
+        c.setOnline(true, relay: Locator.I.get<RelayService>());
+      }
+    });
     SharedPreferences.getInstance().then((sp) {
       settings = SettingsService(sp);
       Locator.I.put<SettingsService>(settings);
@@ -62,6 +75,19 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
         overlaysVisible = !settings.overlaysDefaultHidden();
       });
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      Locator.I.get<FeedController>().replayQueue(relay);
+    }
   }
 
   Post? get _currentPost {
@@ -161,11 +187,11 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
       body: Stack(
         children: [
           GestureDetector(
+            key: const Key('feed-gesture'),
             behavior: HitTestBehavior.opaque,
             onTap: () {}, // play/pause will wire later
             onDoubleTap: _like,
-            onLongPress: () =>
-                setState(() => overlaysVisible = !overlaysVisible),
+            onLongPress: () => setState(() => overlaysVisible = !overlaysVisible),
             child: const VideoPlayerView(),
           ),
           const _GradientScrim(top: true),
