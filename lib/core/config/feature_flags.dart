@@ -1,1 +1,3 @@
-// TODO: feature flags
+class FeatureFlags {
+  static const overlaysDefaultHidden = false;
+}
