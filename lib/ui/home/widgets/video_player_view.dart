@@ -22,6 +22,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
 
   late final ControllerPool<VideoPlayerController> pool;
   Timer? _initDebounce;
+  Future<void>? _refreshing;
 
   @override
   void initState() {
@@ -70,7 +71,13 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     _refreshPool();
   }
 
-  Future<void> _refreshPool() async {
+  Future<void> _refreshPool() {
+    final future = _doRefresh();
+    _refreshing = future;
+    return future;
+  }
+
+  Future<void> _doRefresh() async {
     if (!mounted) return;
     final posts = controller.posts;
     if (posts.isEmpty) return;
@@ -80,7 +87,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     if (idx + 1 < posts.length) keep.add(idx + 1);
 
     // Map urls for the keep set only
-    final m = <int, String>{ for (final i in keep) i : posts[i].url };
+    final m = <int, String>{for (final i in keep) i: posts[i].url};
 
     await pool.ensureFor(indexToUrl: m, keep: keep);
 
@@ -93,9 +100,14 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     _initDebounce?.cancel();
     controller.removeListener(_onController);
     pageController.dispose();
-    pool.clear();
     WidgetsBinding.instance.removeObserver(this);
+    _disposeAsync();
     super.dispose();
+  }
+
+  Future<void> _disposeAsync() async {
+    await _refreshing;
+    await pool.clear();
   }
 
   @override
