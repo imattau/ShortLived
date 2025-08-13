@@ -9,28 +9,23 @@ class HomeFeedPage extends StatefulWidget {
 }
 
 class _HomeFeedPageState extends State<HomeFeedPage> {
-  bool playing = true; // mocked for now
-  bool overlaysVisible = true; // wired to controller later
+  bool overlaysVisible = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Video layer (will become PageView in PR 3)
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => setState(() => playing = !playing),
-            onDoubleTap: () {
-              // TODO: trigger mock like + heart animation
-            },
-            onLongPress: () => setState(() => overlaysVisible = !overlaysVisible),
-            child: const VideoPlayerView(), // placeholder black screen
+            onTap: () {}, // play/pause will wire later
+            onDoubleTap: () {}, // like will wire later
+            onLongPress: () =>
+                setState(() => overlaysVisible = !overlaysVisible),
+            child: const VideoPlayerView(),
           ),
-          // Scrims
           const _GradientScrim(top: true),
           const _GradientScrim(top: false),
-          // Overlays
           AnimatedOpacity(
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
