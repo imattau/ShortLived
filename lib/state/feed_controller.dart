@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../data/models/post.dart';
 import '../data/repos/feed_repository.dart';
 import '../services/nostr/relay_service.dart';
+import '../services/queue/action_queue.dart';
 import 'dart:async';
 
 /// Minimal controller. Replace with Riverpod later if desired.
@@ -12,6 +13,9 @@ class FeedController extends ChangeNotifier {
   final List<Post> _posts = [];
   int _index = 0;
   Set<String> _muted = {};
+  bool _online = true;
+  ActionQueue? _queue;
+  RelayService? _relayForReplay;
   void insertOptimistic(Post p) {
     _posts.insert(0, p);
     _index = 0;
@@ -46,6 +50,15 @@ class FeedController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void bindQueue(ActionQueue q) {
+    _queue = q;
+  }
+
+  void setOnline(bool v, {RelayService? relay}) {
+    _online = v;
+    _relayForReplay = relay ?? _relayForReplay;
+  }
+
   Future<void> likeCurrent(RelayService relay) async {
     if (_posts.isEmpty) return;
     final p = _posts[_index];
@@ -65,12 +78,72 @@ class FeedController extends ChangeNotifier {
       createdAt: p.createdAt,
     );
     notifyListeners();
-    unawaited(relay.like(eventId: p.id));
+
+    final action = QueuedAction(ActionType.like, {'eventId': p.id});
+    if (!_online || _queue == null) {
+      try {
+        await relay.like(eventId: p.id);
+      } catch (_) {}
+      return;
+    }
+
+    try {
+      await relay.like(eventId: p.id);
+    } catch (_) {
+      await _queue!.enqueue(action);
+    }
   }
 
   void setMuted(Set<String> muted) {
     _muted = muted;
     _filterMuted();
+  }
+
+  Future<void> enqueuePublish(Map<String, dynamic> eventJson) async {
+    if (_queue == null) return;
+    await _queue!.enqueue(QueuedAction(ActionType.publish, {'event': eventJson}));
+  }
+
+  Future<void> enqueueReply(String parentId, String content, {String? parentPubkey}) async {
+    if (_queue == null) return;
+    await _queue!.enqueue(QueuedAction(ActionType.reply, {
+      'parentId': parentId,
+      'content': content,
+      'parentPubkey': parentPubkey ?? '',
+    }));
+  }
+
+  Future<void> replayQueue(RelayService relay) async {
+    if (_queue == null) return;
+    final items = await _queue!.all();
+    int processed = 0;
+    for (final a in items) {
+      try {
+        switch (a.type) {
+          case ActionType.publish:
+            await relay.publishEvent(Map<String, dynamic>.from(a.payload['event'] as Map));
+            break;
+          case ActionType.like:
+            await relay.like(eventId: a.payload['eventId'] as String);
+            break;
+          case ActionType.reply:
+            await relay.reply(
+              parentId: a.payload['parentId'] as String,
+              content: a.payload['content'] as String,
+              parentPubkey: (a.payload['parentPubkey'] as String).isEmpty
+                  ? null
+                  : a.payload['parentPubkey'] as String,
+            );
+            break;
+        }
+        processed++;
+      } catch (_) {
+        break;
+      }
+    }
+    if (processed > 0) {
+      await _queue!.removeFirstN(processed);
+    }
   }
 
   void _filterMuted() {
