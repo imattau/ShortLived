@@ -5,6 +5,7 @@ import '../test_utils/fake_video_player_platform.dart';
 
 void main() {
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     FakeVideoPlayerPlatform.register();
   });
   testWidgets('long-press hides and shows overlays', (tester) async {
