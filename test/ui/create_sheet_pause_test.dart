@@ -17,5 +17,7 @@ void main() {
     await tester.pumpAndSettle();
     // Paused banner should be visible while sheet is open
     expect(find.byKey(const Key('paused-banner')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }

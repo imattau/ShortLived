@@ -18,6 +18,8 @@ void main() {
     // Long press to show
     await tester.longPress(find.byType(GestureDetector).first);
     await tester.pumpAndSettle();
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 
   testWidgets('double-tap does not toggle overlays', (tester) async {
@@ -27,5 +29,7 @@ void main() {
     await tester.tap(find.byType(GestureDetector).first); // second tap quickly
     await tester.pumpAndSettle();
     // No assertion beyond not crashing; later we assert like animation
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }

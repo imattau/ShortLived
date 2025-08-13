@@ -18,5 +18,8 @@ void main() {
       final n = int.parse(text);
       expect(n <= 3, true);
     }
+    // Remove the widget tree to ensure controllers are disposed
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }

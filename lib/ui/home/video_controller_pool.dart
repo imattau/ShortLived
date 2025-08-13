@@ -36,9 +36,11 @@ class ControllerPool<T> {
   T? operator [](int i) => _map[i];
 
   Future<void> clear() async {
-    for (final e in _map.entries) {
-      await dispose(e.value);
-    }
+    // Take a snapshot to avoid concurrent modification if ensureFor is active
+    final values = _map.values.toList();
     _map.clear();
+    for (final controller in values) {
+      await dispose(controller);
+    }
   }
 }

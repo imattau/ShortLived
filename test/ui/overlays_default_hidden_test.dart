@@ -15,5 +15,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
     await tester.pumpAndSettle();
     expect(find.byType(AnimatedOpacity), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }

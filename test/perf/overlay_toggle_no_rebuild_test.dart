@@ -18,5 +18,8 @@ void main() {
     await tester.longPress(find.byKey(const Key('feed-gesture')));
     await tester.pumpAndSettle();
     expect(finder, findsOneWidget);
+    // Remove the widget tree to allow controller disposal
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }

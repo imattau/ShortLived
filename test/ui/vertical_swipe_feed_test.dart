@@ -23,5 +23,7 @@ void main() {
 
     // Should now show Playing on a different card
     expect(find.textContaining('Playing'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
   });
 }
