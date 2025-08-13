@@ -1,4 +1,4 @@
-name: shortlived
+name: nostr_video
 description: One-screen overlay UI Nostr short-video app.
 publish_to: 'none'
 
