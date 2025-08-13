@@ -21,5 +21,9 @@ void main() {
     // Remove the widget tree to ensure controllers are disposed
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();
+    // Allow async disposals (pause/dispose) to run so timers are cleared
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    });
   });
 }
