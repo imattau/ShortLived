@@ -1,0 +1,30 @@
+name: shortlived
+description: One-screen overlay UI Nostr short-video app.
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: any
+  video_player: any
+  chewie: any
+  dio: any
+  hive: any
+  hive_flutter: any
+  shared_preferences: any
+  collection: any
+  equatable: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: any
+  build_runner: any
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true
