@@ -1,8 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:nostr_video/ui/home/home_feed_page.dart';
+import '../test_utils/fake_video_player_platform.dart';
 
 void main() {
+  setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    FakeVideoPlayerPlatform.register();
+  });
   testWidgets('long-press hides and shows overlays', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
     // Start visible
