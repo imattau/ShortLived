@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
 class OverlayCluster extends StatelessWidget {
-  const OverlayCluster({super.key, required this.onCreateTap, required this.onLikeTap});
+  const OverlayCluster(
+      {super.key,
+      required this.onCreateTap,
+      required this.onLikeTap,
+      required this.onCommentTap,
+      required this.onZapTap});
   final VoidCallback onCreateTap;
   final VoidCallback onLikeTap;
+  final VoidCallback onCommentTap;
+  final VoidCallback onZapTap;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +19,8 @@ class OverlayCluster extends StatelessWidget {
         children: [
           // Top-left glyph (long-press later to open Relays sheet)
           Positioned(
-            left: 12, top: 8,
+            left: 12,
+            top: 8,
             child: IconButton(
               icon: const Icon(Icons.blur_on),
               tooltip: 'App',
@@ -21,7 +29,8 @@ class OverlayCluster extends StatelessWidget {
           ),
           // Top-right search
           Positioned(
-            right: 12, top: 8,
+            right: 12,
+            top: 8,
             child: IconButton(
               icon: const Icon(Icons.search),
               tooltip: 'Search',
@@ -37,11 +46,20 @@ class OverlayCluster extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(icon: const Icon(Icons.favorite_border), onPressed: onLikeTap),
-                    IconButton(icon: const Icon(Icons.chat_bubble_outline), onPressed: () {}),
-                    IconButton(icon: const Icon(Icons.bolt_outlined), onPressed: () {}),
-                    IconButton(icon: const Icon(Icons.ios_share), onPressed: () {}),
-                    IconButton(icon: const Icon(Icons.person_outline), onPressed: () {}),
+                    IconButton(
+                        icon: const Icon(Icons.favorite_border),
+                        onPressed: onLikeTap),
+                    IconButton(
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        onPressed: onCommentTap),
+                    IconButton(
+                        icon: const Icon(Icons.bolt_outlined),
+                        onPressed: onZapTap),
+                    IconButton(
+                        icon: const Icon(Icons.ios_share), onPressed: () {}),
+                    IconButton(
+                        icon: const Icon(Icons.person_outline),
+                        onPressed: () {}),
                   ],
                 ),
               ),
@@ -49,19 +67,24 @@ class OverlayCluster extends StatelessWidget {
           ),
           // Bottom-left author + caption
           Positioned(
-            left: 12, right: 96, bottom: 84,
+            left: 12,
+            right: 96,
+            bottom: 84,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text('@author', style: TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 6),
-                Text('Caption goes here #tags', maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text('Caption goes here #tags',
+                    maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
           // Bottom-centre Create FAB
           Positioned(
-            left: 0, right: 0, bottom: 16,
+            left: 0,
+            right: 0,
+            bottom: 16,
             child: Center(
               child: FloatingActionButton.large(
                 onPressed: onCreateTap,

@@ -20,6 +20,7 @@ dependencies:
   collection: any
   equatable: any
   web_socket_channel: ^2.4.0
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
