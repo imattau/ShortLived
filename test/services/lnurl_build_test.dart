@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nostr_video/state/feed_controller.dart';
-import 'package:nostr_video/data/repos/feed_repository.dart';
+import 'package:nostr_video/services/lightning/lightning_service_lnurl.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 
 class _NoopRelay implements RelayService {
@@ -26,11 +25,12 @@ class _NoopRelay implements RelayService {
 }
 
 void main() {
-  test('optimistic like increments count', () async {
-    final c = FeedController(MockFeedRepository(count: 1));
-    await c.loadInitial();
-    final before = c.posts.first.likeCount;
-    await c.likeCurrent(_NoopRelay());
-    expect(c.posts.first.likeCount, before + 1);
+  test('builds lightning deep link', () {
+    final svc = LightningServiceLnurl(_NoopRelay());
+    final uri = svc.buildLnurl('alice@wallet.example', 1000, note: 'Hi');
+    expect(uri.scheme, 'lightning');
+    expect(uri.path, 'alice@wallet.example');
+    expect(uri.queryParameters['amount'], '1000');
+    expect(uri.queryParameters['comment'], 'Hi');
   });
 }

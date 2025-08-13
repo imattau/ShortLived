@@ -12,8 +12,13 @@ class RelayServiceWs implements RelayService {
   final Map<String, WebSocketChannel?> _ch = {};
   final Map<String, int> _attempts = {};
   final Backoff _backoff;
+  final _eventsCtrl = StreamController<Map<String, dynamic>>.broadcast();
 
-  RelayServiceWs({required this.factory, Backoff? backoff}) : _backoff = backoff ?? Backoff();
+  @override
+  Stream<Map<String, dynamic>> get events => _eventsCtrl.stream;
+
+  RelayServiceWs({required this.factory, Backoff? backoff})
+      : _backoff = backoff ?? Backoff();
 
   @override
   Future<void> init(List<String> relays) async {
@@ -31,7 +36,13 @@ class RelayServiceWs implements RelayService {
       _attempts[url] = 0;
       ws.stream.listen(
         (msg) {
-          // For now we do not parse replies. Future: handle OK, NOTICE, EOSE.
+          try {
+            final data = (msg is String) ? jsonDecode(msg) : msg;
+            if (data is List && data.isNotEmpty && data[0] == 'EVENT') {
+              final evt = data.length > 2 ? data[2] : null;
+              if (evt is Map<String, dynamic>) _eventsCtrl.add(evt);
+            }
+          } catch (_) {/* ignore */}
         },
         onDone: () => _scheduleReconnect(url),
         onError: (_) => _scheduleReconnect(url),
@@ -54,7 +65,8 @@ class RelayServiceWs implements RelayService {
   }
 
   @override
-  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) async* {
+  Stream<List<dynamic>> subscribeFeed(
+      {required List<String> authors, String? hashtag}) async* {
     yield const [];
   }
 
@@ -71,7 +83,8 @@ class RelayServiceWs implements RelayService {
         }
       }
     }
-    return (eventJson['id'] as String?) ?? 'tmp_${DateTime.now().microsecondsSinceEpoch}';
+    return (eventJson['id'] as String?) ??
+        'tmp_${DateTime.now().microsecondsSinceEpoch}';
   }
 
   @override
@@ -89,21 +102,29 @@ class RelayServiceWs implements RelayService {
   }
 
   @override
-  Future<void> reply({required String parentId, required String content}) async {
+  Future<void> reply(
+      {required String parentId,
+      required String content,
+      String? parentPubkey}) async {
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final tags = <List<String>>[
+      ["e", parentId],
+    ];
+    if (parentPubkey != null && parentPubkey.isNotEmpty) {
+      tags.add(["p", parentPubkey]);
+    }
     final evt = <String, dynamic>{
       "kind": 1,
       "content": content,
-      "tags": [
-        ["e", parentId],
-      ],
+      "tags": tags,
       "created_at": now,
     };
     await publishEvent(evt);
   }
 
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {
+  Future<void> zapRequest(
+      {required String eventId, required int millisats}) async {
     // Not implemented yet
   }
 }
