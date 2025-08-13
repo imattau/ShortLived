@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'widgets/video_player_view.dart';
 import 'widgets/overlay_cluster.dart';
 import '../sheets/create_sheet.dart';
+import '../../core/di/locator.dart';
+import '../../core/config/network.dart';
+import '../../services/nostr/relay_service_ws.dart';
+import '../../services/nostr/relay_service.dart';
+import '../../state/feed_controller.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -12,6 +18,7 @@ class HomeFeedPage extends StatefulWidget {
 class _HomeFeedPageState extends State<HomeFeedPage> {
   bool overlaysVisible = true;
   bool pausedBySheet = false;
+  late final RelayService relay;
 
   Future<void> _openCreate() async {
     setState(() => pausedBySheet = true);
@@ -28,6 +35,19 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    relay = RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
+    relay.init(NetworkConfig.relays);
+    Locator.I.put<RelayService>(relay);
+  }
+
+  void _like() {
+    final controller = Locator.I.get<FeedController>();
+    controller.likeCurrent(relay);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
@@ -35,7 +55,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {}, // play/pause will wire later
-            onDoubleTap: () {}, // like will wire later
+            onDoubleTap: _like,
             onLongPress: () => setState(() => overlaysVisible = !overlaysVisible),
             child: const VideoPlayerView(),
           ),
@@ -44,7 +64,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> {
           AnimatedOpacity(
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
-            child: OverlayCluster(onCreateTap: _openCreate),
+            child: OverlayCluster(onCreateTap: _openCreate, onLikeTap: _like),
           ),
           if (pausedBySheet)
             const Positioned(

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class OverlayCluster extends StatelessWidget {
-  const OverlayCluster({super.key, required this.onCreateTap});
+  const OverlayCluster({super.key, required this.onCreateTap, required this.onLikeTap});
   final VoidCallback onCreateTap;
+  final VoidCallback onLikeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class OverlayCluster extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(icon: const Icon(Icons.favorite_border), onPressed: () {}),
+                    IconButton(icon: const Icon(Icons.favorite_border), onPressed: onLikeTap),
                     IconButton(icon: const Icon(Icons.chat_bubble_outline), onPressed: () {}),
                     IconButton(icon: const Icon(Icons.bolt_outlined), onPressed: () {}),
                     IconButton(icon: const Icon(Icons.ios_share), onPressed: () {}),

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../data/models/post.dart';
 import '../data/repos/feed_repository.dart';
+import '../services/nostr/relay_service.dart';
+import 'dart:async';
 
 /// Minimal controller. Replace with Riverpod later if desired.
 class FeedController extends ChangeNotifier {
@@ -40,5 +42,27 @@ class FeedController extends ChangeNotifier {
     if (i == _index) return;
     _index = i;
     notifyListeners();
+  }
+
+  Future<void> likeCurrent(RelayService relay) async {
+    if (_posts.isEmpty) return;
+    final p = _posts[_index];
+    _posts[_index] = Post(
+      id: p.id,
+      author: p.author,
+      caption: p.caption,
+      tags: p.tags,
+      url: p.url,
+      thumb: p.thumb,
+      mime: p.mime,
+      width: p.width,
+      height: p.height,
+      duration: p.duration,
+      likeCount: p.likeCount + 1,
+      commentCount: p.commentCount,
+      createdAt: p.createdAt,
+    );
+    notifyListeners();
+    unawaited(relay.like(eventId: p.id));
   }
 }

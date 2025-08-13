@@ -1,0 +1,23 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nostr_video/state/feed_controller.dart';
+import 'package:nostr_video/data/repos/feed_repository.dart';
+import 'package:nostr_video/services/nostr/relay_service.dart';
+
+class _NoopRelay implements RelayService {
+  @override Future<void> init(List<String> relays) async {}
+  @override Future<void> like({required String eventId}) async {}
+  @override Future<String> publishEvent(Map<String, dynamic> e) async => 'id';
+  @override Future<void> reply({required String parentId, required String content}) async {}
+  @override Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) async* {}
+  @override Future<void> zapRequest({required String eventId, required int millisats}) async {}
+}
+
+void main() {
+  test('optimistic like increments count', () async {
+    final c = FeedController(MockFeedRepository(count: 1));
+    await c.loadInitial();
+    final before = c.posts.first.likeCount;
+    await c.likeCurrent(_NoopRelay());
+    expect(c.posts.first.likeCount, before + 1);
+  });
+}
