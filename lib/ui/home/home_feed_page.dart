@@ -19,6 +19,7 @@ import '../../services/queue/action_queue.dart';
 import '../../services/queue/action_queue_hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import '../../core/testing/test_switches.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -53,7 +54,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
     WidgetsBinding.instance.addObserver(this);
     relay = Locator.I.tryGet<RelayService>() ??
         RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
-    if (!Locator.I.contains<RelayService>()) {
+    if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
     }
@@ -63,13 +64,15 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
       queue.init();
       Locator.I.put<ActionQueue>(queue);
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final c = Locator.I.get<FeedController>();
-        c.bindQueue(queue);
-        c.setOnline(true, relay: Locator.I.get<RelayService>());
-      }
-    });
+    if (!TestSwitches.disableRelays) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final c = Locator.I.get<FeedController>();
+          c.bindQueue(queue);
+          c.setOnline(true, relay: Locator.I.get<RelayService>());
+        }
+      });
+    }
     final existing = Locator.I.tryGet<SettingsService>();
     if (existing != null) {
       settings = existing;

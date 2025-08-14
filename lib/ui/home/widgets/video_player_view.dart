@@ -7,6 +7,7 @@ import '../../../data/models/post.dart';
 import '../video_controller_pool.dart';
 import 'video_card.dart';
 import 'package:nostr_video/core/di/locator.dart';
+import '../../../core/testing/test_switches.dart';
 
 class VideoPlayerView extends StatefulWidget {
   const VideoPlayerView({super.key, required this.globalPaused});
@@ -20,7 +21,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
   late final FeedController controller;
   final PageController pageController = PageController();
 
-  late final ControllerPool<VideoPlayerController> pool;
+  ControllerPool<VideoPlayerController>? pool;
   Timer? _initDebounce;
   Future<void>? _refreshing;
 
@@ -33,22 +34,24 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     controller.addListener(_onController);
     controller.loadInitial();
 
-    pool = ControllerPool<VideoPlayerController>(
-      ctor: (url) async {
-        final c = VideoPlayerController.networkUrl(Uri.parse(url));
-        await c.initialize();
-        await c.setLooping(true);
-        await c.setVolume(1.0);
-        return c;
+    if (!TestSwitches.disableVideo) {
+      pool = ControllerPool<VideoPlayerController>(
+        ctor: (url) async {
+          final c = VideoPlayerController.networkUrl(Uri.parse(url));
+          await c.initialize();
+          await c.setLooping(true);
+          await c.setVolume(1.0);
+          return c;
         },
-      dispose: (c) async {
-        await c.pause();
-        await c.dispose();
-      },
-    );
+        dispose: (c) async {
+          await c.pause();
+          await c.dispose();
+        },
+      );
 
-    // Warm initial controllers after first data load
-    _initDebounce = Timer(const Duration(milliseconds: 100), _refreshPool);
+      // Warm initial controllers after first data load
+      _initDebounce = Timer(const Duration(milliseconds: 100), _refreshPool);
+    }
   }
 
   @override
@@ -72,13 +75,14 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
   }
 
   Future<void> _refreshPool() {
+    if (TestSwitches.disableVideo) return Future.value();
     final future = _doRefresh();
     _refreshing = future;
     return future;
   }
 
   Future<void> _doRefresh() async {
-    if (!mounted) return;
+    if (!mounted || TestSwitches.disableVideo || pool == null) return;
     final posts = controller.posts;
     if (posts.isEmpty) return;
     final idx = controller.index;
@@ -89,7 +93,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     // Map urls for the keep set only
     final m = <int, String>{for (final i in keep) i: posts[i].url};
 
-    await pool.ensureFor(indexToUrl: m, keep: keep);
+    await pool!.ensureFor(indexToUrl: m, keep: keep);
 
     // Auto play/pause current based on global state is handled in RealVideoView
     if (mounted) setState(() {});
@@ -107,7 +111,9 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
 
   Future<void> _disposeAsync() async {
     await _refreshing;
-    await pool.clear();
+    if (!TestSwitches.disableVideo) {
+      await pool?.clear();
+    }
   }
 
   @override
@@ -116,6 +122,8 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     if (posts.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    final useVideo = !TestSwitches.disableVideo && pool != null;
 
     return Stack(
       fit: StackFit.expand,
@@ -132,7 +140,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
             final Post p = posts[i];
             final isCurrent = i == controller.index;
             final isNeighbour = controller.preloadCandidates.contains(i);
-            final ctl = pool[i];
+            final ctl = useVideo ? pool![i] : null;
             return VideoCard(
               post: p,
               isCurrent: isCurrent,
@@ -144,8 +152,13 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
         ),
         // Debug: show active controller count
         Positioned(
-          right: 8, top: 8,
-          child: Text('${pool.size}', key: const Key('active-controllers'), style: const TextStyle(fontSize: 10)),
+          right: 8,
+          top: 8,
+          child: Text(
+            useVideo ? '${pool!.size}' : '0',
+            key: const Key('active-controllers'),
+            style: const TextStyle(fontSize: 10),
+          ),
         ),
       ],
     );

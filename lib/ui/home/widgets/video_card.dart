@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../../data/models/post.dart';
 import 'real_video_view.dart';
+import '../../../core/testing/test_switches.dart';
 
 class VideoCard extends StatelessWidget {
   final Post post;
@@ -20,7 +21,8 @@ class VideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPlaying = isCurrent && !globalPaused && controller != null;
+    final isPlaying =
+        isCurrent && !globalPaused && (controller != null || TestSwitches.disableVideo);
     return Stack(
       fit: StackFit.expand,
       children: [
