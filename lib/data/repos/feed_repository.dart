@@ -88,9 +88,10 @@ class RealFeedRepository implements FeedRepository {
         ((e['created_at'] ?? 0) as int) * 1000,
         isUtc: true);
 
+    final pubkey = (e['pubkey'] ?? '') as String;
     final author = Author(
-      pubkey: (e['pubkey'] ?? '') as String,
-      name: (e['pubkey'] ?? '').toString().substring(0, 8),
+      pubkey: pubkey,
+      name: pubkey.length >= 8 ? pubkey.substring(0, 8) : pubkey,
       avatarUrl: '',
     );
     return Post(
