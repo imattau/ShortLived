@@ -15,6 +15,7 @@ import '../../services/nostr/relay_service_ws.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/lightning/lightning_service_lnurl.dart';
 import '../../services/settings/settings_service.dart';
+import '../../services/safety/content_safety_service.dart';
 import '../../state/feed_controller.dart';
 import '../../data/models/post.dart';
 import '../../services/queue/action_queue.dart';
@@ -38,6 +39,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
   late final RelayService relay;
   late final LightningServiceLnurl lightning;
   late SettingsService settings;
+  late ContentSafetyService safety; // ignore: unused_field
   late ActionQueue queue;
 
   Future<void> _openCreate() async {
@@ -84,10 +86,12 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
     final existing = Locator.I.tryGet<SettingsService>();
     if (existing != null) {
       settings = existing;
+      safety = ContentSafetyService(settings);
       overlaysVisible = !settings.overlaysDefaultHidden();
     } else {
       SharedPreferences.getInstance().then((sp) {
         settings = SettingsService(sp);
+        safety = ContentSafetyService(settings);
         Locator.I.put<SettingsService>(settings);
         Locator.I.get<FeedController>().setMuted(settings.muted());
         if (mounted) {
@@ -211,6 +215,12 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
     );
   }
 
+  void _toggleSafety() {
+    final next = !settings.sensitiveBlurEnabled();
+    settings.setSensitiveBlurEnabled(next);
+    setState(() {});
+  }
+
   Future<void> _zap() async {
     final controller = Locator.I.get<FeedController>();
     if (controller.posts.isEmpty) return;
@@ -260,6 +270,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
               onDetailsTap: _openDetails,
               onRelaysLongPress: _openRelays,
               onSearchTap: _openSearch,
+              safetyOn: settings.sensitiveBlurEnabled(),
+              onSafetyToggle: _toggleSafety,
             ),
           ),
           ValueListenableBuilder<bool>(
