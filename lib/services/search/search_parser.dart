@@ -14,7 +14,7 @@ class SearchParser {
   /// Extract hashtag without '#'
   static String? parseHashtag(String input) {
     final m = RegExp(r'(?:^|\s)#([a-z0-9_]{1,40})', caseSensitive: false).firstMatch(input);
-    return m == null ? null : m.group(1)!.toLowerCase();
+    return m?.group(1)?.toLowerCase();
   }
 
   static String? parseText(String input) {

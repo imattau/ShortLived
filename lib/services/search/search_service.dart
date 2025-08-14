@@ -1,14 +1,12 @@
 import 'dart:async';
 import '../nostr/relay_service.dart';
-import '../../data/repos/feed_repository.dart';
 import '../../data/models/post.dart';
 import 'search_models.dart';
 import 'search_parser.dart';
 
 class SearchService {
-  SearchService(this._relay, this._repo);
+  SearchService(this._relay);
   final RelayService _relay;
-  final FeedRepository _repo;
 
   Future<SearchQuery> buildQuery(String raw) async {
     final pk = SearchParser.parseAuthor(raw);

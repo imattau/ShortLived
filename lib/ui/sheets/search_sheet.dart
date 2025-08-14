@@ -4,7 +4,6 @@ import '../../state/feed_controller.dart';
 import '../../services/search/search_service.dart';
 import '../../services/search/search_models.dart';
 import '../../services/nostr/relay_service.dart';
-import '../../data/repos/feed_repository.dart';
 
 class SearchSheet extends StatefulWidget {
   const SearchSheet({super.key});
@@ -29,8 +28,7 @@ class _SearchSheetState extends State<SearchSheet> {
 
   Future<void> _run() async {
     final relay = Locator.I.get<RelayService>();
-    final repo = Locator.I.get<FeedRepository?>();
-    final search = SearchService(relay, repo ?? Locator.I.get<FeedRepository>());
+    final search = SearchService(relay);
 
     setState(() { _loading = true; _items = []; });
 
@@ -65,7 +63,7 @@ class _SearchSheetState extends State<SearchSheet> {
   @override
   Widget build(BuildContext context) {
     final controller = Locator.I.get<FeedController>();
-    final trending = SearchService(Locator.I.get<RelayService>(), Locator.I.get<FeedRepository>())
+    final trending = SearchService(Locator.I.get<RelayService>())
         .trendingHashtags(controller.posts);
 
     return SafeArea(

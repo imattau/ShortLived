@@ -3,11 +3,10 @@ import 'package:nostr_video/services/search/search_service.dart';
 import 'package:nostr_video/data/models/post.dart';
 import 'package:nostr_video/data/models/author.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
-import 'package:nostr_video/data/repos/feed_repository.dart';
 
 void main() {
   test('trending hashtags ranks by frequency', () {
-    final svc = SearchService(FakeRelay(), FakeRepo());
+    final svc = SearchService(FakeRelay());
     final posts = [
       Post(id:'1', author: const Author(pubkey:'a',name:'a',avatarUrl:''), caption:'#dart #nostr', tags: const [], url:'u', thumb:'t', mime:'video/mp4', width:1, height:1, duration:1, createdAt:DateTime.now()),
       Post(id:'2', author: const Author(pubkey:'a',name:'a',avatarUrl:''), caption:'nice #nostr clip', tags: const [], url:'u', thumb:'t', mime:'video/mp4', width:1, height:1, duration:1, createdAt:DateTime.now()),
@@ -50,10 +49,3 @@ class FakeRelay implements RelayService {
   Stream<Map<String, dynamic>> get events => const Stream.empty();
 }
 
-class FakeRepo implements FeedRepository {
-  @override
-  Stream<List<Post>> watchFeed() => const Stream.empty();
-
-  @override
-  Future<List<Post>> fetchInitial() async => [];
-}
