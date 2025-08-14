@@ -15,7 +15,7 @@ class ContentSafetyService {
       if (w.isEmpty) continue;
       if (
         text.contains('#$w') ||
-        RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(text),
+        RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(text)
       ) {
         return true;
       }
