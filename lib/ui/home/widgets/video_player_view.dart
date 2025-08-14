@@ -11,6 +11,8 @@ import 'package:nostr_video/core/di/locator.dart';
 import '../../../core/testing/test_switches.dart';
 import '../../../services/nostr/relay_service.dart';
 import '../../../services/cache/cache_service.dart';
+import '../../../services/settings/settings_service.dart';
+import '../../../services/safety/content_safety_service.dart';
 
 class VideoPlayerView extends StatefulWidget {
   const VideoPlayerView({super.key, required this.globalPaused});
@@ -130,6 +132,9 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
     }
 
     final useVideo = !TestSwitches.disableVideo && pool != null;
+    final settings = Locator.I.tryGet<SettingsService>();
+    final safety = settings == null ? null : ContentSafetyService(settings);
+    final blurEnabled = settings?.sensitiveBlurEnabled() ?? false;
 
     return Stack(
       fit: StackFit.expand,
@@ -147,12 +152,14 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
             final isCurrent = i == controller.index;
             final isNeighbour = controller.preloadCandidates.contains(i);
             final ctl = useVideo ? pool![i] : null;
+            final blur = blurEnabled && (safety?.isSensitive(p) ?? false);
             return VideoCard(
               post: p,
               isCurrent: isCurrent,
               isNeighbour: isNeighbour,
               controller: ctl,
               globalPaused: widget.globalPaused,
+              blurBySafety: blur,
             );
           },
         ),

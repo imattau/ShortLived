@@ -13,6 +13,8 @@ class OverlayCluster extends StatelessWidget {
     required this.onDetailsTap,
     required this.onRelaysLongPress,
     required this.onSearchTap,
+    required this.safetyOn,
+    required this.onSafetyToggle,
   });
   final VoidCallback onCreateTap;
   final VoidCallback onLikeTap;
@@ -24,6 +26,8 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onDetailsTap;
   final VoidCallback onRelaysLongPress;
   final VoidCallback onSearchTap;
+  final bool safetyOn;
+  final VoidCallback onSafetyToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +55,15 @@ class OverlayCluster extends StatelessWidget {
               icon: const Icon(Icons.search),
               tooltip: 'Search',
               onPressed: onSearchTap,
+            ),
+          ),
+          Positioned(
+            right: 12,
+            top: 8 + 28,
+            child: IconButton(
+              tooltip: 'Safety mode',
+              icon: Icon(safetyOn ? Icons.shield : Icons.shield_outlined),
+              onPressed: onSafetyToggle,
             ),
           ),
           // Centre-right action rail

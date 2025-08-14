@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/post.dart';
 import '../../services/settings/settings_service.dart';
+import 'report_sheet.dart';
 
 class DetailsSheet extends StatelessWidget {
   const DetailsSheet({
@@ -20,6 +21,7 @@ class DetailsSheet extends StatelessWidget {
       'Dim: ${post.width}x${post.height}',
       'Dur: ${post.duration.toStringAsFixed(1)}s',
     ];
+    final isMarked = settings.sensitiveMarks().contains(post.id);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -60,10 +62,38 @@ class DetailsSheet extends StatelessWidget {
                   icon: const Icon(Icons.volume_off),
                   label: const Text('Mute author'),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    if (isMarked) {
+                      await settings.removeSensitiveMark(post.id);
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Cleared sensitive mark')),
+                      );
+                    } else {
+                      await settings.addSensitiveMark(post.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Marked as sensitive')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.shield),
+                  label: Text(isMarked ? 'Clear sensitive' : 'Mark sensitive'),
+                ),
                 const SizedBox(width: 12),
                 OutlinedButton.icon(
-                  onPressed: () {
-                    /* TODO: report locally */
+                  onPressed: () async {
+                    await showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.black,
+                      isScrollControlled: true,
+                      builder: (_) => ReportSheet(eventId: post.id),
+                    );
                   },
                   icon: const Icon(Icons.flag_outlined),
                   label: const Text('Report'),
