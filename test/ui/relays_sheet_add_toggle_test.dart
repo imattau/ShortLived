@@ -3,12 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nostr_video/ui/sheets/relays_sheet.dart';
 import 'package:nostr_video/services/settings/settings_service.dart';
+import 'package:nostr_video/services/keys/key_service.dart';
+import 'package:nostr_video/core/di/locator.dart';
+
+class _KeyDummy implements KeyService {
+  @override
+  Future<String?> getPrivkey() async => null;
+  @override
+  Future<String?> getPubkey() async => null;
+  @override
+  Future<String> generate() async => '';
+  @override
+  Future<String> importSecret(String nsecOrHex) async => '';
+  @override
+  Future<String?> exportNsec() async => null;
+}
 
 void main() {
   testWidgets('add relay and toggle overlays default', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final sp = await SharedPreferences.getInstance();
     final s = SettingsService(sp);
+    Locator.I.put<KeyService>(_KeyDummy());
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -31,7 +47,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Add a relay
-    await tester.enterText(find.byType(TextField), 'wss://example.com');
+    await tester.enterText(find.byKey(const Key('relay-url')), 'wss://example.com');
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
 

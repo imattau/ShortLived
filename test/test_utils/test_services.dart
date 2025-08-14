@@ -9,6 +9,7 @@ import 'package:nostr_video/services/cache/cache_service.dart';
 import 'package:nostr_video/data/models/post.dart';
 import 'package:nostr_video/data/models/author.dart';
 import 'package:nostr_video/core/di/locator.dart';
+import 'package:nostr_video/services/keys/key_service.dart';
 
 class RelayServiceFake implements RelayService {
   final _ctrl = StreamController<Map<String, dynamic>>.broadcast();
@@ -42,12 +43,26 @@ class RelayServiceFake implements RelayService {
   Future<void> zapRequest({required String eventId, required int millisats}) async {}
 }
 
+class KeyServiceFake implements KeyService {
+  @override
+  Future<String?> getPrivkey() async => null;
+  @override
+  Future<String?> getPubkey() async => null;
+  @override
+  Future<String> generate() async => '';
+  @override
+  Future<String> importSecret(String nsecOrHex) async => '';
+  @override
+  Future<String?> exportNsec() async => null;
+}
+
 Future<void> setupTestLocator({Map<String, Object> prefs = const {}}) async {
   SharedPreferences.setMockInitialValues(prefs);
   final sp = await SharedPreferences.getInstance();
   Locator.I.put<SettingsService>(SettingsService(sp));
   Locator.I.put<ActionQueue>(ActionQueueMemory());
   Locator.I.put<RelayService>(RelayServiceFake());
+  Locator.I.put<KeyService>(KeyServiceFake());
 
   // Seed cache with sample posts so UI has content
   final cache = Locator.I.get<CacheService>();

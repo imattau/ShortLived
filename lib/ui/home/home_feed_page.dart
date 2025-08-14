@@ -17,6 +17,9 @@ import '../../state/feed_controller.dart';
 import '../../data/models/post.dart';
 import '../../services/queue/action_queue.dart';
 import '../../services/queue/action_queue_hive.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../services/keys/key_service.dart';
+import '../../services/keys/key_service_secure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/testing/test_switches.dart';
@@ -52,8 +55,11 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (Locator.I.tryGet<KeyService>() == null) {
+      Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
+    }
     relay = Locator.I.tryGet<RelayService>() ??
-        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
+        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri), keyService: Locator.I.get<KeyService>());
     if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);

@@ -5,7 +5,10 @@ abstract class RelayService {
   Future<void> close(String subId);
   Stream<List<dynamic>> subscribeFeed(
       {required List<String> authors, String? hashtag});
-  Future<String> publishEvent(Map<String, dynamic> eventJson);
+  /// Publish already signed event JSON (has id/pubkey/sig).
+  Future<String> publishEvent(Map<String, dynamic> signedEventJson);
+
+  /// High-level helpers now require signing context; implementations can call KeyService.
   Future<void> like({required String eventId});
   Future<void> reply(
       {required String parentId,
