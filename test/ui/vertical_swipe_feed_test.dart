@@ -37,8 +37,9 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
       await tester.runAsync(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 300));
       });
+      await tester.pump();
     });
   });
 }

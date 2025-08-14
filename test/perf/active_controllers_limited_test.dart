@@ -35,8 +35,9 @@ void main() {
       await tester.pumpAndSettle();
       // Allow async disposals (pause/dispose) to run so timers are cleared
       await tester.runAsync(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 300));
       });
+      await tester.pump();
     });
   });
 }

@@ -31,6 +31,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pump();
     });
   });
 
@@ -44,6 +48,10 @@ void main() {
       // No assertion beyond not crashing; later we assert like animation
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pump();
     });
   });
 }

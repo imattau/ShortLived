@@ -33,6 +33,10 @@ void main() {
       // Remove the widget tree to allow controller disposal
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pump();
     });
   });
 }
