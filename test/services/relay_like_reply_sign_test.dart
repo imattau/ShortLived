@@ -50,7 +50,7 @@ class _WSFake with StreamChannelMixin implements WebSocketChannel {
   Future get ready => Future.value();
 }
 
-class _Sink extends StreamSinkBase implements WebSocketSink {
+class _Sink implements WebSocketSink {
   final frames = <String>[];
 
   @override
@@ -62,14 +62,14 @@ class _Sink extends StreamSinkBase implements WebSocketSink {
   void addError(error, [StackTrace? st]) {}
 
   @override
-  Future close([int? closeCode, String? closeReason]) async {}
-
-  @override
   Future addStream(Stream stream) async {
     await for (final e in stream) {
       if (e is String) frames.add(e);
     }
   }
+
+  @override
+  Future close([int? closeCode, String? closeReason]) async {}
 
   @override
   Future get done async {}
