@@ -7,6 +7,7 @@ import '../sheets/zap_sheet.dart';
 import '../sheets/profile_sheet.dart';
 import '../sheets/details_sheet.dart';
 import '../sheets/relays_sheet.dart';
+import '../sheets/quote_sheet.dart';
 import 'package:nostr_video/core/di/locator.dart';
 import '../../core/config/network.dart';
 import '../../services/nostr/relay_service_ws.dart';
@@ -121,6 +122,24 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
     controller.likeCurrent(relay);
   }
 
+  void _repost() {
+    final c = Locator.I.get<FeedController>();
+    final r = Locator.I.get<RelayService>();
+    c.repostCurrent(r);
+  }
+
+  Future<void> _openQuote() async {
+    final c = Locator.I.get<FeedController>();
+    final p = c.currentOrNull;
+    if (p == null) return;
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
+      builder: (_) => QuoteSheet(eventId: p.id, relay: Locator.I.get<RelayService>()),
+    );
+  }
+
   Future<void> _comment() async {
     final controller = Locator.I.get<FeedController>();
     if (controller.posts.isEmpty) return;
@@ -226,6 +245,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
               onCreateTap: _openCreate,
               onLikeTap: _like,
               onCommentTap: _comment,
+              onRepostTap: _repost,
+              onQuoteTap: _openQuote,
               onZapTap: _zap,
               onProfileTap: _openProfile,
               onDetailsTap: _openDetails,

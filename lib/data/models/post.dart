@@ -13,6 +13,7 @@ class Post {
   final double duration;
   final int likeCount;
   final int commentCount;
+  final int repostCount; // NEW
   final DateTime createdAt;
 
   const Post({
@@ -28,8 +29,30 @@ class Post {
     required this.duration,
     this.likeCount = 0,
     this.commentCount = 0,
+    this.repostCount = 0, // NEW
     required this.createdAt,
   });
+
+  Post copyWith({
+    int? likeCount,
+    int? commentCount,
+    int? repostCount,
+  }) => Post(
+        id: id,
+        author: author,
+        caption: caption,
+        tags: tags,
+        url: url,
+        thumb: thumb,
+        mime: mime,
+        width: width,
+        height: height,
+        duration: duration,
+        likeCount: likeCount ?? this.likeCount,
+        commentCount: commentCount ?? this.commentCount,
+        repostCount: repostCount ?? this.repostCount,
+        createdAt: createdAt,
+      );
 
   /// NIP-94 file tags to attach to a kind:1 post
   List<List<String>> toNip94Tags() => [

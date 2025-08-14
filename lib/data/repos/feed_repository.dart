@@ -32,6 +32,9 @@ class MockFeedRepository implements FeedRepository {
               width: 1080,
               height: 1920,
               duration: 10 + i.toDouble(),
+              likeCount: 0,
+              commentCount: 0,
+              repostCount: 0,
               createdAt: DateTime.now().subtract(Duration(minutes: i)),
             ));
   }
@@ -107,6 +110,7 @@ class RealFeedRepository implements FeedRepository {
       duration: dur,
       likeCount: 0,
       commentCount: 0,
+      repostCount: 0,
       createdAt: created,
     );
   }

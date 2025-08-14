@@ -6,6 +6,8 @@ class OverlayCluster extends StatelessWidget {
     required this.onCreateTap,
     required this.onLikeTap,
     required this.onCommentTap,
+    required this.onRepostTap,
+    required this.onQuoteTap,
     required this.onZapTap,
     required this.onProfileTap,
     required this.onDetailsTap,
@@ -14,6 +16,8 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onCreateTap;
   final VoidCallback onLikeTap;
   final VoidCallback onCommentTap;
+  final VoidCallback onRepostTap;
+  final VoidCallback onQuoteTap;
   final VoidCallback onZapTap;
   final VoidCallback onProfileTap;
   final VoidCallback onDetailsTap;
@@ -64,17 +68,16 @@ class OverlayCluster extends StatelessWidget {
                       icon: const Icon(Icons.chat_bubble_outline),
                       onPressed: onCommentTap,
                     ),
+                    GestureDetector(
+                      onLongPress: onQuoteTap,
+                      child: IconButton(
+                        icon: const Icon(Icons.repeat),
+                        onPressed: onRepostTap,
+                      ),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.bolt_outlined),
                       onPressed: onZapTap,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.ios_share),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.person_outline),
-                      onPressed: () {},
                     ),
                   ],
                 ),

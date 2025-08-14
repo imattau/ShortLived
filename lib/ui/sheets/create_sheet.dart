@@ -56,6 +56,9 @@ class _CreateSheetState extends State<CreateSheet> {
       width: m.width,
       height: m.height,
       duration: m.duration,
+      likeCount: 0,
+      commentCount: 0,
+      repostCount: 0,
       createdAt: DateTime.now(),
     );
     widget.onCreated(post);
