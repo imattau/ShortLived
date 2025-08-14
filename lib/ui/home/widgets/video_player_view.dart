@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
 import '../../../state/feed_controller.dart';
 import '../../../data/repos/feed_repository.dart';
@@ -44,7 +45,8 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
           final c = VideoPlayerController.networkUrl(Uri.parse(url));
           await c.initialize();
           await c.setLooping(true);
-          await c.setVolume(1.0);
+          // Web allows autoplay only when muted.
+          await c.setVolume(kIsWeb ? 0.0 : 1.0);
           return c;
         },
         dispose: (c) async {

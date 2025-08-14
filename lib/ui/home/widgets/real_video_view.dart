@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
 
 class RealVideoView extends StatefulWidget {
@@ -45,13 +46,23 @@ class _RealVideoViewState extends State<RealVideoView> with AutomaticKeepAliveCl
     if (!widget.controller.value.isInitialized) {
       return const ColoredBox(color: Colors.black);
     }
-    return FittedBox(
+    final player = FittedBox(
       fit: BoxFit.cover,
       child: SizedBox(
         width: widget.controller.value.size.width,
         height: widget.controller.value.size.height,
         child: VideoPlayer(widget.controller),
       ),
+    );
+    if (!kIsWeb) return player;
+    // On web: single tap toggles mute so users can enable sound per video.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () async {
+        final v = widget.controller.value.volume;
+        await widget.controller.setVolume(v > 0 ? 0.0 : 1.0);
+      },
+      child: player,
     );
   }
 
