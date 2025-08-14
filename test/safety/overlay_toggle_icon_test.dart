@@ -62,7 +62,7 @@ void main() {
     Locator.I.put<FeedController>(FeedController(MockFeedRepository(count: 0)));
 
     await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.byIcon(Icons.shield), findsOneWidget);
   });
 }
