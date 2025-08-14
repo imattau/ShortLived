@@ -6,5 +6,7 @@ class Locator {
 
   void put<T>(T value) => _store[T] = value;
   T get<T>() => _store[T] as T;
+  T? tryGet<T>() => _store[T] as T?;
+  bool contains<T>() => _store.containsKey(T);
 }
 

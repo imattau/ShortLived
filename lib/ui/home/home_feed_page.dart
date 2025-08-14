@@ -51,12 +51,18 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    relay = RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
-    relay.init(NetworkConfig.relays);
-    Locator.I.put<RelayService>(relay);
-    lightning = LightningServiceLnurl(relay);
-    queue = ActionQueueHive();
-    queue.init();
+    relay = Locator.I.tryGet<RelayService>() ??
+        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
+    if (!Locator.I.contains<RelayService>()) {
+      relay.init(NetworkConfig.relays);
+      Locator.I.put<RelayService>(relay);
+    }
+    lightning = Locator.I.tryGet<LightningServiceLnurl>() ?? LightningServiceLnurl(relay);
+    queue = Locator.I.tryGet<ActionQueue>() ?? ActionQueueHive();
+    if (!Locator.I.contains<ActionQueue>()) {
+      queue.init();
+      Locator.I.put<ActionQueue>(queue);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final c = Locator.I.get<FeedController>();
@@ -64,14 +70,22 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
         c.setOnline(true, relay: Locator.I.get<RelayService>());
       }
     });
-    SharedPreferences.getInstance().then((sp) {
-      settings = SettingsService(sp);
-      Locator.I.put<SettingsService>(settings);
-      Locator.I.get<FeedController>().setMuted(settings.muted());
-      setState(() {
-        overlaysVisible = !settings.overlaysDefaultHidden();
+    final existing = Locator.I.tryGet<SettingsService>();
+    if (existing != null) {
+      settings = existing;
+      overlaysVisible = !settings.overlaysDefaultHidden();
+    } else {
+      SharedPreferences.getInstance().then((sp) {
+        settings = SettingsService(sp);
+        Locator.I.put<SettingsService>(settings);
+        Locator.I.get<FeedController>().setMuted(settings.muted());
+        if (mounted) {
+          setState(() {
+            overlaysVisible = !settings.overlaysDefaultHidden();
+          });
+        }
       });
-    });
+    }
   }
 
   @override
