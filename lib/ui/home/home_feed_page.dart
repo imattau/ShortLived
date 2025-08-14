@@ -7,7 +7,7 @@ import '../sheets/zap_sheet.dart';
 import '../sheets/profile_sheet.dart';
 import '../sheets/details_sheet.dart';
 import '../sheets/relays_sheet.dart';
-import '../../core/di/locator.dart';
+import 'package:nostr_video/core/di/locator.dart';
 import '../../core/config/network.dart';
 import '../../services/nostr/relay_service_ws.dart';
 import '../../services/nostr/relay_service.dart';

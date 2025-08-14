@@ -6,7 +6,7 @@ import '../../../data/repos/feed_repository.dart';
 import '../../../data/models/post.dart';
 import '../video_controller_pool.dart';
 import 'video_card.dart';
-import '../../../core/di/locator.dart';
+import 'package:nostr_video/core/di/locator.dart';
 
 class VideoPlayerView extends StatefulWidget {
   const VideoPlayerView({super.key, required this.globalPaused});
