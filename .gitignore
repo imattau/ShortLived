@@ -9,6 +9,6 @@ ios/
 linux/
 macos/
 windows/
-web/
+# Generated plugins
 .flutter-plugins
 .flutter-plugins-dependencies
