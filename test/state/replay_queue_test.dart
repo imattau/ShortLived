@@ -38,7 +38,7 @@ class _RelaySpy implements RelayService {
 void main() async {
   test('replays queued actions in order', () async {
     final c = FeedController(MockFeedRepository(count: 1));
-    await c.loadInitial();
+    await c.connect();
     final q = ActionQueueMemory();
     await q.init();
     c.bindQueue(q);

@@ -6,7 +6,7 @@ import 'package:nostr_video/data/models/author.dart';
 void main() {
   test('muted authors are filtered from feed', () async {
     final c = FeedController(MockFeedRepository(count: 3));
-    await c.loadInitial();
+    await c.connect();
     final pk = c.posts.first.author.pubkey;
     final Author a = c.posts.first.author;
     expect(a.pubkey, pk);

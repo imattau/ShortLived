@@ -28,7 +28,7 @@ class _NoopRelay implements RelayService {
 void main() {
   test('optimistic like increments count', () async {
     final c = FeedController(MockFeedRepository(count: 1));
-    await c.loadInitial();
+    await c.connect();
     final before = c.posts.first.likeCount;
     await c.likeCurrent(_NoopRelay());
     expect(c.posts.first.likeCount, before + 1);
