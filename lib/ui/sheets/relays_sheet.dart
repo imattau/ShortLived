@@ -140,6 +140,7 @@ class _RelaysSheetState extends State<RelaysSheet> {
                   final v = _importCtrl.text.trim();
                   if (v.isEmpty) return;
                   await Locator.I.get<KeyService>().importSecret(v);
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Key imported')));
                   setState(() {});
                 },
@@ -157,7 +158,7 @@ class _RelaysSheetState extends State<RelaysSheet> {
                   final nsec = await Locator.I.get<KeyService>().exportNsec();
                   if (nsec == null) return;
                   await Clipboard.setData(ClipboardData(text: nsec));
-                  // ignore: use_build_context_synchronously
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('nsec copied (handle with care)')));
                 },
                 child: const Text('Export nsec'),
@@ -171,7 +172,7 @@ class _RelaysSheetState extends State<RelaysSheet> {
                                 TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Generate'))]));
                   if (ok != true) return;
                   await Locator.I.get<KeyService>().generate();
-                  // ignore: use_build_context_synchronously
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('New key generated')));
                   setState(() {});
                 },

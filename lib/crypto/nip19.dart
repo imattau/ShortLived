@@ -3,18 +3,18 @@ import 'hex.dart';
 
 class Nip19 {
   static String encodeNpub(String pubkeyHex) {
-    final words = b32.convertBits(fromHex(pubkeyHex), 8, 5, true);
-    return b32.bech32('npub', words).toString();
+    final words = b32.toWords(fromHex(pubkeyHex));
+    return b32.encode(b32.Bech32('npub', words));
   }
 
   static String encodeNsec(String privHex) {
-    final words = b32.convertBits(fromHex(privHex), 8, 5, true);
-    return b32.bech32('nsec', words).toString();
+    final words = b32.toWords(fromHex(privHex));
+    return b32.encode(b32.Bech32('nsec', words));
   }
 
   static String decode(String bech) {
-    final dec = b32.Bech32Decoder().convert(bech);
-    final data = b32.convertBits(dec.data, 5, 8, false);
+    final dec = b32.decode(bech);
+    final data = b32.fromWords(dec.data);
     return toHex(data);
   }
 
