@@ -18,7 +18,7 @@ class _KeyMem implements KeyService {
   @override
   Future<String> importSecret(String s) async {
     _priv = s;
-    _pub = '02${'a' * 66}';
+    _pub = '02${List.filled(66, 'a').join()}';
     return _pub!;
   }
 
@@ -42,24 +42,32 @@ class _WSFake with StreamChannelMixin implements WebSocketChannel {
 
   @override
   String? get closeReason => null;
+
+  @override
+  String? get protocol => null;
+
+  @override
+  Future get ready => Future.value();
 }
 
-class _Sink extends StreamSinkBase<String> implements WebSocketSink {
+class _Sink extends StreamSinkBase implements WebSocketSink {
   final frames = <String>[];
 
   @override
-  void add(String event) => frames.add(event);
+  void add(event) {
+    if (event is String) frames.add(event);
+  }
 
   @override
-  void addError(Object error, [StackTrace? st]) {}
+  void addError(error, [StackTrace? st]) {}
 
   @override
   Future close([int? closeCode, String? closeReason]) async {}
 
   @override
-  Future addStream(Stream<String> stream) async {
+  Future addStream(Stream stream) async {
     await for (final e in stream) {
-      frames.add(e);
+      if (e is String) frames.add(e);
     }
   }
 
@@ -69,7 +77,9 @@ class _Sink extends StreamSinkBase<String> implements WebSocketSink {
 
 void main() {
   test('like/reply are signed before publish', () async {
-    final rs = RelayServiceWs(factory: (u) => _WSFake(), keyService: _KeyMem()..importSecret('11'*32));
+    final ks = _KeyMem();
+    await ks.importSecret(List.filled(32, '11').join());
+    final rs = RelayServiceWs(factory: (u) => _WSFake(), keyService: ks);
     await rs.init(const ['wss://example']);
     await rs.like(eventId: 'evt1');
     await rs.reply(parentId: 'evt1', content: 'hello');
