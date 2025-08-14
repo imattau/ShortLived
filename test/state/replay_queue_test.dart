@@ -33,6 +33,12 @@ class _RelaySpy implements RelayService {
   Stream<Map<String, dynamic>> get events async* {}
   @override
   Future<void> zapRequest({required String eventId, required int millisats}) async {}
+
+  @override
+  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => 'sub';
+
+  @override
+  Future<void> close(String subId) async {}
 }
 
 void main() async {

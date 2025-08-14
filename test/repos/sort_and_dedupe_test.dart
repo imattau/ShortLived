@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nostr_video/data/repos/feed_repository.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 import 'package:nostr_video/services/cache/cache_service.dart';
+import 'package:nostr_video/data/models/post.dart';
 
 class _RelayFake implements RelayService {
   final _ctrl = StreamController<Map<String, dynamic>>.broadcast();
@@ -29,13 +30,17 @@ class _RelayFake implements RelayService {
 class _CacheNoop implements CacheService {
   @override
   Future<void> cacheThumb(String postId, String url) async {}
+
   @override
   Future<void> init() async {}
-  List posts = [];
+
+  List<Post> posts = [];
+
   @override
-  Future<List> loadCachedPosts() async => posts.cast();
+  Future<List<Post>> loadCachedPosts() async => posts;
+
   @override
-  Future<void> savePosts(List p) async {
+  Future<void> savePosts(List<Post> p) async {
     posts = p;
   }
 }
@@ -51,7 +56,7 @@ void main() {
       r.events; // silence lints
     });
 
-    (r as _RelayFake)._ctrl.add({
+    r._ctrl.add({
       'id': 'same',
       'kind': 1,
       'pubkey': 'pk',
@@ -64,7 +69,7 @@ void main() {
         ['dur', '1']
       ]
     });
-    (r as _RelayFake)._ctrl.add({
+    r._ctrl.add({
       'id': 'same',
       'kind': 1,
       'pubkey': 'pk',
