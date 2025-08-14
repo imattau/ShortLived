@@ -71,21 +71,7 @@ class FeedController extends ChangeNotifier {
   Future<void> likeCurrent(RelayService relay) async {
     if (_posts.isEmpty) return;
     final p = _posts[_index];
-    _posts[_index] = Post(
-      id: p.id,
-      author: p.author,
-      caption: p.caption,
-      tags: p.tags,
-      url: p.url,
-      thumb: p.thumb,
-      mime: p.mime,
-      width: p.width,
-      height: p.height,
-      duration: p.duration,
-      likeCount: p.likeCount + 1,
-      commentCount: p.commentCount,
-      createdAt: p.createdAt,
-    );
+    _posts[_index] = p.copyWith(likeCount: p.likeCount + 1);
     notifyListeners();
 
     final action = QueuedAction(ActionType.like, {'eventId': p.id});
@@ -100,6 +86,20 @@ class FeedController extends ChangeNotifier {
       await relay.like(eventId: p.id);
     } catch (_) {
       await _queue!.enqueue(action);
+    }
+  }
+
+  Post? get currentOrNull => (_posts.isEmpty) ? null : _posts[_index];
+
+  Future<void> repostCurrent(RelayService relay) async {
+    if (_posts.isEmpty) return;
+    final p = _posts[_index];
+    _posts[_index] = p.copyWith(repostCount: p.repostCount + 1);
+    notifyListeners();
+    try {
+      await relay.repost(eventId: p.id);
+    } catch (_) {
+      // swallow; offline queue could be added later for reposts, but keep UI optimistic
     }
   }
 

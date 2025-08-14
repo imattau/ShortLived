@@ -7,6 +7,7 @@ import 'backoff.dart';
 import 'relay_service.dart';
 import '../../services/keys/key_service.dart';
 import '../../crypto/nostr_event.dart';
+import '../../crypto/nip19.dart';
 
 typedef WebSocketFactory = WebSocketChannel Function(Uri uri);
 
@@ -116,6 +117,24 @@ class RelayServiceWs implements RelayService {
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final e = NostrEvent(kind: kind, createdAt: now, content: content, tags: tags);
     return NostrEvent.sign(priv, pub, e);
+  }
+
+  @override
+  Future<void> repost({required String eventId, String? originalJson}) async {
+    final tags = <List<String>>[
+      ["e", eventId],
+    ];
+    final evt = await _sign(6, originalJson ?? "", tags);
+    await publishEvent(evt);
+  }
+
+  Future<void> quote({required String eventId, required String content}) async {
+    final noteRef = Nip19.encodeNote(eventId);
+    final tags = <List<String>>[
+      ["e", eventId],
+    ];
+    final evt = await _sign(1, "$content\nnostr:$noteRef", tags);
+    await publishEvent(evt);
   }
 
   @override

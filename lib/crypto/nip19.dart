@@ -27,6 +27,11 @@ class Nip19 {
     return input;
   }
 
+  static String encodeNote(String eventIdHex) {
+    final words = _convertBits(fromHex(eventIdHex), 8, 5, pad: true);
+    return b32.Bech32Codec().encode(b32.Bech32('note', words));
+  }
+
   // Borrowed from bech32's Segwit implementation.
   static List<int> _convertBits(List<int> data, int from, int to,
       {required bool pad}) {

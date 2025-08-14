@@ -41,6 +41,9 @@ class RelayServiceFake implements RelayService {
 
   @override
   Future<void> zapRequest({required String eventId, required int millisats}) async {}
+
+  @override
+  Future<void> repost({required String eventId, String? originalJson}) async {}
 }
 
 class KeyServiceFake implements KeyService {

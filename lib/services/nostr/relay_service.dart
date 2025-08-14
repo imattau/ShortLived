@@ -14,6 +14,7 @@ abstract class RelayService {
       {required String parentId,
       required String content,
       String? parentPubkey});
+  Future<void> repost({required String eventId, String? originalJson});
   Future<void> zapRequest({required String eventId, required int millisats});
 
   /// Broadcast of raw event objects (Nostr event JSON map)
