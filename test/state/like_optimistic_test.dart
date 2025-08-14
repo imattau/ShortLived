@@ -23,12 +23,18 @@ class _NoopRelay implements RelayService {
   @override
   Future<void> zapRequest(
       {required String eventId, required int millisats}) async {}
+
+  @override
+  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => 'sub';
+
+  @override
+  Future<void> close(String subId) async {}
 }
 
 void main() {
   test('optimistic like increments count', () async {
     final c = FeedController(MockFeedRepository(count: 1));
-    await c.loadInitial();
+    await c.connect();
     final before = c.posts.first.likeCount;
     await c.likeCurrent(_NoopRelay());
     expect(c.posts.first.likeCount, before + 1);

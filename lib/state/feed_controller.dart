@@ -34,14 +34,23 @@ class FeedController extends ChangeNotifier {
     return s;
   }
 
-  Future<void> loadInitial() async {
-    final data = await repo.fetchInitial();
+  StreamSubscription<List<Post>>? _sub;
+
+  Future<void> connect() async {
+    final initial = await repo.fetchInitial();
+    setPosts(initial);
+    _sub?.cancel();
+    _sub = repo.watchFeed().listen((list) {
+      setPosts(list);
+    });
+  }
+
+  void setPosts(List<Post> data) {
     _posts
       ..clear()
       ..addAll(data);
     _index = 0;
     _filterMuted();
-    notifyListeners();
   }
 
   void onPageChanged(int i) {
@@ -161,5 +170,11 @@ class FeedController extends ChangeNotifier {
       _index = _posts.isEmpty ? 0 : _posts.length - 1;
     }
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
   }
 }

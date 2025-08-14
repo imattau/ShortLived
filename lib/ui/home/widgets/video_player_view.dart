@@ -8,6 +8,8 @@ import '../video_controller_pool.dart';
 import 'video_card.dart';
 import 'package:nostr_video/core/di/locator.dart';
 import '../../../core/testing/test_switches.dart';
+import '../../../services/nostr/relay_service.dart';
+import '../../../services/cache/cache_service.dart';
 
 class VideoPlayerView extends StatefulWidget {
   const VideoPlayerView({super.key, required this.globalPaused});
@@ -29,10 +31,12 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    controller = FeedController(MockFeedRepository());
+    final relay = Locator.I.get<RelayService>();
+    final cache = Locator.I.get<CacheService>();
+    controller = FeedController(RealFeedRepository(relay, cache));
     Locator.I.put<FeedController>(controller);
     controller.addListener(_onController);
-    controller.loadInitial();
+    controller.connect();
 
     if (!TestSwitches.disableVideo) {
       pool = ControllerPool<VideoPlayerController>(

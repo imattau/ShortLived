@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/config/network.dart';
 import 'backoff.dart';
@@ -13,6 +14,8 @@ class RelayServiceWs implements RelayService {
   final Map<String, int> _attempts = {};
   final Backoff _backoff;
   final _eventsCtrl = StreamController<Map<String, dynamic>>.broadcast();
+  final Set<String> _subs = {};
+  final _rand = const Uuid();
 
   @override
   Stream<Map<String, dynamic>> get events => _eventsCtrl.stream;
@@ -27,6 +30,29 @@ class RelayServiceWs implements RelayService {
     }
   }
 
+  @override
+  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async {
+    final id = subId ?? _rand.v4();
+    _subs.add(id);
+    final frame = jsonEncode(["REQ", id, ...filters]);
+    for (final url in NetworkConfig.relays) {
+      final ws = _ch[url];
+      ws?.sink.add(frame);
+    }
+    return id;
+  }
+
+  @override
+  Future<void> close(String subId) async {
+    if (!_subs.contains(subId)) return;
+    _subs.remove(subId);
+    final frame = jsonEncode(["CLOSE", subId]);
+    for (final url in NetworkConfig.relays) {
+      final ws = _ch[url];
+      ws?.sink.add(frame);
+    }
+  }
+
   void _connect(String url) {
     if (_ch[url] != null) return;
     final uri = Uri.parse(url);
@@ -34,20 +60,26 @@ class RelayServiceWs implements RelayService {
       final ws = factory(uri);
       _ch[url] = ws;
       _attempts[url] = 0;
-      ws.stream.listen(
-        (msg) {
-          try {
-            final data = (msg is String) ? jsonDecode(msg) : msg;
-            if (data is List && data.isNotEmpty && data[0] == 'EVENT') {
-              final evt = data.length > 2 ? data[2] : null;
-              if (evt is Map<String, dynamic>) _eventsCtrl.add(evt);
+      ws.stream.listen((msg) {
+        try {
+          final data = (msg is String) ? jsonDecode(msg) : msg;
+          if (data is List && data.isNotEmpty) {
+            switch (data[0]) {
+              case 'EVENT':
+                final evt = data.length > 2 ? data[2] : null;
+                if (evt is Map<String, dynamic>) _eventsCtrl.add(evt);
+                break;
+              case 'EOSE':
+                // End of stored events; ignore for now
+                break;
+              default:
+                break;
             }
-          } catch (_) {/* ignore */}
-        },
-        onDone: () => _scheduleReconnect(url),
-        onError: (_) => _scheduleReconnect(url),
-        cancelOnError: true,
-      );
+          }
+        } catch (_) {/* ignore */}
+      }, onDone: () => _scheduleReconnect(url),
+          onError: (_) => _scheduleReconnect(url),
+          cancelOnError: true);
     } catch (_) {
       _scheduleReconnect(url);
     }
