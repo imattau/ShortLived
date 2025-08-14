@@ -23,7 +23,8 @@ dependencies:
   url_launcher: ^6.3.2
   uuid: any
   flutter_secure_storage: ^9.0.0
-  elliptic: ^2.0.0
+  elliptic: ^0.3.11
+  ecdsa: ^0.1.2
   crypto: ^3.0.0
   bech32: ^0.2.2
 

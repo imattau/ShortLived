@@ -1,7 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:elliptic/elliptic.dart' as ec;
 import '../../crypto/nip19.dart';
-import '../../crypto/hex.dart';
 import 'key_service.dart';
 
 class KeyServiceSecure implements KeyService {
@@ -20,10 +19,10 @@ class KeyServiceSecure implements KeyService {
   Future<String> generate() async {
     final curve = ec.getSecp256k1();
     final priv = curve.generatePrivateKey();
-    final privHex = toHex(priv.bytes);
-    final pubHex  = toHex(priv.publicKey.toCompressedHex(false)); // uncompressed -> hex
+    final privHex = priv.toHex();
+    final pubHex = priv.publicKey.toCompressedHex().substring(2);
     await _store.write(key: _kPriv, value: privHex);
-    await _store.write(key: _kPub,  value: pubHex);
+    await _store.write(key: _kPub, value: pubHex);
     return pubHex;
   }
 
@@ -31,10 +30,10 @@ class KeyServiceSecure implements KeyService {
   Future<String> importSecret(String nsecOrHex) async {
     final privHex = Nip19.maybeDecodeNsecToHex(nsecOrHex.trim());
     final curve = ec.getSecp256k1();
-    final pk = ec.PrivateKey.fromBytes(curve, fromHex(privHex));
-    final pubHex = toHex(pk.publicKey.toCompressedHex(false));
+    final pk = ec.PrivateKey.fromHex(curve, privHex);
+    final pubHex = pk.publicKey.toCompressedHex().substring(2);
     await _store.write(key: _kPriv, value: privHex);
-    await _store.write(key: _kPub,  value: pubHex);
+    await _store.write(key: _kPub, value: pubHex);
     return pubHex;
   }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart' as c;
 import 'package:elliptic/elliptic.dart' as ec;
+import 'package:ecdsa/ecdsa.dart' as ecdsa;
 import 'hex.dart';
 
 class NostrEvent {
@@ -24,7 +25,7 @@ class NostrEvent {
     final curve = ec.getSecp256k1();
     final priv = ec.PrivateKey.fromHex(curve, privHex);
     final id = idFor(pubHex, e);
-    final sig = priv.sign(fromHex(id)).toCompactHex(); // 64-byte compact
+    final sig = ecdsa.signature(priv, fromHex(id)).toCompactHex();
     return {
       'id': id,
       'pubkey': pubHex,
