@@ -13,8 +13,10 @@ class ContentSafetyService {
     final text = '${p.caption} ${p.tags.join(" ")}'.toLowerCase();
     for (final w in words) {
       if (w.isEmpty) continue;
-      final regex = RegExp('(^|\\s)${RegExp.escape(w)}(\\s|$)');
-      if (text.contains('#$w') || regex.hasMatch(text)) {
+      if (
+        text.contains('#$w') ||
+        RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(text),
+      ) {
         return true;
       }
     }
