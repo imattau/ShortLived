@@ -10,21 +10,28 @@ class _RelayFake implements RelayService {
   @override
   Stream<Map<String, dynamic>> get events => _ctrl.stream;
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => 'sub';
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+          {String? subId}) async =>
+      'sub';
   @override
   Future<void> close(String subId) async {}
   @override
   Future<void> init(List<String> relays) async {}
   @override
-  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) async* {}
+  Stream<List<dynamic>> subscribeFeed(
+      {required List<String> authors, String? hashtag}) async* {}
   @override
   Future<String> publishEvent(Map<String, dynamic> eventJson) async => 'id';
   @override
   Future<void> like({required String eventId}) async {}
   @override
-  Future<void> reply({required String parentId, required String content, String? parentPubkey}) async {}
+  Future<void> reply(
+      {required String parentId,
+      required String content,
+      String? parentPubkey}) async {}
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+  Future<void> zapRequest(
+      {required String eventId, required int millisats}) async {}
 }
 
 class _CacheNoop implements CacheService {
@@ -56,31 +63,33 @@ void main() {
       r.events; // silence lints
     });
 
-    r._ctrl.add({
-      'id': 'same',
-      'kind': 1,
-      'pubkey': 'pk',
-      'created_at': 1,
-      'content': '',
-      'tags': [
-        ['t', 'video/mp4'],
-        ['url', 'u'],
-        ['dim', '1x1'],
-        ['dur', '1']
-      ]
-    });
-    r._ctrl.add({
-      'id': 'same',
-      'kind': 1,
-      'pubkey': 'pk',
-      'created_at': 2,
-      'content': 'newer',
-      'tags': [
-        ['t', 'video/mp4'],
-        ['url', 'u'],
-        ['dim', '1x1'],
-        ['dur', '1']
-      ]
+    Timer.run(() {
+      r._ctrl.add({
+        'id': 'same',
+        'kind': 1,
+        'pubkey': 'pk',
+        'created_at': 1,
+        'content': '',
+        'tags': [
+          ['t', 'video/mp4'],
+          ['url', 'u'],
+          ['dim', '1x1'],
+          ['dur', '1']
+        ]
+      });
+      r._ctrl.add({
+        'id': 'same',
+        'kind': 1,
+        'pubkey': 'pk',
+        'created_at': 2,
+        'content': 'newer',
+        'tags': [
+          ['t', 'video/mp4'],
+          ['url', 'u'],
+          ['dim', '1x1'],
+          ['dur', '1']
+        ]
+      });
     });
 
     final first = await stream.firstWhere((l) => l.isNotEmpty);
