@@ -10,15 +10,13 @@ class ContentSafetyService {
     if (manual) return true;
     final words = settings.sensitiveWords();
     if (words.isEmpty) return false;
-    final text = '${p.caption} ${p.tags.join(" ")}'.toLowerCase();
+    final text = '${p.caption} ${p.tags.join(' ')}'.toLowerCase();
     for (final w in words) {
       if (w.isEmpty) continue;
-      if (text.contains('#$w') ||
-          RegExp('(^|\\s)'+RegExp.escape(w)+'(\\s|$)').hasMatch(text)) {
+      if (text.contains('#$w') || text.split(RegExp('\\s+')).contains(w)) {
         return true;
       }
     }
     return false;
   }
 }
-

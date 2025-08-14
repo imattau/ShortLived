@@ -16,7 +16,7 @@ class BlurShield extends StatelessWidget {
           child: ClipRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-              child: Container(color: Colors.black.withOpacity(0.35)),
+              child: Container(color: Colors.black.withValues(alpha: 0.35)),
             ),
           ),
         ),
@@ -26,10 +26,15 @@ class BlurShield extends StatelessWidget {
             children: [
               const Icon(Icons.shield, size: 40, color: Colors.white),
               const SizedBox(height: 8),
-              const Text('Sensitive — tap to reveal',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Sensitive — tap to reveal',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              ElevatedButton(onPressed: onReveal, child: const Text('Reveal once')),
+              ElevatedButton(
+                onPressed: onReveal,
+                child: const Text('Reveal once'),
+              ),
             ],
           ),
         ),
@@ -37,4 +42,3 @@ class BlurShield extends StatelessWidget {
     );
   }
 }
-

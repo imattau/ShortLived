@@ -69,17 +69,18 @@ class DetailsSheet extends StatelessWidget {
               children: [
                 OutlinedButton.icon(
                   onPressed: () async {
+                    String msg;
                     if (isMarked) {
                       await settings.removeSensitiveMark(post.id);
-                      // ignore: use_build_context_synchronously
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Cleared sensitive mark')),
-                      );
+                      msg = 'Cleared sensitive mark';
                     } else {
                       await settings.addSensitiveMark(post.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Marked as sensitive')),
-                      );
+                      msg = 'Marked as sensitive';
+                    }
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(msg)));
                     }
                   },
                   icon: const Icon(Icons.shield),

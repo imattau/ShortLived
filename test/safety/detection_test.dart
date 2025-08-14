@@ -6,7 +6,7 @@ import 'package:nostr_video/data/models/post.dart';
 import 'package:nostr_video/data/models/author.dart';
 
 class _SettingsHarness extends SettingsService {
-  _SettingsHarness(SharedPreferences p) : super(p);
+  _SettingsHarness(super.prefs);
 }
 
 void main() async {
@@ -39,4 +39,3 @@ void main() async {
     expect(svc.isSensitive(p1), true);
   });
 }
-
