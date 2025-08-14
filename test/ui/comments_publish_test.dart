@@ -38,6 +38,9 @@ class _RelaySpy implements RelayService {
 
   @override
   Future<void> close(String subId) async {}
+
+  @override
+  Future<void> repost({required String eventId, String? originalJson}) async {}
 }
 
 void main() {
