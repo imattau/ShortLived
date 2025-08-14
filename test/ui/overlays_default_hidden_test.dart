@@ -7,6 +7,7 @@ import 'package:nostr_video/services/settings/settings_service.dart';
 import 'package:nostr_video/services/queue/action_queue_memory.dart';
 import 'package:nostr_video/services/queue/action_queue.dart';
 import 'package:nostr_video/core/di/locator.dart';
+import 'package:network_image_mock/network_image_mock.dart';
 
 void main() {
   setUpAll(() async {
@@ -20,10 +21,12 @@ void main() {
   testWidgets('overlays are hidden on open when setting is true', (
     tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
-    await tester.pumpAndSettle();
-    expect(find.byType(AnimatedOpacity), findsOneWidget);
-    await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
+    await mockNetworkImagesFor(() async {
+      await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
+      await tester.pumpAndSettle();
+      expect(find.byType(AnimatedOpacity), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+    });
   });
 }
