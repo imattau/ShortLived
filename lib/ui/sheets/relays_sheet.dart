@@ -41,9 +41,10 @@ class _RelaysSheetState extends State<RelaysSheet> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Container(
               height: 4,
               width: 36,
@@ -92,6 +93,7 @@ class _RelaysSheetState extends State<RelaysSheet> {
                     child: SizedBox(
                         height: 36,
                         child: TextField(
+                            key: const Key('relay-url'),
                             controller: _ctrl,
                             decoration: const InputDecoration(
                                 hintText: 'wss://your-relay.example')))),
@@ -178,8 +180,9 @@ class _RelaysSheetState extends State<RelaysSheet> {
                 },
                 child: const Text('Generate new key'),
               ),
-            ]),
-          ],
+              ]),
+            ],
+          ),
         ),
       ),
     );

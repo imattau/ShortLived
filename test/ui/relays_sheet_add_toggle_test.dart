@@ -47,7 +47,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Add a relay
-    await tester.enterText(find.byType(TextField), 'wss://example.com');
+    await tester.enterText(find.byKey(const Key('relay-url')), 'wss://example.com');
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
 
