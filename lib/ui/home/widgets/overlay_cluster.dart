@@ -12,6 +12,7 @@ class OverlayCluster extends StatelessWidget {
     required this.onProfileTap,
     required this.onDetailsTap,
     required this.onRelaysLongPress,
+    required this.onSearchTap,
   });
   final VoidCallback onCreateTap;
   final VoidCallback onLikeTap;
@@ -22,6 +23,7 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onProfileTap;
   final VoidCallback onDetailsTap;
   final VoidCallback onRelaysLongPress;
+  final VoidCallback onSearchTap;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class OverlayCluster extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.search),
               tooltip: 'Search',
-              onPressed: () {},
+              onPressed: onSearchTap,
             ),
           ),
           // Centre-right action rail
