@@ -28,6 +28,8 @@ dev_dependencies:
   mocktail: any
   build_runner: any
   flutter_lints: any
+  video_player_platform_interface: any
+  network_image_mock: any
 
 flutter:
   uses-material-design: true

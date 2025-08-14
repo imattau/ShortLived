@@ -1,39 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import '../../../data/models/post.dart';
+import 'real_video_view.dart';
+import '../../../core/testing/test_switches.dart';
 
 class VideoCard extends StatelessWidget {
   final Post post;
   final bool isCurrent;
   final bool isNeighbour;
-  const VideoCard(
-      {super.key,
-      required this.post,
-      required this.isCurrent,
-      required this.isNeighbour});
+  final VideoPlayerController? controller; // null if not active
+  final bool globalPaused;
+  const VideoCard({
+    super.key,
+    required this.post,
+    required this.isCurrent,
+    required this.isNeighbour,
+    required this.controller,
+    required this.globalPaused,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder for a real video. Show a thumb and basic labels.
+    final isPlaying =
+        isCurrent && !globalPaused && (controller != null || TestSwitches.disableVideo);
     return Stack(
       fit: StackFit.expand,
       children: [
-        // In PR 4+, replace with actual video player. For now, coloured box.
-        Image.network(post.thumb,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(color: Colors.black)),
-        Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              '\${post.caption}\n\${isCurrent ? "Playing" : isNeighbour ? "Preloaded" : "Idle"}',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                  shadows: [Shadow(blurRadius: 8)]),
-            ),
+        if (controller != null)
+          RealVideoView(controller: controller!, isActive: isCurrent || isNeighbour, isPlaying: isPlaying)
+        else
+          // Not active: black placeholder to save resources
+          const ColoredBox(color: Colors.black),
+        // Optional tiny label for tests/dev
+        Positioned(
+          left: 8, top: 8,
+          child: Text(
+            isPlaying ? 'Playing' : (isNeighbour ? 'Preloaded' : 'Idle'),
+            style: const TextStyle(fontSize: 10, color: Colors.white),
           ),
         ),
       ],

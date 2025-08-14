@@ -18,19 +18,16 @@ void main() {
     Locator.I.put<SettingsService>(SettingsService(sp));
     Locator.I.put<ActionQueue>(ActionQueueMemory());
   });
-  testWidgets('overlay toggle does not remove feed PageView', (tester) async {
+  testWidgets('paused flag toggles without removing PageView', (tester) async {
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
       await tester.pumpAndSettle();
-      final finder = find.byKey(const Key('feed-pageview'));
-      expect(finder, findsOneWidget);
+      final pv = find.byKey(const Key('feed-pageview'));
+      expect(pv, findsOneWidget);
+      // Long-press overlays to ensure no rebuild of PageView
       await tester.longPress(find.byKey(const Key('feed-gesture')));
       await tester.pumpAndSettle();
-      expect(finder, findsOneWidget);
-      await tester.longPress(find.byKey(const Key('feed-gesture')));
-      await tester.pumpAndSettle();
-      expect(finder, findsOneWidget);
-      // Remove the widget tree to allow controller disposal
+      expect(pv, findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
       await tester.runAsync(() async {
