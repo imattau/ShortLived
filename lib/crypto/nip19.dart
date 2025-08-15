@@ -81,6 +81,7 @@ String? nip19Decode(String bech) {
     return null;
   }
 }
+
 bool isNpub(String s) => s.toLowerCase().startsWith('npub1');
 bool isNsec(String s) => s.toLowerCase().startsWith('nsec1');
 
@@ -89,7 +90,7 @@ String neventEncode({
   String? authorPubkeyHex,
   List<String> relays = const [],
 }) {
-  String _encode(List<_Tlv> items) {
+  String encode(List<_Tlv> items) {
     final body = items.expand((e) => e.bytes()).toList();
     final words = Nip19._convertBits(body, 8, 5, pad: true);
     return b32.Bech32Codec().encode(b32.Bech32('nevent', words));
@@ -103,16 +104,16 @@ String neventEncode({
   ];
 
   try {
-    return _encode(items);
-  } on FormatException {
+    return encode(items);
+  } catch (_) {
     // Length can exceed bech32's 90 char limit; progressively drop optional
     // fields to stay within bounds.
     final noRelays = items.where((e) => e.t != 0x01).toList();
     try {
-      return _encode(noRelays);
-    } on FormatException {
+      return encode(noRelays);
+    } catch (_) {
       final onlyId = items.where((e) => e.t == 0x00).toList();
-      return _encode(onlyId);
+      return encode(onlyId);
     }
   }
 }
