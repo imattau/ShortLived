@@ -15,6 +15,8 @@ class OverlayCluster extends StatelessWidget {
     required this.onSearchTap,
     required this.safetyOn,
     required this.onSafetyToggle,
+    this.showInstall = false,
+    this.onInstallTap,
   });
   final VoidCallback onCreateTap;
   final VoidCallback onLikeTap;
@@ -28,12 +30,26 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onSearchTap;
   final bool safetyOn;
   final VoidCallback onSafetyToggle;
+  final bool showInstall;
+  final VoidCallback? onInstallTap;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Stack(
         children: [
+          Positioned(
+            top: 8,
+            left: 8,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: showInstall ? 1 : 0,
+              child: ActionChip(
+                label: const Text('Install app'),
+                onPressed: onInstallTap,
+              ),
+            ),
+          ),
           // Top-left glyph (long-press later to open Relays sheet)
           Positioned(
             left: 12,
