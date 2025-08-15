@@ -48,7 +48,7 @@ class ThreadRepository {
           _byId[id] = ThreadComment(
             id: id,
             pubkey: pk,
-            authorName: meta?.name ?? pk.substring(0, 8),
+            authorName: meta?.name ?? (pk.length > 8 ? pk.substring(0, 8) : pk),
             authorAvatar: meta?.picture ?? '',
             content: (evt['content'] ?? '') as String,
             createdAt: created,
