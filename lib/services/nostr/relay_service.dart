@@ -30,4 +30,6 @@ abstract class RelayService {
     String content,
     List<String>? relays,
   });
+
+  // Future work: optionally expose a way to fetch user lists (e.g. mute list).
 }

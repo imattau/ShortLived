@@ -1,6 +1,8 @@
 import 'dart:async';
 import '../../services/nostr/relay_service.dart';
 import '../../services/nostr/metadata_service.dart';
+import '../../services/moderation/mute_service.dart';
+import '../../core/di/locator.dart';
 
 class ThreadRepository {
   ThreadRepository(this._relay, this._meta);
@@ -40,6 +42,12 @@ class ThreadRepository {
           if (id.isEmpty) return;
 
           final pk = (evt['pubkey'] ?? '') as String;
+          final caption = (evt['content'] ?? '') as String? ?? '';
+          final mute = Locator.I.tryGet<MuteService>();
+          if (mute != null &&
+              mute.isPostMuted(author: pk, eventId: id, caption: caption)) {
+            return;
+          }
           final meta = _meta.get(pk);
           final created = DateTime.fromMillisecondsSinceEpoch(
               ((evt['created_at'] ?? 0) as int) * 1000,
@@ -50,7 +58,7 @@ class ThreadRepository {
             pubkey: pk,
             authorName: meta?.name ?? (pk.length > 8 ? pk.substring(0, 8) : pk),
             authorAvatar: meta?.picture ?? '',
-            content: (evt['content'] ?? '') as String,
+            content: caption,
             createdAt: created,
           );
 

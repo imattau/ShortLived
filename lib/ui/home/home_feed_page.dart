@@ -23,6 +23,7 @@ import '../../services/queue/action_queue_hive.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/keys/key_service.dart';
 import '../../services/keys/key_service_secure.dart';
+import '../../services/moderation/mute_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/testing/test_switches.dart';
@@ -100,13 +101,19 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
         settings = SettingsService(sp);
         safety = ContentSafetyService(settings);
         Locator.I.put<SettingsService>(settings);
-        Locator.I.get<FeedController>().setMuted(settings.muted());
         if (mounted) {
           setState(() {
             overlaysVisible = !settings.overlaysDefaultHidden();
           });
         }
       });
+    }
+    if (Locator.I.tryGet<MuteService>() == null) {
+      Locator.I.put<MuteService>(MuteService(
+        Locator.I.get<SettingsService>(),
+        Locator.I.get<RelayService>(),
+        Locator.I.get<KeyService>(),
+      ));
     }
   }
 
@@ -204,10 +211,6 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
       builder: (_) => DetailsSheet(
         post: p,
         settings: settings,
-        onMuted: () {
-          final mut = settings.muted();
-          Locator.I.get<FeedController>().setMuted(mut);
-        },
       ),
     );
     _pausedBySheet.value = false;

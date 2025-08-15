@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../moderation/mute_models.dart';
 
 class SettingsService {
   static const _kMuted = 'muted_pubkeys';
@@ -50,5 +51,32 @@ class SettingsService {
   Future<void> removeSensitiveMark(String eventId) async {
     final s = sensitiveMarks()..remove(eventId);
     await prefs.setStringList(_kSensitiveMarks, s.toList());
+  }
+}
+
+extension MutePersistence on SettingsService {
+  static const _kMuteUsers = 'mute_users';
+  static const _kMuteEvents = 'mute_events';
+  static const _kMuteTags = 'mute_tags';
+  static const _kMuteWords = 'mute_words';
+
+  MuteList loadMuteList() {
+    final u = prefs.getStringList(_kMuteUsers) ?? const [];
+    final e = prefs.getStringList(_kMuteEvents) ?? const [];
+    final t = prefs.getStringList(_kMuteTags) ?? const [];
+    final w = prefs.getStringList(_kMuteWords) ?? const [];
+    return MuteList(
+      users: u.toSet(),
+      events: e.toSet(),
+      tags: t.toSet(),
+      words: w.toSet(),
+    );
+  }
+
+  Future<void> saveMuteList(MuteList list) async {
+    await prefs.setStringList(_kMuteUsers, list.users.toList());
+    await prefs.setStringList(_kMuteEvents, list.events.toList());
+    await prefs.setStringList(_kMuteTags, list.tags.toList());
+    await prefs.setStringList(_kMuteWords, list.words.toList());
   }
 }
