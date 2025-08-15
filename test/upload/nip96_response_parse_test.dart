@@ -8,7 +8,6 @@ class _DioFake extends DioMixin implements Dio {
   _DioFake(this.payload) {
     options = BaseOptions();
     httpClientAdapter = _FakeAdapter();
-    transformer = DefaultTransformer();
   }
 
   final Map<String, dynamic> payload;
@@ -22,21 +21,22 @@ class _DioFake extends DioMixin implements Dio {
       Options? options,
       CancelToken? cancelToken,
       ProgressCallback? onSendProgress,
-      ProgressCallback? onReceiveProgress}) async {
+      ProgressCallback? onReceiveProgress,
+      Map<String, dynamic>? queryParameters}) async {
     onSendProgress?.call(5, 10);
     onSendProgress?.call(10, 10);
     return Response<T>(data: payload as T, requestOptions: RequestOptions(path: path));
   }
 }
 
-class _FakeAdapter extends HttpClientAdapter {
+class _FakeAdapter implements HttpClientAdapter {
   @override
   void close({bool force = false}) {}
 
   @override
   Future<ResponseBody> fetch(RequestOptions options,
       Stream<List<int>>? requestStream, Future<void>? cancelFuture) async {
-    throw UnimplementedError();
+    return ResponseBody.fromString('', 200);
   }
 }
 
