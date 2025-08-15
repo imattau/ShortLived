@@ -60,3 +60,15 @@ class Nip19 {
     return result;
   }
 }
+
+String npubEncode(String pubkeyHex) => Nip19.encodeNpub(pubkeyHex);
+String nsecEncode(String privHex) => Nip19.encodeNsec(privHex);
+String? nip19Decode(String bech) {
+  try {
+    return Nip19.decode(bech);
+  } catch (_) {
+    return null;
+  }
+}
+bool isNpub(String s) => s.toLowerCase().startsWith('npub1');
+bool isNsec(String s) => s.toLowerCase().startsWith('nsec1');

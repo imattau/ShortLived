@@ -10,6 +10,7 @@ import '../sheets/details_sheet.dart';
 import '../sheets/relays_sheet.dart';
 import '../sheets/quote_sheet.dart';
 import '../sheets/search_sheet.dart';
+import '../sheets/settings_sheet.dart';
 import 'package:nostr_video/core/di/locator.dart';
 import '../../core/config/network.dart';
 import '../../services/nostr/relay_service_ws.dart';
@@ -200,6 +201,17 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     _pausedBySheet.value = false;
   }
 
+  Future<void> _openSettings() async {
+    _pausedBySheet.value = true;
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
+      builder: (_) => const SettingsSheet(),
+    );
+    _pausedBySheet.value = false;
+  }
+
   Future<void> _openProfile() async {
     final p = _currentPost;
     if (p == null) return;
@@ -299,6 +311,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                 onDetailsTap: _openDetails,
                 onRelaysLongPress: _openRelays,
                 onSearchTap: _openSearch,
+                onSettingsTap: _openSettings,
                 safetyOn: settings.sensitiveBlurEnabled(),
                 onSafetyToggle: _toggleSafety,
                 showInstall: avail,

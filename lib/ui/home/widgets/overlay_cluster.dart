@@ -13,6 +13,7 @@ class OverlayCluster extends StatelessWidget {
     required this.onDetailsTap,
     required this.onRelaysLongPress,
     required this.onSearchTap,
+    required this.onSettingsTap,
     required this.safetyOn,
     required this.onSafetyToggle,
     this.showInstall = false,
@@ -28,6 +29,7 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onDetailsTap;
   final VoidCallback onRelaysLongPress;
   final VoidCallback onSearchTap;
+  final VoidCallback onSettingsTap;
   final bool safetyOn;
   final VoidCallback onSafetyToggle;
   final bool showInstall;
@@ -59,7 +61,7 @@ class OverlayCluster extends StatelessWidget {
               child: IconButton(
                 icon: const Icon(Icons.blur_on),
                 tooltip: 'App',
-                onPressed: () {},
+                onPressed: onSettingsTap,
               ),
             ),
           ),
