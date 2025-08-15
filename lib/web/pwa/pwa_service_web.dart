@@ -1,5 +1,9 @@
-import 'dart:html' as html; // ignore: avoid_web_libraries_in_flutter
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
+
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'package:flutter/material.dart';
+
 import 'pwa_service_base.dart';
 
 class PwaServiceWeb implements PwaService {
@@ -14,13 +18,13 @@ class PwaServiceWeb implements PwaService {
 
   @override
   Future<bool> promptInstall() async {
-    final res = await html.window.callMethod('__pwaPrompt', const []) as Object?;
-    final map = res is Map ? Map<String, dynamic>.from(res) : <String, dynamic>{};
-    if (map['ok'] == true) {
+    final result = await js_util.promiseToFuture<Object?>(
+        js_util.callMethod(html.window, '__pwaPrompt', const []));
+    final ok = js_util.getProperty(result as Object, 'ok') == true;
+    if (ok) {
       installAvailable.value = false;
-      return true;
     }
-    return false;
+    return ok;
   }
 }
 
