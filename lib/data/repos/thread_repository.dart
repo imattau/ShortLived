@@ -13,17 +13,9 @@ class ThreadRepository {
   Future<void> dispose() async => _sub?.cancel();
 
   Stream<List<ThreadComment>> watchThread({required String rootEventId}) async* {
-    // Subscribe for kind:1 replies that reference the root
-    final subId = await _relay.subscribe([
-      {
-        "kinds": [1],
-        "#e": [rootEventId],
-        "limit": 200,
-      }
-    ]);
-
     final ctrl = StreamController<List<ThreadComment>>.broadcast();
 
+    // Listen before subscribing so early events aren't missed.
     _sub = _relay.events.listen((evt) {
       if (evt['kind'] != 1) return;
       final tags = (evt['tags'] as List?)?.whereType<List>().toList() ?? const [];
@@ -59,6 +51,15 @@ class ThreadRepository {
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt)); // oldest → newest
       ctrl.add(list);
     });
+
+    // Subscribe for kind:1 replies that reference the root
+    final subId = await _relay.subscribe([
+      {
+        "kinds": [1],
+        "#e": [rootEventId],
+        "limit": 200,
+      }
+    ]);
 
     yield* ctrl.stream;
 
