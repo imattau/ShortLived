@@ -36,6 +36,13 @@ class FakePrefs implements SharedPreferences {
     }
     @override
     Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async {
+      final event = {
+        'id': 'id',
+        'kind': kind,
+        'content': content,
+        'tags': tags,
+      };
+      lastPublished = event;
       return 'id';
     }
 
