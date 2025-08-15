@@ -35,9 +35,6 @@ class _WSFake extends StreamChannelMixin<dynamic> implements WebSocketChannel {
 
   @override
   Future<void> get ready => Future.value();
-
-  @override
-  Future close([int? code, String? reason]) async {}
 }
 
 class _Sink implements WebSocketSink {
