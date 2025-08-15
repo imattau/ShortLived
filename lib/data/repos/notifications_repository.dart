@@ -37,7 +37,9 @@ class NotificationsRepository {
 
       final pk = (evt['pubkey'] ?? '') as String;
       final m = _meta.get(pk);
-      final name = m?.name ?? (pk.isNotEmpty ? pk.substring(0,8) : 'unknown');
+      final name = m?.name ?? (pk.isNotEmpty
+          ? (pk.length >= 8 ? pk.substring(0, 8) : pk)
+          : 'unknown');
       final avatar = m?.picture ?? '';
       final created = (evt['created_at'] ?? 0) as int;
 

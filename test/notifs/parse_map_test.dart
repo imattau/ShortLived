@@ -4,7 +4,7 @@ import 'package:nostr_video/data/repos/notifications_repository.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 import 'package:nostr_video/services/keys/signer.dart';
 import 'package:nostr_video/services/nostr/metadata_service.dart';
-import 'package:nostr_video/core/test_switches.dart';
+import 'package:nostr_video/core/testing/test_switches.dart';
 
 class _RelayFake implements RelayService {
   final _c = StreamController<Map<String, dynamic>>.broadcast();
@@ -35,6 +35,7 @@ class _RelayFake implements RelayService {
   @override
   Future<void> resetConnections(List<String> urls) async {}
   void emit(Map<String,dynamic> e) => _c.add(e);
+  void dispose() => _c.close();
 }
 
 class _SignerFake implements Signer {
@@ -64,5 +65,7 @@ void main() async {
     await Future<void>.delayed(const Duration(milliseconds: 1));
     final list = await repo.stream().firstWhere((l) => l.isNotEmpty);
     expect(list.first.type.name, 'like');
+    await repo.dispose();
+    r.dispose();
   });
 }
