@@ -50,7 +50,7 @@ void main() {
       'dur': 21.4,
     });
     final svc = Nip96UploadService(dio);
-    final tmp = File('fake'); // path unused by fake
+    final tmp = await File('${Directory.systemTemp.path}/fake').writeAsBytes(const []);
     final UploadResult res = await svc.uploadFile(tmp, onProgress: (_, __) {});
     expect(res.url, contains('.mp4'));
     expect(res.width, 1080);
