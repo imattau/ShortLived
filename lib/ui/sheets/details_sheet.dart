@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../data/models/post.dart';
 import '../../services/settings/settings_service.dart';
+import '../../services/moderation/mute_service.dart';
+import '../../core/di/locator.dart';
+import '../sheets/muted_sheet.dart';
 import 'report_sheet.dart';
 
 class DetailsSheet extends StatelessWidget {
@@ -8,11 +11,9 @@ class DetailsSheet extends StatelessWidget {
     super.key,
     required this.post,
     required this.settings,
-    required this.onMuted,
   });
   final Post post;
   final SettingsService settings;
-  final VoidCallback onMuted;
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +53,56 @@ class DetailsSheet extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    await settings.addMute(post.author.pubkey);
-                    onMuted();
-                    // ignore: use_build_context_synchronously
-                    Navigator.of(context).maybePop();
-                  },
+                OutlinedButton.icon(
                   icon: const Icon(Icons.volume_off),
-                  label: const Text('Mute author'),
+                  label: const Text('Mute tag'),
+                  onPressed: () async {
+                    final tag = _firstHashtagOrNullFrom(post.caption);
+                    if (tag == null) return;
+                    await Locator.I.get<MuteService>().muteTag(tag);
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Muted #$tag')),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.visibility_off),
+                  label: const Text('Mute word'),
+                  onPressed: () async {
+                    final word = await _promptWord(context);
+                    if (word == null || word.trim().isEmpty) return;
+                    await Locator.I.get<MuteService>().muteWord(word.trim());
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Word muted')),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.block),
+                  label: const Text('Mute post'),
+                  onPressed: () async {
+                    await Locator.I.get<MuteService>().muteEvent(post.id);
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Post muted')),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () async {
+                    await showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.black,
+                      isScrollControlled: true,
+                      builder: (_) => const MutedSheet(),
+                    );
+                  },
+                  child: const Text('Manage muted…'),
                 ),
               ],
             ),
@@ -78,9 +120,8 @@ class DetailsSheet extends StatelessWidget {
                       msg = 'Marked as sensitive';
                     }
                     if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(msg)));
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(msg)));
                     }
                   },
                   icon: const Icon(Icons.shield),
@@ -106,4 +147,24 @@ class DetailsSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _firstHashtagOrNullFrom(String text) {
+  final m = RegExp(r'(?:^|\s)#([a-z0-9_]{1,40})', caseSensitive: false).firstMatch(text);
+  return m == null ? null : m.group(1)!.toLowerCase();
+}
+
+Future<String?> _promptWord(BuildContext context) async {
+  final ctrl = TextEditingController();
+  return showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Mute word'),
+      content: TextField(controller: ctrl),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()), child: const Text('OK')),
+      ],
+    ),
+  );
 }

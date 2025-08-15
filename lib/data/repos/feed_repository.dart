@@ -2,6 +2,8 @@ import '../models/post.dart';
 import '../models/author.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/cache/cache_service.dart';
+import '../../services/moderation/mute_service.dart';
+import '../../core/di/locator.dart';
 
 abstract class FeedRepository {
   Stream<List<Post>> watchFeed();
@@ -150,10 +152,18 @@ class RealFeedRepository implements FeedRepository {
       }
     ];
     final subId = await _relay.subscribe(filters);
+    final mute = Locator.I.tryGet<MuteService>();
     try {
       await for (final evt in _relay.events) {
         final p = _postFromEvent(evt);
         if (p == null) continue;
+        if (mute != null &&
+            mute.isPostMuted(
+                author: p.author.pubkey,
+                eventId: p.id,
+                caption: p.caption)) {
+          continue;
+        }
         _byId[p.id] = p;
         final list = _sorted();
         yield list;

@@ -4,6 +4,7 @@ import '../../state/feed_controller.dart';
 import '../../services/search/search_service.dart';
 import '../../services/search/search_models.dart';
 import '../../services/nostr/relay_service.dart';
+import '../../services/moderation/mute_service.dart';
 
 class SearchSheet extends StatefulWidget {
   const SearchSheet({super.key});
@@ -49,7 +50,26 @@ class _SearchSheetState extends State<SearchSheet> {
         subtitle: '@${pk.substring(0, 8)}',
       ));
       // Coalesce updates
-      if (mounted) setState(() { _items = results.toList(); });
+      List<SearchResultItem> items = results.toList();
+      final mute = Locator.I.tryGet<MuteService>();
+      if (mute != null) {
+        items = items.where((it) {
+          if (it.eventId.isNotEmpty && mute.current().events.contains(it.eventId)) {
+            return false;
+          }
+          final low = (it.title + ' ' + it.subtitle).toLowerCase();
+          for (final w in mute.current().words) {
+            if (RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(low)) {
+              return false;
+            }
+          }
+          for (final t in mute.current().tags) {
+            if (low.contains('#$t')) return false;
+          }
+          return true;
+        }).toList();
+      }
+      if (mounted) setState(() { _items = items; });
     });
 
     // Close after 1.2s of collection to avoid lingering subs

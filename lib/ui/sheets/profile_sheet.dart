@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../state/feed_controller.dart';
 import '../../data/models/post.dart';
+import '../../services/moderation/mute_service.dart';
+import '../../core/di/locator.dart';
 
 class ProfileSheet extends StatelessWidget {
   const ProfileSheet({
@@ -48,12 +50,24 @@ class ProfileSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    /* TODO: follow toggle */
-                  },
-                  child: const Text('Follow'),
-                ),
+                Builder(builder: (context) {
+                  final isMuted = Locator.I.tryGet<MuteService>()?.current().users.contains(pubkey) ?? false;
+                  return TextButton(
+                    onPressed: () async {
+                      final svc = Locator.I.get<MuteService>();
+                      if (isMuted) {
+                        await svc.unmuteUser(pubkey);
+                      } else {
+                        await svc.muteUser(pubkey);
+                      }
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(isMuted ? 'Unmuted' : 'Muted')),
+                      );
+                    },
+                    child: Text(isMuted ? 'Muted' : 'Mute'),
+                  );
+                }),
               ],
             ),
             const SizedBox(height: 12),
