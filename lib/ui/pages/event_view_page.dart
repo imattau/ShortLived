@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/di/locator.dart';
-import '../../data/models/post.dart';
 import '../../state/feed_controller.dart';
 import '../../crypto/nip19.dart';
 import 'package:share_plus/share_plus.dart';
