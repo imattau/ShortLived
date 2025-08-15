@@ -7,14 +7,16 @@ import 'package:stream_channel/stream_channel.dart';
 
 class _SignerFake implements Signer {
   @override
-  Future<String?> getPubkey() async => '02' + 'a' * 66;
+  Future<String?> getPubkey() async => '02${'a' * 66}';
   @override
-  Future<Map<String, dynamic>?> sign(int k, String c, List<List<String>> t) async => {
+  Future<Map<String, dynamic>?> sign(
+          int k, String c, List<List<String>> t) async =>
+      {
         'kind': k,
         'content': c,
         'tags': t,
         'id': 'id',
-        'pubkey': '02' + 'a' * 66,
+        'pubkey': '02${'a' * 66}',
         'sig': 's'
       };
 }
