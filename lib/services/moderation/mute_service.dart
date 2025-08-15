@@ -69,7 +69,8 @@ class MuteService {
       }
     }
     for (final w in _list.words) {
-      if (RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(low)) {
+      if (
+          RegExp(r'(^|\s)' + RegExp.escape(w) + r'\w*(\s|$)').hasMatch(low)) {
         return true;
       }
     }

@@ -25,10 +25,13 @@ class MuteServiceHarness {
       return true;
     }
     for (final t in _list.tags) {
-      if (low.contains('#$t')) return true;
+      if (RegExp(r'(?:^|\s)#' + RegExp.escape(t) + r'(?:\s|$)').hasMatch(low)) {
+        return true;
+      }
     }
     for (final w in _list.words) {
-      if (RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(low)) {
+      if (
+          RegExp(r'(^|\s)' + RegExp.escape(w) + r'\w*(\s|$)').hasMatch(low)) {
         return true;
       }
     }

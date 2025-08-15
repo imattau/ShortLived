@@ -59,12 +59,16 @@ class _SearchSheetState extends State<SearchSheet> {
           }
             final low = '${it.title} ${it.subtitle}'.toLowerCase();
           for (final w in mute.current().words) {
-            if (RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(low)) {
+            if (
+                RegExp(r'(^|\s)' + RegExp.escape(w) + r'\w*(\s|$)').hasMatch(low)) {
               return false;
             }
           }
           for (final t in mute.current().tags) {
-            if (low.contains('#$t')) return false;
+            if (
+                RegExp(r'(?:^|\s)#' + RegExp.escape(t) + r'(?:\s|$)').hasMatch(low)) {
+              return false;
+            }
           }
           return true;
         }).toList();
