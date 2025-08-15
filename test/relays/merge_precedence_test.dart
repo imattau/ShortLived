@@ -81,7 +81,7 @@ class _Keys implements KeyService {
   @override
   Future<String?> getPrivkey() async => '11' * 32;
   @override
-  Future<String?> getPubkey() async => '02' + 'a' * 66;
+  Future<String?> getPubkey() async => '02${'a' * 66}';
   @override
   Future<String> generate() async => '';
   @override
@@ -106,7 +106,7 @@ void main() {
     Future.delayed(const Duration(milliseconds: 10), () {
       relay.emit({
         'kind': 10002,
-        'pubkey': '02' + 'a' * 66,
+        'pubkey': '02${'a' * 66}',
         'created_at': 999,
         'tags': [
           ['r', 'wss://new', 'read'],

@@ -78,7 +78,7 @@ class _KeysFake implements KeyService {
   @override
   Future<String?> getPrivkey() async => '11' * 32;
   @override
-  Future<String?> getPubkey() async => '02' + 'a' * 66;
+  Future<String?> getPubkey() async => '02${'a' * 66}';
   @override
   Future<String> generate() async => '';
   @override
