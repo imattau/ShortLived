@@ -16,6 +16,7 @@ class OverlayCluster extends StatelessWidget {
     required this.onSettingsTap,
     required this.safetyOn,
     required this.onSafetyToggle,
+    required this.onShareTap,
     this.showInstall = false,
     this.onInstallTap,
   });
@@ -32,6 +33,7 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onSettingsTap;
   final bool safetyOn;
   final VoidCallback onSafetyToggle;
+  final VoidCallback onShareTap;
   final bool showInstall;
   final VoidCallback? onInstallTap;
 
@@ -101,21 +103,25 @@ class OverlayCluster extends StatelessWidget {
                       icon: const Icon(Icons.chat_bubble_outline),
                       onPressed: onCommentTap,
                     ),
-                    GestureDetector(
-                      onLongPress: onQuoteTap,
-                      child: IconButton(
-                        icon: const Icon(Icons.repeat),
-                        onPressed: onRepostTap,
-                      ),
+                  GestureDetector(
+                    onLongPress: onQuoteTap,
+                    child: IconButton(
+                      icon: const Icon(Icons.repeat),
+                      onPressed: onRepostTap,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.bolt_outlined),
-                      onPressed: onZapTap,
-                    ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.bolt_outlined),
+                    onPressed: onZapTap,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.ios_share),
+                    onPressed: onShareTap,
+                  ),
+                ],
               ),
             ),
+          ),
           ),
           // Bottom-left author + caption
           Positioned(

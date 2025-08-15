@@ -30,6 +30,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/testing/test_switches.dart';
 import '../../services/nostr/relay_directory.dart';
 import '../../web/pwa/pwa_service.dart';
+import '../../crypto/nip19.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -267,6 +269,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     );
   }
 
+  void _shareCurrent() {
+    final p = Locator.I.get<FeedController>().currentOrNull;
+    if (p == null) return;
+    final link =
+        neventEncode(eventIdHex: p.id, authorPubkeyHex: p.author.pubkey);
+    Share.share('nostr:$link');
+  }
+
   Future<void> _promptInstall() async {
     final ok = await _pwa.promptInstall();
     if (!mounted) return;
@@ -314,6 +324,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                 onSettingsTap: _openSettings,
                 safetyOn: settings.sensitiveBlurEnabled(),
                 onSafetyToggle: _toggleSafety,
+                onShareTap: _shareCurrent,
                 showInstall: avail,
                 onInstallTap: avail ? _promptInstall : null,
               ),

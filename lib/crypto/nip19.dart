@@ -2,6 +2,17 @@ import 'package:bech32/bech32.dart' as b32;
 
 import 'hex.dart';
 
+class _Tlv {
+  final int t;
+  final List<int> v;
+  _Tlv(this.t, this.v);
+  List<int> bytes() => [t, v.length, ...v];
+}
+
+List<int> _hexToBytes(String hex) => fromHex(hex);
+// ignore: unused_element
+String _bytesToHex(List<int> b) => toHex(b);
+
 class Nip19 {
   static String encodeNpub(String pubkeyHex) {
     final words = _convertBits(fromHex(pubkeyHex), 8, 5, pad: true);
@@ -72,3 +83,32 @@ String? nip19Decode(String bech) {
 }
 bool isNpub(String s) => s.toLowerCase().startsWith('npub1');
 bool isNsec(String s) => s.toLowerCase().startsWith('nsec1');
+
+String neventEncode({
+  required String eventIdHex,
+  String? authorPubkeyHex,
+  List<String> relays = const [],
+}) {
+  final items = <_Tlv>[
+    _Tlv(0x00, _hexToBytes(eventIdHex)),
+    if (authorPubkeyHex != null && authorPubkeyHex.isNotEmpty)
+      _Tlv(0x02, _hexToBytes(authorPubkeyHex)),
+    for (final r in relays) _Tlv(0x01, r.codeUnits),
+  ];
+  final body = items.expand((e) => e.bytes()).toList();
+  final words = Nip19._convertBits(body, 8, 5, pad: true);
+  return b32.Bech32Codec().encode(b32.Bech32('nevent', words));
+}
+
+String nprofileEncode({
+  required String pubkeyHex,
+  List<String> relays = const [],
+}) {
+  final items = <_Tlv>[
+    _Tlv(0x00, _hexToBytes(pubkeyHex)),
+    for (final r in relays) _Tlv(0x01, r.codeUnits),
+  ];
+  final body = items.expand((e) => e.bytes()).toList();
+  final words = Nip19._convertBits(body, 8, 5, pad: true);
+  return b32.Bech32Codec().encode(b32.Bech32('nprofile', words));
+}

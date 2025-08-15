@@ -4,6 +4,7 @@ import '../../../data/models/post.dart';
 import 'real_video_view.dart';
 import '../../../core/testing/test_switches.dart';
 import '../../widgets/blur_shield.dart';
+import '../../widgets/hashtag_text.dart';
 
 class VideoCard extends StatefulWidget {
   final Post post;
@@ -63,6 +64,15 @@ class _VideoCardState extends State<VideoCard> {
         BlurShield(
           visible: widget.blurBySafety && !revealed,
           onReveal: () => setState(() => revealed = true),
+        ),
+        Positioned(
+          left: 12,
+          right: 12,
+          bottom: 12,
+          child: HashtagText(
+            widget.post.caption,
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );
