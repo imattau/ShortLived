@@ -27,6 +27,7 @@ import '../../services/moderation/mute_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/testing/test_switches.dart';
+import '../../services/nostr/relay_directory.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -34,7 +35,8 @@ class HomeFeedPage extends StatefulWidget {
   State<HomeFeedPage> createState() => _HomeFeedPageState();
 }
 
-class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver {
+class _HomeFeedPageState extends State<HomeFeedPage>
+    with WidgetsBindingObserver {
   bool overlaysVisible = true;
   final ValueNotifier<bool> _pausedBySheet = ValueNotifier(false);
   late final RelayService relay;
@@ -42,15 +44,16 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
   late SettingsService settings;
   late ContentSafetyService safety; // ignore: unused_field
   late ActionQueue queue;
+  late RelayDirectory relayDir;
 
   Future<void> _openCreate() async {
     _pausedBySheet.value = true;
-      await showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.black,
-        builder: (ctx) => const CreateSheet(),
-      );
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.black,
+      builder: (ctx) => const CreateSheet(),
+    );
     _pausedBySheet.value = false;
   }
 
@@ -62,11 +65,18 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
       Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
     }
     relay = Locator.I.tryGet<RelayService>() ??
-        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri), keyService: Locator.I.get<KeyService>());
+        RelayServiceWs(
+            factory: (uri) => WebSocketChannel.connect(uri),
+            keyService: Locator.I.get<KeyService>());
     if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
     }
+    relayDir = Locator.I.tryGet<RelayDirectory>() ??
+        RelayDirectory(Locator.I.get(), Locator.I.get(), Locator.I.get());
+    Locator.I.put<RelayDirectory>(relayDir);
+    // On production runs, apply NIP-65; tests have disableRelays = true.
+    relayDir.init();
     _zapSub = relay.events.listen((evt) {
       if (evt['kind'] == 9735) {
         final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
@@ -156,7 +166,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
       context: context,
       backgroundColor: Colors.black,
       isScrollControlled: true,
-      builder: (_) => QuoteSheet(eventId: p.id, relay: Locator.I.get<RelayService>()),
+      builder: (_) =>
+          QuoteSheet(eventId: p.id, relay: Locator.I.get<RelayService>()),
     );
   }
 
@@ -180,7 +191,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
       context: context,
       backgroundColor: Colors.black,
       isScrollControlled: true,
-      builder: (_) => RelaysSheet(settings: settings),
+      builder: (_) => const RelaysSheet(),
     );
     _pausedBySheet.value = false;
   }
@@ -218,7 +229,9 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
 
   Future<void> _openSearch() async {
     await showModalBottomSheet(
-      context: context, backgroundColor: Colors.black, isScrollControlled: true,
+      context: context,
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
       builder: (_) => const SearchSheet(),
     );
   }
@@ -248,7 +261,8 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
             behavior: HitTestBehavior.opaque,
             onTap: () {}, // play/pause will wire later
             onDoubleTap: _like,
-            onLongPress: () => setState(() => overlaysVisible = !overlaysVisible),
+            onLongPress: () =>
+                setState(() => overlaysVisible = !overlaysVisible),
             child: ValueListenableBuilder<bool>(
               valueListenable: _pausedBySheet,
               builder: (_, paused, __) => VideoPlayerView(globalPaused: paused),

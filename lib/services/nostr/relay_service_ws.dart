@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import '../../core/config/network.dart';
 import 'backoff.dart';
 import 'relay_service.dart';
 import '../../services/keys/key_service.dart';
@@ -24,7 +23,8 @@ class RelayServiceWs implements RelayService {
   @override
   Stream<Map<String, dynamic>> get events => _eventsCtrl.stream;
 
-  RelayServiceWs({required this.factory, required KeyService keyService, Backoff? backoff})
+  RelayServiceWs(
+      {required this.factory, required KeyService keyService, Backoff? backoff})
       : _keyService = keyService,
         _backoff = backoff ?? Backoff();
 
@@ -36,11 +36,12 @@ class RelayServiceWs implements RelayService {
   }
 
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async {
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+      {String? subId}) async {
     final id = subId ?? _rand.v4();
     _subs.add(id);
     final frame = jsonEncode(["REQ", id, ...filters]);
-    for (final url in NetworkConfig.relays) {
+    for (final url in _ch.keys) {
       final ws = _ch[url];
       ws?.sink.add(frame);
     }
@@ -52,7 +53,7 @@ class RelayServiceWs implements RelayService {
     if (!_subs.contains(subId)) return;
     _subs.remove(subId);
     final frame = jsonEncode(["CLOSE", subId]);
-    for (final url in NetworkConfig.relays) {
+    for (final url in _ch.keys) {
       final ws = _ch[url];
       ws?.sink.add(frame);
     }
@@ -82,7 +83,8 @@ class RelayServiceWs implements RelayService {
             }
           }
         } catch (_) {/* ignore */}
-      }, onDone: () => _scheduleReconnect(url),
+      },
+          onDone: () => _scheduleReconnect(url),
           onError: (_) => _scheduleReconnect(url),
           cancelOnError: true);
     } catch (_) {
@@ -108,14 +110,16 @@ class RelayServiceWs implements RelayService {
   }
 
   // helper:
-  Future<Map<String, dynamic>> _sign(int kind, String content, List<List<String>> tags) async {
+  Future<Map<String, dynamic>> _sign(
+      int kind, String content, List<List<String>> tags) async {
     final priv = await _keyService.getPrivkey();
-    final pub  = await _keyService.getPubkey();
+    final pub = await _keyService.getPubkey();
     if (priv == null || pub == null) {
       throw Exception('No keys present. Generate or import a key first.');
     }
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final e = NostrEvent(kind: kind, createdAt: now, content: content, tags: tags);
+    final e =
+        NostrEvent(kind: kind, createdAt: now, content: content, tags: tags);
     return NostrEvent.sign(priv, pub, e);
   }
 
@@ -140,7 +144,7 @@ class RelayServiceWs implements RelayService {
   @override
   Future<String> publishEvent(Map<String, dynamic> signedEventJson) async {
     final jsonStr = jsonEncode(["EVENT", signedEventJson]);
-    for (final url in NetworkConfig.relays) {
+    for (final url in _ch.keys) {
       final ws = _ch[url];
       if (ws != null) {
         try {
@@ -198,8 +202,28 @@ class RelayServiceWs implements RelayService {
     final tags = <List<String>>[
       ['p', recipientPubkey],
       ['e', eventId],
-      if (relays != null && relays.isNotEmpty) ...relays.map((r) => ['relays', r]),
+      if (relays != null && relays.isNotEmpty)
+        ...relays.map((r) => ['relays', r]),
     ];
     return _sign(9734, content, tags);
+  }
+
+  @override
+  Future<void> resetConnections(List<String> urls) async {
+    final keep = urls.toSet();
+    for (final url in _ch.keys.toList()) {
+      if (!keep.contains(url)) {
+        try {
+          await _ch[url]?.sink.close();
+        } catch (_) {}
+        _ch.remove(url);
+        _attempts.remove(url);
+      }
+    }
+    for (final u in urls) {
+      if (!_ch.containsKey(u)) {
+        _connect(u);
+      }
+    }
   }
 }

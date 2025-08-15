@@ -26,6 +26,8 @@ class _NoopRelay implements RelayService {
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
   @override
+  Future<void> resetConnections(List<String> urls) async {}
+  @override
   Future<void> zapRequest(
       {required String eventId, required int millisats}) async {}
   @override
