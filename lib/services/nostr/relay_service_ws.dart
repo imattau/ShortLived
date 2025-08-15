@@ -163,14 +163,21 @@ class RelayServiceWs implements RelayService {
   }
 
   @override
-  Future<void> reply(
-      {required String parentId,
-      required String content,
-      String? parentPubkey}) async {
-    final tags = <List<String>>[["e", parentId]];
-    if (parentPubkey != null && parentPubkey.isNotEmpty) {
-      tags.add(["p", parentPubkey]);
-    }
+  Future<void> reply({
+    required String parentId,
+    required String content,
+    String? parentPubkey,
+    String? rootId,
+    String? rootPubkey,
+  }) async {
+    // NIP-10: prefer explicit root; otherwise assume parent is root.
+    final rid = rootId ?? parentId;
+    final rpk = rootPubkey ?? parentPubkey ?? '';
+    final tags = <List<String>>[
+      ['e', rid, '', 'root'],
+      if (parentId != rid) ['e', parentId, '', 'reply'],
+      if (rpk.isNotEmpty) ['p', rpk],
+    ];
     final evt = await _sign(1, content, tags);
     await publishEvent(evt);
   }

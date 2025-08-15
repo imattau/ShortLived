@@ -10,10 +10,13 @@ abstract class RelayService {
 
   /// High-level helpers now require signing context; implementations can call KeyService.
   Future<void> like({required String eventId});
-  Future<void> reply(
-      {required String parentId,
-      required String content,
-      String? parentPubkey});
+  Future<void> reply({
+    required String parentId,
+    required String content,
+    String? parentPubkey,
+    String? rootId,
+    String? rootPubkey,
+  });
   Future<void> repost({required String eventId, String? originalJson});
   Future<void> zapRequest({required String eventId, required int millisats});
 

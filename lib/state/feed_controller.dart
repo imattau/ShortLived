@@ -59,6 +59,9 @@ class FeedController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Force listeners to rebuild after external mutations.
+  void refresh() => notifyListeners();
+
   void bindQueue(ActionQueue q) {
     _queue = q;
   }
@@ -113,12 +116,15 @@ class FeedController extends ChangeNotifier {
     await _queue!.enqueue(QueuedAction(ActionType.publish, {'event': eventJson}));
   }
 
-  Future<void> enqueueReply(String parentId, String content, {String? parentPubkey}) async {
+  Future<void> enqueueReply(String parentId, String content,
+      {String? parentPubkey, String? rootId, String? rootPubkey}) async {
     if (_queue == null) return;
     await _queue!.enqueue(QueuedAction(ActionType.reply, {
       'parentId': parentId,
       'content': content,
       'parentPubkey': parentPubkey ?? '',
+      'rootId': rootId,
+      'rootPubkey': rootPubkey,
     }));
   }
 
@@ -142,6 +148,8 @@ class FeedController extends ChangeNotifier {
               parentPubkey: (a.payload['parentPubkey'] as String).isEmpty
                   ? null
                   : a.payload['parentPubkey'] as String,
+              rootId: a.payload['rootId'] as String?,
+              rootPubkey: a.payload['rootPubkey'] as String?,
             );
             break;
         }

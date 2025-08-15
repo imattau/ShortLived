@@ -43,7 +43,9 @@ class RelayServiceFake implements RelayService {
   Future<void> reply(
       {required String parentId,
       required String content,
-      String? parentPubkey}) async {}
+      String? parentPubkey,
+      String? rootId,
+      String? rootPubkey}) async {}
 
   @override
   Future<void> zapRequest(
