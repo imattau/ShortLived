@@ -13,9 +13,13 @@ class RealVideoView extends StatefulWidget {
 }
 
 class _RealVideoViewState extends State<RealVideoView> with AutomaticKeepAliveClientMixin {
+  bool _webMuted = kIsWeb; // start muted only on web
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      widget.controller.setVolume(0);
+    }
     _maybePlayPause();
   }
 
@@ -55,14 +59,25 @@ class _RealVideoViewState extends State<RealVideoView> with AutomaticKeepAliveCl
       ),
     );
     if (!kIsWeb) return player;
-    // On web: single tap toggles mute so users can enable sound per video.
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () async {
-        final v = widget.controller.value.volume;
-        await widget.controller.setVolume(v > 0 ? 0.0 : 1.0);
-      },
-      child: player,
+    // Overlay a small unmute button on web when muted
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        player,
+        if (_webMuted)
+          Positioned(
+            bottom: 24,
+            left: 16,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.volume_up),
+              label: const Text('Unmute'),
+              onPressed: () {
+                setState(() => _webMuted = false);
+                widget.controller.setVolume(1.0);
+              },
+            ),
+          ),
+      ],
     );
   }
 

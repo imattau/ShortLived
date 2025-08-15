@@ -3,33 +3,16 @@
   <head>
     <base href="/">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-
-    <!-- Ensure your upload host is allowed -->
-    <!-- Content Security Policy: allow your relays/upload/media origins -->
-    <!-- Replace RELAY_HOSTS and MEDIA_HOSTS with your actual domains -->
-    <meta http-equiv="Content-Security-Policy"
-      content="
-        default-src 'self';
-        connect-src 'self' https://* wss://*;
-        img-src 'self' https://* data: blob:;
-        media-src 'self' https://* blob: data:;
-        style-src 'self' 'unsafe-inline';
-        script-src 'self' 'wasm-unsafe-eval';
-        worker-src 'self' blob:;
-      ">
-
-    <title>ShortLived</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script defer src="install_prompt.js"></script>
+    <!-- Flutter injects main.dart.js and registers flutter_service_worker.js in release builds -->
   </head>
   <body>
-    <script>
-      // Optional: minimal install prompt UX.
-      window.addEventListener('beforeinstallprompt', e => {
-        window.__pwaPrompt = e;
-      });
-    </script>
-    <script src="flutter_bootstrap.js" async></script>
+    <script>/* Flutter bootstrapped here by build */</script>
   </body>
 </html>

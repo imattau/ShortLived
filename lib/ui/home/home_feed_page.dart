@@ -28,6 +28,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/testing/test_switches.dart';
 import '../../services/nostr/relay_directory.dart';
+import '../../web/pwa/pwa_service.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -45,6 +46,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   late ContentSafetyService safety; // ignore: unused_field
   late ActionQueue queue;
   late RelayDirectory relayDir;
+  late final PwaService _pwa;
 
   Future<void> _openCreate() async {
     _pausedBySheet.value = true;
@@ -61,6 +63,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Use a stub if no PwaService has been registered. Tests typically do not
+    // bootstrap the service locator, so falling back keeps them isolated.
+    _pwa = Locator.I.tryGet<PwaService>() ?? PwaServiceStub();
       if (Locator.I.tryGet<KeyService>() == null) {
         Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
       }
@@ -250,6 +255,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     );
   }
 
+  Future<void> _promptInstall() async {
+    final ok = await _pwa.promptInstall();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(ok ? 'Installing…' : 'Install declined')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,21 +283,27 @@ class _HomeFeedPageState extends State<HomeFeedPage>
           const _GradientScrim(top: true),
           const _GradientScrim(top: false),
           AnimatedOpacity(
+            key: const Key('overlay-visibility'),
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
-            child: OverlayCluster(
-              onCreateTap: _openCreate,
-              onLikeTap: _like,
-              onCommentTap: _openComments,
-              onRepostTap: _repost,
-              onQuoteTap: _openQuote,
-              onZapTap: _openZap,
-              onProfileTap: _openProfile,
-              onDetailsTap: _openDetails,
-              onRelaysLongPress: _openRelays,
-              onSearchTap: _openSearch,
-              safetyOn: settings.sensitiveBlurEnabled(),
-              onSafetyToggle: _toggleSafety,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: _pwa.installAvailable,
+              builder: (_, avail, __) => OverlayCluster(
+                onCreateTap: _openCreate,
+                onLikeTap: _like,
+                onCommentTap: _openComments,
+                onRepostTap: _repost,
+                onQuoteTap: _openQuote,
+                onZapTap: _openZap,
+                onProfileTap: _openProfile,
+                onDetailsTap: _openDetails,
+                onRelaysLongPress: _openRelays,
+                onSearchTap: _openSearch,
+                safetyOn: settings.sensitiveBlurEnabled(),
+                onSafetyToggle: _toggleSafety,
+                showInstall: avail,
+                onInstallTap: avail ? _promptInstall : null,
+              ),
             ),
           ),
           ValueListenableBuilder<bool>(

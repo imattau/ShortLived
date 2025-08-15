@@ -15,7 +15,7 @@ void main() {
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
       // Start visible
-      expect(find.byType(AnimatedOpacity), findsOneWidget);
+      expect(find.byKey(const Key('overlay-visibility')), findsOneWidget);
       // Long press to hide
       await tester.longPress(find.byType(GestureDetector).first);
       await tester.pumpAndSettle();
