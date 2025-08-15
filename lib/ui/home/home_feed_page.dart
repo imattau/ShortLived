@@ -63,7 +63,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _pwa = Locator.I.get<PwaService>();
+    // Use a stub if no PwaService has been registered. Tests typically do not
+    // bootstrap the service locator, so falling back keeps them isolated.
+    _pwa = Locator.I.tryGet<PwaService>() ?? PwaServiceStub();
       if (Locator.I.tryGet<KeyService>() == null) {
         Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
       }
@@ -281,6 +283,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
           const _GradientScrim(top: true),
           const _GradientScrim(top: false),
           AnimatedOpacity(
+            key: const Key('overlay-visibility'),
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
             child: ValueListenableBuilder<bool>(

@@ -17,7 +17,7 @@ void main() {
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(const MaterialApp(home: HomeFeedPage()));
       await tester.pumpAndSettle();
-      expect(find.byType(AnimatedOpacity), findsOneWidget);
+      expect(find.byKey(const Key('overlay-visibility')), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
       await tester.runAsync(() async {
