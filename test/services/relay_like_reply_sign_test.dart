@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nostr_video/services/nostr/relay_service_ws.dart';
 import 'package:nostr_video/services/keys/key_service.dart';
+import 'package:nostr_video/services/keys/local_signer.dart';
+import 'package:nostr_video/services/keys/signer.dart';
+import 'package:nostr_video/core/di/locator.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -77,9 +80,10 @@ class _Sink implements WebSocketSink {
 
 void main() {
   test('like/reply are signed before publish', () async {
-    final ks = _KeyMem();
-    await ks.importSecret(List.filled(32, '11').join());
-    final rs = RelayServiceWs(factory: (u) => _WSFake(), keyService: ks);
+      final ks = _KeyMem();
+      await ks.importSecret(List.filled(32, '11').join());
+      Locator.I.put<Signer>(LocalSigner(ks));
+      final rs = RelayServiceWs(factory: (u) => _WSFake());
     await rs.init(const ['wss://example']);
     await rs.like(eventId: 'evt1');
     await rs.reply(parentId: 'evt1', content: 'hello', rootId: 'evt1');

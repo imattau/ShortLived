@@ -109,3 +109,9 @@ extension MutePersistence on SettingsService {
     await prefs.setStringList(_kMuteWords, list.words.toList());
   }
 }
+
+extension SignerPreference on SettingsService {
+  static const _kSignerPref = 'signer_pref'; // 'local' | 'nip07'
+  String signerPref() => prefs.getString(_kSignerPref) ?? 'local';
+  Future<void> setSignerPref(String v) => prefs.setString(_kSignerPref, v);
+}

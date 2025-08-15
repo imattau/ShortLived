@@ -135,9 +135,17 @@ class FeedController extends ChangeNotifier {
     for (final a in items) {
       try {
         switch (a.type) {
-          case ActionType.publish:
-            await relay.publishEvent(Map<String, dynamic>.from(a.payload['event'] as Map));
-            break;
+            case ActionType.publish:
+              final e = Map<String, dynamic>.from(a.payload['event'] as Map);
+              final kind = e['kind'] as int;
+              final content = (e['content'] as String?) ?? '';
+              final tags = (e['tags'] as List?)
+                      ?.whereType<List>()
+                      .map((t) => t.map((v) => v.toString()).toList())
+                      .toList() ??
+                  <List<String>>[];
+              await relay.signAndPublish(kind: kind, content: content, tags: tags);
+              break;
           case ActionType.like:
             await relay.like(eventId: a.payload['eventId'] as String);
             break;

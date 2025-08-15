@@ -21,9 +21,11 @@ class _RelayStub implements RelayService {
   Stream<List<dynamic>> subscribeFeed(
           {required List<String> authors, String? hashtag}) =>
       const Stream.empty();
-  @override
-  Future<String> publishEvent(Map<String, dynamic> signedEventJson) async =>
-      'id';
+    @override
+    Future<String> publishEvent(Map<String, dynamic> signedEventJson) async =>
+        'id';
+    @override
+    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
   @override
   Future<void> like({required String eventId}) async {}
   @override

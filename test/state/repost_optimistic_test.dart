@@ -12,8 +12,10 @@ class _NoopRelay implements RelayService {
       's';
   @override
   Future<void> close(String subId) async {}
-  @override
-  Future<String> publishEvent(Map<String, dynamic> e) async => 'id';
+    @override
+    Future<String> publishEvent(Map<String, dynamic> e) async => 'id';
+    @override
+    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
   @override
   Future<void> like({required String eventId}) async {}
   @override

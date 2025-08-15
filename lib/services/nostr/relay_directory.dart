@@ -1,7 +1,6 @@
 import 'dart:async';
 import '../keys/key_service.dart';
 import '../nostr/relay_service.dart';
-import '../../crypto/nostr_event.dart';
 import '../settings/settings_service.dart';
 
 class RelayEntry {
@@ -14,11 +13,11 @@ class RelayEntry {
       RelayEntry(uri, read: read ?? this.read, write: write ?? this.write);
 }
 
-class RelayDirectory {
-  RelayDirectory(this._settings, this._relay, this._keys);
-  final SettingsService _settings;
-  final RelayService _relay;
-  final KeyService _keys;
+  class RelayDirectory {
+    RelayDirectory(this._settings, this._relay, this._keys);
+    final SettingsService _settings;
+    final RelayService _relay;
+    final KeyService _keys;
 
   List<RelayEntry> _list = [];
 
@@ -130,10 +129,6 @@ class RelayDirectory {
   }
 
   Future<void> _publishKind10002(int createdAt) async {
-    final priv = await _keys.getPrivkey();
-    final pub = await _keys.getPubkey();
-    if (priv == null || pub == null) return;
-
     final tags = <List<String>>[
       for (final e in _list)
         if (e.read && e.write)
@@ -145,10 +140,6 @@ class RelayDirectory {
         else
           ...[]
     ];
-
-    final e =
-        NostrEvent(kind: 10002, createdAt: createdAt, content: '', tags: tags);
-    final signed = NostrEvent.sign(priv, pub, e);
-    await _relay.publishEvent(signed);
+    await _relay.signAndPublish(kind: 10002, content: '', tags: tags);
   }
 }
