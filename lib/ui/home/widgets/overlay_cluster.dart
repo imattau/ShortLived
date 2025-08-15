@@ -19,6 +19,8 @@ class OverlayCluster extends StatelessWidget {
     required this.onShareTap,
     this.showInstall = false,
     this.onInstallTap,
+    this.onNotificationsTap,
+    this.unreadCount = 0,
   });
   final VoidCallback onCreateTap;
   final VoidCallback onLikeTap;
@@ -36,6 +38,8 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onShareTap;
   final bool showInstall;
   final VoidCallback? onInstallTap;
+  final VoidCallback? onNotificationsTap;
+  final int unreadCount;
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +71,37 @@ class OverlayCluster extends StatelessWidget {
               ),
             ),
           ),
-          // Top-right search
+          // Top-right notifications and search
           Positioned(
             right: 12,
+            top: 8,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications),
+                  onPressed: onNotificationsTap,
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text('$unreadCount',
+                          style: const TextStyle(fontSize: 10)),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Positioned(
+            right: 12 + 40,
             top: 8,
             child: IconButton(
               icon: const Icon(Icons.search),
