@@ -61,9 +61,9 @@ void main() async {
     final r = _RelayFake();
     final repo = NotificationsRepository(r, _SignerFake(), _MetaMem());
     await repo.start();
-    r.emit({'id':'x1','kind':7,'pubkey':'p','created_at':10,'tags':[['p','me'],['e','post1']]});
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-    final list = await repo.stream().firstWhere((l) => l.isNotEmpty);
+    final future = repo.stream().firstWhere((l) => l.isNotEmpty);
+    r.emit({'id': 'x1', 'kind': 7, 'pubkey': 'p', 'created_at': 10, 'tags': [['p', 'me'], ['e', 'post1']]});
+    final list = await future;
     expect(list.first.type.name, 'like');
     await repo.dispose();
     r.dispose();
