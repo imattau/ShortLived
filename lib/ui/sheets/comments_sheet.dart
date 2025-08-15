@@ -52,7 +52,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
       if (idx >= 0) {
         final p = fc.posts[idx];
         fc.posts[idx] = p.copyWith(commentCount: p.commentCount + 1);
-        fc.notifyListeners();
+        fc.refresh();
       }
 
       await Locator.I.get<RelayService>().reply(

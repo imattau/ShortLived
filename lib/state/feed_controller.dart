@@ -59,6 +59,9 @@ class FeedController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Force listeners to rebuild after external mutations.
+  void refresh() => notifyListeners();
+
   void bindQueue(ActionQueue q) {
     _queue = q;
   }

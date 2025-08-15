@@ -2,12 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nostr_video/services/nostr/relay_service_ws.dart';
 import 'package:nostr_video/services/keys/key_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:stream_channel/stream_channel.dart';
 
 class _KeyMem implements KeyService {
   @override
   Future<String?> getPrivkey() async => '11' * 32;
   @override
-  Future<String?> getPubkey() async => '02' + 'a' * 66;
+  Future<String?> getPubkey() async => '02${'a' * 66}';
   @override
   Future<String> generate() async => '';
   @override
@@ -16,20 +17,35 @@ class _KeyMem implements KeyService {
   Future<String?> exportNsec() async => null;
 }
 
-class _WSFake implements WebSocketChannel {
+class _WSFake extends StreamChannelMixin<dynamic> implements WebSocketChannel {
   @override
-  Stream get stream => const Stream.empty();
+  Stream<dynamic> get stream => const Stream.empty();
+
   @override
   WebSocketSink get sink => _Sink();
+
+  @override
+  String? get protocol => null;
+
+  @override
+  Future close([int? code, String? reason]) async {}
 }
 
 class _Sink implements WebSocketSink {
   @override
   void add(event) {}
+
   @override
-  void addError(error, [StackTrace? st]) {}
+  void addError(Object error, [StackTrace? st]) {}
+
+  @override
+  Future addStream(Stream stream) async {}
+
   @override
   Future close([int? code, String? reason]) async {}
+
+  @override
+  Future get done => Future.value();
 }
 
 void main() {

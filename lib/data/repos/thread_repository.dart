@@ -1,6 +1,4 @@
 import 'dart:async';
-import '../models/post.dart';
-import '../models/author.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/nostr/metadata_service.dart';
 
