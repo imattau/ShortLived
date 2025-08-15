@@ -4,9 +4,9 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'backoff.dart';
 import 'relay_service.dart';
-import '../../services/keys/key_service.dart';
-import '../../crypto/nostr_event.dart';
 import '../../crypto/nip19.dart';
+import '../keys/signer.dart';
+import '../../core/di/locator.dart';
 
 typedef WebSocketFactory = WebSocketChannel Function(Uri uri);
 
@@ -18,15 +18,13 @@ class RelayServiceWs implements RelayService {
   final _eventsCtrl = StreamController<Map<String, dynamic>>.broadcast();
   final Set<String> _subs = {};
   final _rand = const Uuid();
-  final KeyService _keyService;
-
   @override
   Stream<Map<String, dynamic>> get events => _eventsCtrl.stream;
 
-  RelayServiceWs(
-      {required this.factory, required KeyService keyService, Backoff? backoff})
-      : _keyService = keyService,
-        _backoff = backoff ?? Backoff();
+  late final Signer _signer = Locator.I.get<Signer>();
+
+  RelayServiceWs({required this.factory, Backoff? backoff})
+      : _backoff = backoff ?? Backoff();
 
   @override
   Future<void> init(List<String> relays) async {
@@ -110,17 +108,20 @@ class RelayServiceWs implements RelayService {
   }
 
   // helper:
-  Future<Map<String, dynamic>> _sign(
-      int kind, String content, List<List<String>> tags) async {
-    final priv = await _keyService.getPrivkey();
-    final pub = await _keyService.getPubkey();
-    if (priv == null || pub == null) {
-      throw Exception('No keys present. Generate or import a key first.');
-    }
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final e =
-        NostrEvent(kind: kind, createdAt: now, content: content, tags: tags);
-    return NostrEvent.sign(priv, pub, e);
+  Future<Map<String, dynamic>?> _sign(
+      int kind, String content, List<List<String>> tags) {
+    return _signer.sign(kind, content, tags);
+  }
+
+  @override
+  Future<String?> signAndPublish({
+    required int kind,
+    required String content,
+    required List<List<String>> tags,
+  }) async {
+    final evt = await _sign(kind, content, tags);
+    if (evt == null) return null;
+    return publishEvent(evt);
   }
 
   @override
@@ -128,8 +129,7 @@ class RelayServiceWs implements RelayService {
     final tags = <List<String>>[
       ["e", eventId],
     ];
-    final evt = await _sign(6, originalJson ?? "", tags);
-    await publishEvent(evt);
+    await signAndPublish(kind: 6, content: originalJson ?? "", tags: tags);
   }
 
   Future<void> quote({required String eventId, required String content}) async {
@@ -137,8 +137,8 @@ class RelayServiceWs implements RelayService {
     final tags = <List<String>>[
       ["e", eventId],
     ];
-    final evt = await _sign(1, "$content\nnostr:$noteRef", tags);
-    await publishEvent(evt);
+    await signAndPublish(
+        kind: 1, content: "$content\nnostr:$noteRef", tags: tags);
   }
 
   @override
@@ -160,10 +160,9 @@ class RelayServiceWs implements RelayService {
 
   @override
   Future<void> like({required String eventId}) async {
-    final evt = await _sign(7, "+", [
+    await signAndPublish(kind: 7, content: "+", tags: [
       ["e", eventId],
     ]);
-    await publishEvent(evt);
   }
 
   @override
@@ -182,8 +181,7 @@ class RelayServiceWs implements RelayService {
       if (parentId != rid) ['e', parentId, '', 'reply'],
       if (rpk.isNotEmpty) ['p', rpk],
     ];
-    final evt = await _sign(1, content, tags);
-    await publishEvent(evt);
+    await signAndPublish(kind: 1, content: content, tags: tags);
   }
 
   @override
@@ -205,7 +203,8 @@ class RelayServiceWs implements RelayService {
       if (relays != null && relays.isNotEmpty)
         ...relays.map((r) => ['relays', r]),
     ];
-    return _sign(9734, content, tags);
+    final evt = await _sign(9734, content, tags);
+    return evt ?? <String, dynamic>{};
   }
 
   @override

@@ -28,7 +28,7 @@ class FakePrefs implements SharedPreferences {
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _RelayFake implements RelayService {
+  class _RelayFake implements RelayService {
   final _ctrl = StreamController<Map<String, dynamic>>.broadcast();
   Map<String, dynamic>? published;
   @override
@@ -45,11 +45,15 @@ class _RelayFake implements RelayService {
   Stream<List<dynamic>> subscribeFeed(
           {required List<String> authors, String? hashtag}) =>
       const Stream.empty();
-  @override
-  Future<String> publishEvent(Map<String, dynamic> e) async {
-    published = e;
-    return 'id';
-  }
+    @override
+    Future<String> publishEvent(Map<String, dynamic> e) async {
+      published = e;
+      return 'id';
+    }
+    @override
+    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async {
+      return 'id';
+    }
 
   @override
   Future<void> like({required String eventId}) async {}

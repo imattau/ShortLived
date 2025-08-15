@@ -61,13 +61,11 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (Locator.I.tryGet<KeyService>() == null) {
-      Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
-    }
-    relay = Locator.I.tryGet<RelayService>() ??
-        RelayServiceWs(
-            factory: (uri) => WebSocketChannel.connect(uri),
-            keyService: Locator.I.get<KeyService>());
+      if (Locator.I.tryGet<KeyService>() == null) {
+        Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
+      }
+      relay = Locator.I.tryGet<RelayService>() ??
+          RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
     if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
@@ -106,11 +104,13 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       settings = existing;
       safety = ContentSafetyService(settings);
       overlaysVisible = !settings.overlaysDefaultHidden();
+      Locator.I.ensureSigner();
     } else {
       SharedPreferences.getInstance().then((sp) {
         settings = SettingsService(sp);
         safety = ContentSafetyService(settings);
         Locator.I.put<SettingsService>(settings);
+        Locator.I.ensureSigner();
         if (mounted) {
           setState(() {
             overlaysVisible = !settings.overlaysDefaultHidden();
@@ -122,7 +122,6 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       Locator.I.put<MuteService>(MuteService(
         Locator.I.get<SettingsService>(),
         Locator.I.get<RelayService>(),
-        Locator.I.get<KeyService>(),
       ));
     }
   }

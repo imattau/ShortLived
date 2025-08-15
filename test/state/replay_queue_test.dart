@@ -5,9 +5,9 @@ import 'package:nostr_video/data/repos/feed_repository.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 import 'package:nostr_video/services/queue/action_queue.dart';
 
-class _RelaySpy implements RelayService {
+  class _RelaySpy implements RelayService {
   int likes = 0;
-  int publishes = 0;
+    int publishes = 0;
   int replies = 0;
   @override
   Future<void> init(List<String> relays) async {}
@@ -16,11 +16,16 @@ class _RelaySpy implements RelayService {
     likes++;
   }
 
-  @override
-  Future<String> publishEvent(Map<String, dynamic> eventJson) async {
-    publishes++;
-    return 'id';
-  }
+    @override
+    Future<String> publishEvent(Map<String, dynamic> eventJson) async {
+      publishes++;
+      return 'id';
+    }
+    @override
+    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async {
+      publishes++;
+      return 'id';
+    }
 
   @override
   Future<void> reply(

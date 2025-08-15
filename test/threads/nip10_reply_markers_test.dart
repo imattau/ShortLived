@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nostr_video/services/nostr/relay_service_ws.dart';
 import 'package:nostr_video/services/keys/key_service.dart';
+import 'package:nostr_video/services/keys/local_signer.dart';
+import 'package:nostr_video/services/keys/signer.dart';
+import 'package:nostr_video/core/di/locator.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -56,8 +59,10 @@ class _Sink implements WebSocketSink {
 
 void main() {
   test('reply includes NIP-10 markers', () async {
-    final rs = RelayServiceWs(factory: (u) => _WSFake(), keyService: _KeyMem());
-    await rs.init(const ['wss://example']);
+      final ks = _KeyMem();
+      Locator.I.put<Signer>(LocalSigner(ks));
+      final rs = RelayServiceWs(factory: (u) => _WSFake());
+      await rs.init(const ['wss://example']);
     // We can’t intercept frames easily; call and assert no-throw.
     await rs.reply(
         parentId: 'evtParent',

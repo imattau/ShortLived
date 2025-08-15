@@ -1,17 +1,13 @@
 import '../nostr/relay_service.dart';
-import '../keys/key_service.dart';
-import '../../crypto/nostr_event.dart';
 import '../settings/settings_service.dart';
 import 'mute_models.dart';
 
 class MuteService {
   final SettingsService settings;
   final RelayService relay;
-  final KeyService keys;
   MuteList _list;
 
-  MuteService(this.settings, this.relay, this.keys)
-      : _list = settings.loadMuteList();
+  MuteService(this.settings, this.relay) : _list = settings.loadMuteList();
 
   MuteList current() => _list;
 
@@ -83,20 +79,12 @@ class MuteService {
   }
 
   Future<void> _publishKind10000() async {
-    final priv = await keys.getPrivkey();
-    final pub = await keys.getPubkey();
-    if (priv == null || pub == null) return;
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
     final tags = <List<String>>[
       for (final pk in _list.users) ['p', pk],
       for (final id in _list.events) ['e', id],
       for (final t in _list.tags) ['t', t],
       for (final w in _list.words) ['word', w],
     ];
-
-    final e = NostrEvent(kind: 10000, createdAt: now, content: '', tags: tags);
-    final signed = NostrEvent.sign(priv, pub, e);
-    await relay.publishEvent(signed);
+    await relay.signAndPublish(kind: 10000, content: '', tags: tags);
   }
 }

@@ -27,13 +27,24 @@ class FakePrefs implements SharedPreferences {
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _RelaySpy implements RelayService {
+  class _RelaySpy implements RelayService {
   Map<String, dynamic>? lastPublished;
-  @override
-  Future<String> publishEvent(Map<String, dynamic> e) async {
-    lastPublished = e;
-    return e['id'] as String? ?? 'id';
-  }
+    @override
+    Future<String> publishEvent(Map<String, dynamic> e) async {
+      lastPublished = e;
+      return e['id'] as String? ?? 'id';
+    }
+    @override
+    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async {
+      final event = {
+        'id': 'id',
+        'kind': kind,
+        'content': content,
+        'tags': tags,
+      };
+      lastPublished = event;
+      return 'id';
+    }
 
   @override
   Future<void> init(List<String> relays) async {}

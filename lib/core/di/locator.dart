@@ -1,5 +1,11 @@
 import '../../services/cache/cache_service.dart';
 import '../../data/models/post.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../services/keys/signer.dart';
+import '../../services/keys/local_signer.dart';
+import '../../services/keys/nip07_signer.dart';
+import '../../services/keys/key_service.dart';
+import '../../services/settings/settings_service.dart';
 
 class Locator {
   Locator._() {
@@ -15,6 +21,21 @@ class Locator {
   T get<T>() => _store[T] as T;
   T? tryGet<T>() => _store[T] as T?;
   bool contains<T>() => _store.containsKey(T);
+}
+
+extension SignerRegistration on Locator {
+  void ensureSigner() {
+    final settings = get<SettingsService>();
+    final pref = settings.signerPref();
+    if (pref == 'nip07' && kIsWeb) {
+      final nip = Nip07Signer();
+      if (nip.available) {
+        put<Signer>(nip);
+        return;
+      }
+    }
+    put<Signer>(LocalSigner(get<KeyService>()));
+  }
 }
 
 class _MemoryCacheService implements CacheService {

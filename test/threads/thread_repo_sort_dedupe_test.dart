@@ -42,7 +42,7 @@ void main() {
   });
 }
 
-class _RelayEventsFake implements RelayService {
+  class _RelayEventsFake implements RelayService {
   final _c = StreamController<Map<String, dynamic>>.broadcast();
   void emit(Map<String, dynamic> e) => _c.add(e);
   @override
@@ -59,8 +59,10 @@ class _RelayEventsFake implements RelayService {
   @override
   Stream<List<dynamic>> subscribeFeed(
       {required List<String> authors, String? hashtag}) async* {}
-  @override
-  Future<String> publishEvent(Map<String, dynamic> signedEventJson) async => '';
+    @override
+    Future<String> publishEvent(Map<String, dynamic> signedEventJson) async => '';
+    @override
+    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => '';
   @override
   Future<void> like({required String eventId}) async {}
   @override
