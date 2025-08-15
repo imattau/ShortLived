@@ -6,6 +6,7 @@ void main() {
   testWidgets('links hashtags', (tester) async {
     await tester.pumpWidget(const MaterialApp(
         home: Scaffold(body: HashtagText('hello #aTag world'))));
-    expect(find.text('#aTag'), findsOneWidget);
+    final rich = tester.widget<RichText>(find.byType(RichText));
+    expect(rich.text.toPlainText(), contains('#aTag'));
   });
 }

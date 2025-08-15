@@ -89,15 +89,32 @@ String neventEncode({
   String? authorPubkeyHex,
   List<String> relays = const [],
 }) {
+  String _encode(List<_Tlv> items) {
+    final body = items.expand((e) => e.bytes()).toList();
+    final words = Nip19._convertBits(body, 8, 5, pad: true);
+    return b32.Bech32Codec().encode(b32.Bech32('nevent', words));
+  }
+
   final items = <_Tlv>[
     _Tlv(0x00, _hexToBytes(eventIdHex)),
     if (authorPubkeyHex != null && authorPubkeyHex.isNotEmpty)
       _Tlv(0x02, _hexToBytes(authorPubkeyHex)),
     for (final r in relays) _Tlv(0x01, r.codeUnits),
   ];
-  final body = items.expand((e) => e.bytes()).toList();
-  final words = Nip19._convertBits(body, 8, 5, pad: true);
-  return b32.Bech32Codec().encode(b32.Bech32('nevent', words));
+
+  try {
+    return _encode(items);
+  } on FormatException {
+    // Length can exceed bech32's 90 char limit; progressively drop optional
+    // fields to stay within bounds.
+    final noRelays = items.where((e) => e.t != 0x01).toList();
+    try {
+      return _encode(noRelays);
+    } on FormatException {
+      final onlyId = items.where((e) => e.t == 0x00).toList();
+      return _encode(onlyId);
+    }
+  }
 }
 
 String nprofileEncode({

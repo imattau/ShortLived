@@ -7,9 +7,10 @@ import 'package:nostr_video/core/di/locator.dart';
 
 void main() {
   testWidgets('event page renders share icon', (tester) async {
-    Locator.I.put<FeedController>(FeedController(MockFeedRepository(count: 1)));
-    await tester.pumpWidget(const MaterialApp(
-        home: EventViewPage(encoded: 'evt_0')));
+    final fc = FeedController(MockFeedRepository(count: 1));
+    Locator.I.put<FeedController>(fc);
+    await fc.connect();
+    await tester.pumpWidget(const MaterialApp(home: EventViewPage(encoded: 'evt_0')));
     expect(find.byIcon(Icons.share), findsOneWidget);
   });
 }
