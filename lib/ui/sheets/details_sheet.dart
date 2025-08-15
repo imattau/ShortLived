@@ -5,6 +5,10 @@ import '../../services/moderation/mute_service.dart';
 import '../../core/di/locator.dart';
 import '../sheets/muted_sheet.dart';
 import 'report_sheet.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../crypto/nip19.dart';
+// ignore: unused_import
+import '../pages/profile_feed_page.dart';
 
 class DetailsSheet extends StatelessWidget {
   const DetailsSheet({
@@ -139,6 +143,23 @@ class DetailsSheet extends StatelessWidget {
                   },
                   icon: const Icon(Icons.flag_outlined),
                   label: const Text('Report'),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.share),
+                  label: const Text('Share'),
+                  onPressed: () {
+                    final ne = neventEncode(
+                        eventIdHex: post.id,
+                        authorPubkeyHex: post.author.pubkey);
+                    Share.share('nostr:$ne');
+                  },
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => Navigator.of(context)
+                      .pushNamed('/profile', arguments: post.author.pubkey),
+                  child: const Text('View author'),
                 ),
               ],
             ),

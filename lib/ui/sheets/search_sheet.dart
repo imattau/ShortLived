@@ -5,6 +5,7 @@ import '../../services/search/search_service.dart';
 import '../../services/search/search_models.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/moderation/mute_service.dart';
+import '../../crypto/nip19.dart';
 
 class SearchSheet extends StatefulWidget {
   const SearchSheet({super.key});
@@ -84,6 +85,25 @@ class _SearchSheetState extends State<SearchSheet> {
     if (mounted) setState(() { _loading = false; });
   }
 
+  Future<void> _submit(String q) async {
+    final s = q.trim();
+    if (s.isEmpty) return;
+    if (s.startsWith('#') && s.length > 1) {
+      if (mounted) {
+        Navigator.of(context)
+            .pushNamed('/tag', arguments: s.substring(1).toLowerCase());
+      }
+      return;
+    }
+    if (isNpub(s) || RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(s)) {
+      if (mounted) {
+        Navigator.of(context).pushNamed('/profile', arguments: s);
+      }
+      return;
+    }
+    await _run();
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Locator.I.get<FeedController>();
@@ -97,19 +117,40 @@ class _SearchSheetState extends State<SearchSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(height: 4, width: 36, margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
-            Row(
-              children: [
-                Expanded(child: TextField(controller: _ctrl, decoration: const InputDecoration(hintText: 'Search #tag, npub… or text'))),
-                const SizedBox(width: 8),
-                ElevatedButton(onPressed: _loading ? null : _run, child: const Text('Go')),
-              ],
-            ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _ctrl,
+                      decoration: const InputDecoration(
+                          hintText: 'Search #tag, npub… or text'),
+                      onSubmitted: _submit,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _loading ? null : () => _submit(_ctrl.text),
+                    child: const Text('Go'),
+                  ),
+                ],
+              ),
             const SizedBox(height: 12),
-            if (trending.isNotEmpty)
-              Align(alignment: Alignment.centerLeft, child: Wrap(
-                spacing: 8, runSpacing: 8,
-                children: trending.map((t) => ActionChip(label: Text('#$t'), onPressed: () { _ctrl.text = '#$t'; _run(); })).toList(),
-              )),
+              if (trending.isNotEmpty)
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: trending
+                          .map((t) => ActionChip(
+                                label: Text('#$t'),
+                                onPressed: () {
+                                  _ctrl.text = '#$t';
+                                  _submit('#$t');
+                                },
+                              ))
+                          .toList(),
+                    )),
             const SizedBox(height: 8),
             if (_loading) const LinearProgressIndicator(minHeight: 2),
             const SizedBox(height: 8),

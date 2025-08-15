@@ -2,6 +2,17 @@ import 'package:bech32/bech32.dart' as b32;
 
 import 'hex.dart';
 
+class _Tlv {
+  final int t;
+  final List<int> v;
+  _Tlv(this.t, this.v);
+  List<int> bytes() => [t, v.length, ...v];
+}
+
+List<int> _hexToBytes(String hex) => fromHex(hex);
+// ignore: unused_element
+String _bytesToHex(List<int> b) => toHex(b);
+
 class Nip19 {
   static String encodeNpub(String pubkeyHex) {
     final words = _convertBits(fromHex(pubkeyHex), 8, 5, pad: true);
@@ -70,5 +81,52 @@ String? nip19Decode(String bech) {
     return null;
   }
 }
+
 bool isNpub(String s) => s.toLowerCase().startsWith('npub1');
 bool isNsec(String s) => s.toLowerCase().startsWith('nsec1');
+
+String neventEncode({
+  required String eventIdHex,
+  String? authorPubkeyHex,
+  List<String> relays = const [],
+}) {
+  String encode(List<_Tlv> items) {
+    final body = items.expand((e) => e.bytes()).toList();
+    final words = Nip19._convertBits(body, 8, 5, pad: true);
+    return b32.Bech32Codec().encode(b32.Bech32('nevent', words));
+  }
+
+  final items = <_Tlv>[
+    _Tlv(0x00, _hexToBytes(eventIdHex)),
+    if (authorPubkeyHex != null && authorPubkeyHex.isNotEmpty)
+      _Tlv(0x02, _hexToBytes(authorPubkeyHex)),
+    for (final r in relays) _Tlv(0x01, r.codeUnits),
+  ];
+
+  try {
+    return encode(items);
+  } catch (_) {
+    // Length can exceed bech32's 90 char limit; progressively drop optional
+    // fields to stay within bounds.
+    final noRelays = items.where((e) => e.t != 0x01).toList();
+    try {
+      return encode(noRelays);
+    } catch (_) {
+      final onlyId = items.where((e) => e.t == 0x00).toList();
+      return encode(onlyId);
+    }
+  }
+}
+
+String nprofileEncode({
+  required String pubkeyHex,
+  List<String> relays = const [],
+}) {
+  final items = <_Tlv>[
+    _Tlv(0x00, _hexToBytes(pubkeyHex)),
+    for (final r in relays) _Tlv(0x01, r.codeUnits),
+  ];
+  final body = items.expand((e) => e.bytes()).toList();
+  final words = Nip19._convertBits(body, 8, 5, pad: true);
+  return b32.Bech32Codec().encode(b32.Bech32('nprofile', words));
+}
