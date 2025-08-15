@@ -153,19 +153,16 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
     );
   }
 
-  Future<void> _comment() async {
-    final controller = Locator.I.get<FeedController>();
-    if (controller.posts.isEmpty) return;
-    final p = controller.posts[controller.index];
+  Future<void> _openComments() async {
+    final c = Locator.I.get<FeedController>();
+    final p = c.currentOrNull;
+    if (p == null) return;
     _pausedBySheet.value = true;
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
-      builder: (_) => CommentsSheet(
-        parentEventId: p.id,
-        parentPubkey: p.author.pubkey,
-        relay: relay,
-      ),
+      isScrollControlled: true,
+      builder: (_) => CommentsSheet(post: p),
     );
     _pausedBySheet.value = false;
   }
@@ -262,7 +259,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
             child: OverlayCluster(
               onCreateTap: _openCreate,
               onLikeTap: _like,
-              onCommentTap: _comment,
+              onCommentTap: _openComments,
               onRepostTap: _repost,
               onQuoteTap: _openQuote,
               onZapTap: _openZap,

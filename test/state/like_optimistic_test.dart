@@ -14,7 +14,9 @@ class _NoopRelay implements RelayService {
   Future<void> reply(
       {required String parentId,
       required String content,
-      String? parentPubkey}) async {}
+      String? parentPubkey,
+      String? rootId,
+      String? rootPubkey}) async {}
   @override
   Stream<List<dynamic>> subscribeFeed(
       {required List<String> authors, String? hashtag}) async* {}

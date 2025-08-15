@@ -82,7 +82,7 @@ void main() {
     final rs = RelayServiceWs(factory: (u) => _WSFake(), keyService: ks);
     await rs.init(const ['wss://example']);
     await rs.like(eventId: 'evt1');
-    await rs.reply(parentId: 'evt1', content: 'hello');
+    await rs.reply(parentId: 'evt1', content: 'hello', rootId: 'evt1');
 
     // we can’t easily intercept frames per relay here; rely on no-throw and smoke test.
     expect(true, true);
