@@ -60,7 +60,7 @@ class _CreateSheetState extends State<CreateSheet> {
     });
     try {
       final uploader = Locator.I.tryGet<UploadService>() ?? Nip96UploadService(Dio());
-      final up = await uploader.uploadFile(
+      final UploadResult up = await uploader.uploadFile(
         file,
         onProgress: (s, t) {
           if (mounted && t > 0) setState(() => _progress = s / t);

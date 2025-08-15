@@ -44,14 +44,12 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
 
   Future<void> _openCreate() async {
     _pausedBySheet.value = true;
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.black,
-      builder: (ctx) => CreateSheet(onCreated: (post) {
-        Locator.I.get<FeedController>().insertOptimistic(post);
-      }),
-    );
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.black,
+        builder: (ctx) => const CreateSheet(),
+      );
     _pausedBySheet.value = false;
   }
 

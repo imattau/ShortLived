@@ -4,19 +4,39 @@ import 'package:nostr_video/services/upload/upload_models.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 
-class _DioFake extends Dio {
-  Map<String, dynamic> payload;
-  _DioFake(this.payload);
+class _DioFake extends DioMixin implements Dio {
+  _DioFake(this.payload) {
+    options = BaseOptions();
+    httpClientAdapter = _FakeAdapter();
+    transformer = DefaultTransformer();
+  }
+
+  final Map<String, dynamic> payload;
+
+  @override
+  final Interceptors interceptors = Interceptors();
+
   @override
   Future<Response<T>> post<T>(String path,
       {data,
       Options? options,
-      ProgressCallback? onSendProgress,
       CancelToken? cancelToken,
+      ProgressCallback? onSendProgress,
       ProgressCallback? onReceiveProgress}) async {
     onSendProgress?.call(5, 10);
     onSendProgress?.call(10, 10);
-    return Response<T>(data: payload as T, requestOptions: RequestOptions());
+    return Response<T>(data: payload as T, requestOptions: RequestOptions(path: path));
+  }
+}
+
+class _FakeAdapter extends HttpClientAdapter {
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(RequestOptions options,
+      Stream<List<int>>? requestStream, Future<void>? cancelFuture) async {
+    throw UnimplementedError();
   }
 }
 
@@ -31,7 +51,7 @@ void main() {
     });
     final svc = Nip96UploadService(dio);
     final tmp = File('fake'); // path unused by fake
-    final res = await svc.uploadFile(tmp, onProgress: (_, __) {});
+    final UploadResult res = await svc.uploadFile(tmp, onProgress: (_, __) {});
     expect(res.url, contains('.mp4'));
     expect(res.width, 1080);
     expect(res.height, 1920);
