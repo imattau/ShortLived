@@ -4,6 +4,7 @@ import 'package:nostr_video/data/repos/notifications_repository.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 import 'package:nostr_video/services/keys/signer.dart';
 import 'package:nostr_video/services/nostr/metadata_service.dart';
+import 'package:nostr_video/core/test_switches.dart';
 
 class _RelayFake implements RelayService {
   final _c = StreamController<Map<String, dynamic>>.broadcast();
@@ -54,6 +55,7 @@ class _MetaMem implements MetadataService {
 }
 
 void main() async {
+  setUp(() => TestSwitches.disableRelays = false);
   test('maps basic kinds to notifications', () async {
     final r = _RelayFake();
     final repo = NotificationsRepository(r, _SignerFake(), _MetaMem());

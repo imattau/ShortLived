@@ -70,15 +70,20 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   void _setupNotifications() {
+    if (TestSwitches.disableRelays) return;
+    final relay = Locator.I.tryGet<RelayService>();
+    final signer = Locator.I.tryGet<Signer>();
+    final meta = Locator.I.tryGet<MetadataService>();
+    final settings = Locator.I.tryGet<SettingsService>();
+    if (relay == null || signer == null || meta == null || settings == null) {
+      return;
+    }
     if (Locator.I.tryGet<NotificationsRepository>() == null) {
-      Locator.I.put<NotificationsRepository>(NotificationsRepository(
-        Locator.I.get<RelayService>(),
-        Locator.I.get<Signer>(),
-        Locator.I.get<MetadataService>(),
-      ));
+      Locator.I.put<NotificationsRepository>(
+          NotificationsRepository(relay, signer, meta));
     }
     Locator.I.get<NotificationsRepository>().start();
-    final seenAt = Locator.I.get<SettingsService>().notifLastSeen();
+    final seenAt = settings.notifLastSeen();
     _notifSub =
         Locator.I.get<NotificationsRepository>().stream().listen((list) {
       final c = list.where((n) => n.createdAt > seenAt).length;

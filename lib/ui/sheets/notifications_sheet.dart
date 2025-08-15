@@ -15,12 +15,13 @@ class _NotificationsSheetState extends State<NotificationsSheet> {
   @override
   void initState() {
     super.initState();
-    Locator.I.get<NotificationsRepository>().stream().listen((list) {
+    final repo = Locator.I.tryGet<NotificationsRepository>();
+    repo?.stream().listen((list) {
       if (mounted) setState(() => _items = list);
     });
     // Mark read on open
     final nowSecs = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    Locator.I.get<SettingsService>().setNotifLastSeen(nowSecs);
+    Locator.I.tryGet<SettingsService>()?.setNotifLastSeen(nowSecs);
   }
 
   @override
