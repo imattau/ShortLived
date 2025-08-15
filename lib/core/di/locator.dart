@@ -35,3 +35,8 @@ class _MemoryCacheService implements CacheService {
   }
 }
 
+// During app start, remember to register the UploadService if absent:
+// if (Locator.I.tryGet<UploadService>() == null) {
+//   Locator.I.put<UploadService>(Nip96UploadService(Dio()));
+// }
+

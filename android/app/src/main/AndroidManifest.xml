@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.app">
+    <!-- Add if missing for Android 13+ scoped storage video reads -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!-- For older Android -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+</manifest>
