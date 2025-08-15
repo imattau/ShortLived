@@ -19,4 +19,12 @@ abstract class RelayService {
 
   /// Broadcast of raw event objects (Nostr event JSON map)
   Stream<Map<String, dynamic>> get events;
+
+  /// Build a signed NIP-57 zap request event (kind 9734).
+  Future<Map<String, dynamic>> buildZapRequest({
+    required String recipientPubkey,
+    required String eventId,
+    String content,
+    List<String>? relays,
+  });
 }

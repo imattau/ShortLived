@@ -180,4 +180,19 @@ class RelayServiceWs implements RelayService {
       {required String eventId, required int millisats}) async {
     // Not implemented yet
   }
+
+  @override
+  Future<Map<String, dynamic>> buildZapRequest({
+    required String recipientPubkey,
+    required String eventId,
+    String content = '',
+    List<String>? relays,
+  }) async {
+    final tags = <List<String>>[
+      ['p', recipientPubkey],
+      ['e', eventId],
+      if (relays != null && relays.isNotEmpty) ...relays.map((r) => ['relays', r]),
+    ];
+    return _sign(9734, content, tags);
+  }
 }
