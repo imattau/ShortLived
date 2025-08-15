@@ -10,13 +10,16 @@ class _RelayNoop implements RelayService {
   Future<void> init(List<String> relays) async {}
 
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => 's';
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+          {String? subId}) async =>
+      's';
 
   @override
   Future<void> close(String subId) async {}
 
   @override
-  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) =>
+  Stream<List<dynamic>> subscribeFeed(
+          {required List<String> authors, String? hashtag}) =>
       Stream<List<dynamic>>.empty();
 
   @override
@@ -38,10 +41,14 @@ class _RelayNoop implements RelayService {
   }) async {}
 
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+  Future<void> zapRequest(
+      {required String eventId, required int millisats}) async {}
 
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
+
+  @override
+  Future<void> resetConnections(List<String> urls) async {}
 
   @override
   Stream<Map<String, dynamic>> get events => const Stream.empty();
@@ -52,7 +59,8 @@ class _RelayNoop implements RelayService {
     required String eventId,
     String content = '',
     List<String>? relays,
-  }) async => {};
+  }) async =>
+      {};
 }
 
 class _KeysFake implements KeyService {

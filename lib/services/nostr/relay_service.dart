@@ -1,10 +1,12 @@
 abstract class RelayService {
   Future<void> init(List<String> relays);
+
   /// Subscribe to feed using Nostr filters; returns a subscription id you can close later.
   Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId});
   Future<void> close(String subId);
   Stream<List<dynamic>> subscribeFeed(
       {required List<String> authors, String? hashtag});
+
   /// Publish already signed event JSON (has id/pubkey/sig).
   Future<String> publishEvent(Map<String, dynamic> signedEventJson);
 
@@ -30,6 +32,9 @@ abstract class RelayService {
     String content,
     List<String>? relays,
   });
+
+  /// NEW: reset the active connections to the provided relay URLs
+  Future<void> resetConnections(List<String> urls);
 
   // Future work: optionally expose a way to fetch user lists (e.g. mute list).
 }

@@ -61,6 +61,9 @@ class RelayServiceFake implements RelayService {
           String content = '',
           List<String>? relays}) async =>
       {};
+
+  @override
+  Future<void> resetConnections(List<String> urls) async {}
 }
 
 class KeyServiceFake implements KeyService {

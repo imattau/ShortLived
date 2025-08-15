@@ -81,6 +81,9 @@ class FakeRelay implements RelayService {
   Stream<Map<String, dynamic>> get events => const Stream.empty();
 
   @override
+  Future<void> resetConnections(List<String> urls) async {}
+
+  @override
   Future<Map<String, dynamic>> buildZapRequest(
           {required String recipientPubkey,
           required String eventId,

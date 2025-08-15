@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../moderation/mute_models.dart';
+import '../nostr/relay_directory.dart';
 
 class SettingsService {
   static const _kMuted = 'muted_pubkeys';
@@ -36,8 +37,9 @@ class SettingsService {
   Future<void> setSensitiveBlurEnabled(bool v) =>
       prefs.setBool(_kSensitiveBlur, v);
 
-  Set<String> sensitiveWords() =>
-      (prefs.getStringList(_kSensitiveWords) ?? const ['nsfw', '18plus', 'nudity']).toSet();
+  Set<String> sensitiveWords() => (prefs.getStringList(_kSensitiveWords) ??
+          const ['nsfw', '18plus', 'nudity'])
+      .toSet();
   Future<void> setSensitiveWords(Set<String> words) =>
       prefs.setStringList(_kSensitiveWords, words.toList());
 
@@ -52,6 +54,33 @@ class SettingsService {
     final s = sensitiveMarks()..remove(eventId);
     await prefs.setStringList(_kSensitiveMarks, s.toList());
   }
+}
+
+extension RelayPersistence on SettingsService {
+  static const _kRelays = 'relays_list';
+  static const _kRelaysAt = 'relays_updated_at';
+
+  List<RelayEntry> loadRelays() {
+    final raw = prefs.getStringList(_kRelays) ?? const [];
+    return raw.map((s) {
+      final parts = s.split('|'); // url|r|w
+      final url = parts[0];
+      final read = parts.length > 1 ? parts[1] == '1' : true;
+      final write = parts.length > 2 ? parts[2] == '1' : true;
+      return RelayEntry(Uri.parse(url), read: read, write: write);
+    }).toList();
+  }
+
+  Future<void> saveRelays(List<RelayEntry> list,
+      {required int updatedAt}) async {
+    final raw = list
+        .map((e) => '${e.uri}|${e.read ? '1' : '0'}|${e.write ? '1' : '0'}')
+        .toList();
+    await prefs.setStringList(_kRelays, raw);
+    await prefs.setInt(_kRelaysAt, updatedAt);
+  }
+
+  int relaysUpdatedAt() => prefs.getInt(_kRelaysAt) ?? 0;
 }
 
 extension MutePersistence on SettingsService {
