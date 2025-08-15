@@ -35,6 +35,14 @@ class _RelayFake implements RelayService {
 
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
+
+  @override
+  Future<Map<String, dynamic>> buildZapRequest(
+          {required String recipientPubkey,
+          required String eventId,
+          String content = '',
+          List<String>? relays}) async =>
+      {};
 }
 
 class _CacheNoop implements CacheService {

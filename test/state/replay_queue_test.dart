@@ -23,25 +23,40 @@ class _RelaySpy implements RelayService {
   }
 
   @override
-  Future<void> reply({required String parentId, required String content, String? parentPubkey}) async {
+  Future<void> reply(
+      {required String parentId,
+      required String content,
+      String? parentPubkey}) async {
     replies++;
   }
 
   @override
-  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) async* {}
+  Stream<List<dynamic>> subscribeFeed(
+      {required List<String> authors, String? hashtag}) async* {}
   @override
   Stream<Map<String, dynamic>> get events async* {}
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+  Future<void> zapRequest(
+      {required String eventId, required int millisats}) async {}
 
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => 'sub';
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+          {String? subId}) async =>
+      'sub';
 
   @override
   Future<void> close(String subId) async {}
 
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
+
+  @override
+  Future<Map<String, dynamic>> buildZapRequest(
+          {required String recipientPubkey,
+          required String eventId,
+          String content = '',
+          List<String>? relays}) async =>
+      {};
 }
 
 void main() async {
