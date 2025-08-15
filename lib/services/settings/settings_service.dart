@@ -115,3 +115,9 @@ extension SignerPreference on SettingsService {
   String signerPref() => prefs.getString(_kSignerPref) ?? 'local';
   Future<void> setSignerPref(String v) => prefs.setString(_kSignerPref, v);
 }
+
+extension NotificationsSeen on SettingsService {
+  static const _kNotifSeenAt = 'notif_last_seen';
+  int notifLastSeen() => prefs.getInt(_kNotifSeenAt) ?? 0;
+  Future<void> setNotifLastSeen(int secs) => prefs.setInt(_kNotifSeenAt, secs);
+}

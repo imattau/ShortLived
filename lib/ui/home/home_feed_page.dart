@@ -11,6 +11,7 @@ import '../sheets/relays_sheet.dart';
 import '../sheets/quote_sheet.dart';
 import '../sheets/search_sheet.dart';
 import '../sheets/settings_sheet.dart';
+import '../sheets/notifications_sheet.dart';
 import 'package:nostr_video/core/di/locator.dart';
 import '../../core/config/network.dart';
 import '../../services/nostr/relay_service_ws.dart';
@@ -24,7 +25,11 @@ import '../../services/queue/action_queue_hive.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../services/keys/key_service.dart';
 import '../../services/keys/key_service_secure.dart';
+import '../../services/keys/signer.dart';
 import '../../services/moderation/mute_service.dart';
+import '../../services/nostr/metadata_service.dart';
+import '../../data/repos/notifications_repository.dart';
+import '../../data/models/notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../core/testing/test_switches.dart';
@@ -50,6 +55,8 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   late ActionQueue queue;
   late RelayDirectory relayDir;
   late final PwaService _pwa;
+  int _unread = 0;
+  StreamSubscription<List<NotificationItem>>? _notifSub;
 
   Future<void> _openCreate() async {
     _pausedBySheet.value = true;
@@ -60,6 +67,23 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       builder: (ctx) => const CreateSheet(),
     );
     _pausedBySheet.value = false;
+  }
+
+  void _setupNotifications() {
+    if (Locator.I.tryGet<NotificationsRepository>() == null) {
+      Locator.I.put<NotificationsRepository>(NotificationsRepository(
+        Locator.I.get<RelayService>(),
+        Locator.I.get<Signer>(),
+        Locator.I.get<MetadataService>(),
+      ));
+    }
+    Locator.I.get<NotificationsRepository>().start();
+    final seenAt = Locator.I.get<SettingsService>().notifLastSeen();
+    _notifSub =
+        Locator.I.get<NotificationsRepository>().stream().listen((list) {
+      final c = list.where((n) => n.createdAt > seenAt).length;
+      if (mounted) setState(() => _unread = c);
+    });
   }
 
   @override
@@ -113,12 +137,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       safety = ContentSafetyService(settings);
       overlaysVisible = !settings.overlaysDefaultHidden();
       Locator.I.ensureSigner();
+      _setupNotifications();
     } else {
       SharedPreferences.getInstance().then((sp) {
         settings = SettingsService(sp);
         safety = ContentSafetyService(settings);
         Locator.I.put<SettingsService>(settings);
         Locator.I.ensureSigner();
+        _setupNotifications();
         if (mounted) {
           setState(() {
             overlaysVisible = !settings.overlaysDefaultHidden();
@@ -136,6 +162,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
 
   @override
   void dispose() {
+    _notifSub?.cancel();
     _zapSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -212,6 +239,22 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       builder: (_) => const SettingsSheet(),
     );
     _pausedBySheet.value = false;
+  }
+
+  Future<void> _openNotifications() async {
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
+      builder: (_) => const NotificationsSheet(),
+    );
+    final seenAt = Locator.I.get<SettingsService>().notifLastSeen();
+    final list = await Locator.I
+        .get<NotificationsRepository>()
+        .stream()
+        .firstWhere((_) => true, orElse: () => const []);
+    final c = list.where((n) => n.createdAt > seenAt).length;
+    if (mounted) setState(() => _unread = c);
   }
 
   Future<void> _openProfile() async {
@@ -322,6 +365,8 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                 onRelaysLongPress: _openRelays,
                 onSearchTap: _openSearch,
                 onSettingsTap: _openSettings,
+                onNotificationsTap: _openNotifications,
+                unreadCount: _unread,
                 safetyOn: settings.sensitiveBlurEnabled(),
                 onSafetyToggle: _toggleSafety,
                 onShareTap: _shareCurrent,
