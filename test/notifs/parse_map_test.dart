@@ -38,7 +38,7 @@ class _RelayFake implements RelayService {
 
 class _SignerFake implements Signer {
   @override
-  Future<String?> getPubkey() async => '02'+'a'*66;
+  Future<String?> getPubkey() async => '02${''.padRight(66, 'a')}';
   @override
   Future<Map<String, dynamic>?> sign(int kind, String content, List<List<String>> tags) async => {};
 }
