@@ -29,23 +29,40 @@ class _RelayServiceStub implements RelayService {
   @override
   Future<void> init(List<String> relays) async {}
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => 'sub';
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+          {String? subId}) async =>
+      'sub';
   @override
   Future<void> close(String subId) async {}
   @override
-  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) => const Stream.empty();
+  Stream<List<dynamic>> subscribeFeed(
+          {required List<String> authors, String? hashtag}) =>
+      const Stream.empty();
   @override
-  Future<String> publishEvent(Map<String, dynamic> signedEventJson) async => 'id';
+  Future<String> publishEvent(Map<String, dynamic> signedEventJson) async =>
+      'id';
   @override
   Future<void> like({required String eventId}) async {}
   @override
-  Future<void> reply({required String parentId, required String content, String? parentPubkey}) async {}
+  Future<void> reply(
+      {required String parentId,
+      required String content,
+      String? parentPubkey}) async {}
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+  Future<void> zapRequest(
+      {required String eventId, required int millisats}) async {}
   @override
   Stream<Map<String, dynamic>> get events => const Stream.empty();
+
+  @override
+  Future<Map<String, dynamic>> buildZapRequest(
+          {required String recipientPubkey,
+          required String eventId,
+          String content = '',
+          List<String>? relays}) async =>
+      {};
 }
 
 void main() {

@@ -8,8 +8,30 @@ void main() {
   test('trending hashtags ranks by frequency', () {
     final svc = SearchService(FakeRelay());
     final posts = [
-      Post(id:'1', author: const Author(pubkey:'a',name:'a',avatarUrl:''), caption:'#dart #nostr', tags: const [], url:'u', thumb:'t', mime:'video/mp4', width:1, height:1, duration:1, createdAt:DateTime.now()),
-      Post(id:'2', author: const Author(pubkey:'a',name:'a',avatarUrl:''), caption:'nice #nostr clip', tags: const [], url:'u', thumb:'t', mime:'video/mp4', width:1, height:1, duration:1, createdAt:DateTime.now()),
+      Post(
+          id: '1',
+          author: const Author(pubkey: 'a', name: 'a', avatarUrl: ''),
+          caption: '#dart #nostr',
+          tags: const [],
+          url: 'u',
+          thumb: 't',
+          mime: 'video/mp4',
+          width: 1,
+          height: 1,
+          duration: 1,
+          createdAt: DateTime.now()),
+      Post(
+          id: '2',
+          author: const Author(pubkey: 'a', name: 'a', avatarUrl: ''),
+          caption: 'nice #nostr clip',
+          tags: const [],
+          url: 'u',
+          thumb: 't',
+          mime: 'video/mp4',
+          width: 1,
+          height: 1,
+          duration: 1,
+          createdAt: DateTime.now()),
     ];
     final top = svc.trendingHashtags(posts);
     expect(top.first, 'nostr');
@@ -22,13 +44,17 @@ class FakeRelay implements RelayService {
   Future<void> init(List<String> relays) async {}
 
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters, {String? subId}) async => '';
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+          {String? subId}) async =>
+      '';
 
   @override
   Future<void> close(String subId) async {}
 
   @override
-  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) => const Stream.empty();
+  Stream<List<dynamic>> subscribeFeed(
+          {required List<String> authors, String? hashtag}) =>
+      const Stream.empty();
 
   @override
   Future<String> publishEvent(Map<String, dynamic> signedEventJson) async => '';
@@ -37,15 +63,26 @@ class FakeRelay implements RelayService {
   Future<void> like({required String eventId}) async {}
 
   @override
-  Future<void> reply({required String parentId, required String content, String? parentPubkey}) async {}
+  Future<void> reply(
+      {required String parentId,
+      required String content,
+      String? parentPubkey}) async {}
 
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
 
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+  Future<void> zapRequest(
+      {required String eventId, required int millisats}) async {}
 
   @override
   Stream<Map<String, dynamic>> get events => const Stream.empty();
-}
 
+  @override
+  Future<Map<String, dynamic>> buildZapRequest(
+          {required String recipientPubkey,
+          required String eventId,
+          String content = '',
+          List<String>? relays}) async =>
+      {};
+}

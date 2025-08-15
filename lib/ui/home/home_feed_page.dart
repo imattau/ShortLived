@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'widgets/video_player_view.dart';
 import 'widgets/overlay_cluster.dart';
@@ -13,7 +14,6 @@ import 'package:nostr_video/core/di/locator.dart';
 import '../../core/config/network.dart';
 import '../../services/nostr/relay_service_ws.dart';
 import '../../services/nostr/relay_service.dart';
-import '../../services/lightning/lightning_service_lnurl.dart';
 import '../../services/settings/settings_service.dart';
 import '../../services/safety/content_safety_service.dart';
 import '../../state/feed_controller.dart';
@@ -37,7 +37,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
   bool overlaysVisible = true;
   final ValueNotifier<bool> _pausedBySheet = ValueNotifier(false);
   late final RelayService relay;
-  late final LightningServiceLnurl lightning;
+  StreamSubscription<Map<String, dynamic>>? _zapSub;
   late SettingsService settings;
   late ContentSafetyService safety; // ignore: unused_field
   late ActionQueue queue;
@@ -66,7 +66,16 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
     }
-    lightning = Locator.I.tryGet<LightningServiceLnurl>() ?? LightningServiceLnurl(relay);
+    _zapSub = relay.events.listen((evt) {
+      if (evt['kind'] == 9735) {
+        final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
+        final sats = (msats / 1000).round();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Received zap: $sats sats')));
+        }
+      }
+    });
     queue = Locator.I.tryGet<ActionQueue>() ?? ActionQueueHive();
     if (!Locator.I.contains<ActionQueue>()) {
       queue.init();
@@ -103,6 +112,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
 
   @override
   void dispose() {
+    _zapSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -219,21 +229,13 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
     setState(() {});
   }
 
-  Future<void> _zap() async {
-    final controller = Locator.I.get<FeedController>();
-    if (controller.posts.isEmpty) return;
-    final p = controller.posts[controller.index];
-    _pausedBySheet.value = true;
+  Future<void> _openZap() async {
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
-      builder: (_) => ZapSheet(
-        lud16: 'tips@example.com',
-        eventId: p.id,
-        lightning: lightning,
-      ),
+      isScrollControlled: true,
+      builder: (_) => const ZapSheet(),
     );
-    _pausedBySheet.value = false;
   }
 
   @override
@@ -263,7 +265,7 @@ class _HomeFeedPageState extends State<HomeFeedPage> with WidgetsBindingObserver
               onCommentTap: _comment,
               onRepostTap: _repost,
               onQuoteTap: _openQuote,
-              onZapTap: _zap,
+              onZapTap: _openZap,
               onProfileTap: _openProfile,
               onDetailsTap: _openDetails,
               onRelaysLongPress: _openRelays,
