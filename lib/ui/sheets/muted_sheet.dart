@@ -14,7 +14,7 @@ class _MutedSheetState extends State<MutedSheet> {
     final svc = Locator.I.get<MuteService>();
     final list = svc.current();
 
-    Chip _item(String label, VoidCallback onDelete) => Chip(
+    Chip item(String label, Future<void> Function() onDelete) => Chip(
       label: Text(label),
       deleteIcon: const Icon(Icons.close),
       onDeleted: () async {
@@ -46,7 +46,7 @@ class _MutedSheetState extends State<MutedSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: list.users
-                    .map((pk) => _item('@${pk.substring(0, 8)}', () => svc.unmuteUser(pk)))
+                    .map((pk) => item('@${pk.substring(0, 8)}', () => svc.unmuteUser(pk)))
                     .toList(),
               ),
               const SizedBox(height: 12),
@@ -55,7 +55,7 @@ class _MutedSheetState extends State<MutedSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: list.tags
-                    .map((t) => _item('#$t', () => svc.unmuteTag(t)))
+                    .map((t) => item('#$t', () => svc.unmuteTag(t)))
                     .toList(),
               ),
               const SizedBox(height: 12),
@@ -64,7 +64,7 @@ class _MutedSheetState extends State<MutedSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: list.words
-                    .map((w) => _item(w, () => svc.unmuteWord(w)))
+                    .map((w) => item(w, () => svc.unmuteWord(w)))
                     .toList(),
               ),
               const SizedBox(height: 12),
@@ -73,7 +73,7 @@ class _MutedSheetState extends State<MutedSheet> {
                 spacing: 8,
                 runSpacing: 8,
                 children: list.events
-                    .map((id) => _item(id.substring(0, 8), () => svc.unmuteEvent(id)))
+                    .map((id) => item(id.substring(0, 8), () => svc.unmuteEvent(id)))
                     .toList(),
               ),
             ],

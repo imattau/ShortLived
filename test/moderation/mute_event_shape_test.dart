@@ -16,6 +16,10 @@ class _RelayNoop implements RelayService {
   Future<void> close(String subId) async {}
 
   @override
+  Stream<List<dynamic>> subscribeFeed({required List<String> authors, String? hashtag}) =>
+      Stream<List<dynamic>>.empty();
+
+  @override
   Future<String> publishEvent(Map<String, dynamic> e) async {
     expect(e['kind'], 10000);
     return e['id'] as String? ?? 'id';
@@ -56,7 +60,7 @@ class _KeysFake implements KeyService {
   Future<String?> getPrivkey() async => '11' * 32;
 
   @override
-  Future<String?> getPubkey() async => '02' + 'a' * 66;
+  Future<String?> getPubkey() async => '02${'a' * 66}';
 
   @override
   Future<String> generate() async => '';

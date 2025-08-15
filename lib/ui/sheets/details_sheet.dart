@@ -150,8 +150,9 @@ class DetailsSheet extends StatelessWidget {
 }
 
 String? _firstHashtagOrNullFrom(String text) {
-  final m = RegExp(r'(?:^|\s)#([a-z0-9_]{1,40})', caseSensitive: false).firstMatch(text);
-  return m == null ? null : m.group(1)!.toLowerCase();
+  final m = RegExp(r'(?:^|\s)#([a-z0-9_]{1,40})', caseSensitive: false)
+      .firstMatch(text);
+  return m?.group(1)?.toLowerCase();
 }
 
 Future<String?> _promptWord(BuildContext context) async {

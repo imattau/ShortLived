@@ -57,7 +57,7 @@ class _SearchSheetState extends State<SearchSheet> {
           if (it.eventId.isNotEmpty && mute.current().events.contains(it.eventId)) {
             return false;
           }
-          final low = (it.title + ' ' + it.subtitle).toLowerCase();
+            final low = '${it.title} ${it.subtitle}'.toLowerCase();
           for (final w in mute.current().words) {
             if (RegExp(r'(^|\s)' + RegExp.escape(w) + r'(\s|$)').hasMatch(low)) {
               return false;
