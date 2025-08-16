@@ -35,9 +35,11 @@ class HudOverlay extends StatelessWidget {
           builder: (_, visible, __) {
             final overlay = IgnorePointer(
               ignoring: !visible,
-              child: SafeArea(
-                child: Stack(
-                  children: [
+              child: Material(
+                type: MaterialType.transparency,
+                child: SafeArea(
+                  child: Stack(
+                    children: [
                     Positioned(
                       right: T.s24,
                       top: T.s24,
@@ -130,7 +132,8 @@ class HudOverlay extends StatelessWidget {
                   ],
                 ),
               ),
-            );
+            ),
+          );
 
             return AnimatedOpacity(
               duration: const Duration(milliseconds: 150),

@@ -26,6 +26,7 @@ class FeedPager extends StatefulWidget {
 class _FeedPagerState extends State<FeedPager> {
   late final PageController _controller = PageController();
   int _index = 0;
+  bool _didWarmUp = false;
 
   @override
   void initState() {
@@ -37,7 +38,15 @@ class _FeedPagerState extends State<FeedPager> {
     widget.controller.muted.addListener(() {
       setState(() {});
     });
-    _warmUp(_index);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didWarmUp) {
+      _didWarmUp = true;
+      _warmUp(_index);
+    }
   }
 
   void _warmUp(int i) {
