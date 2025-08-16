@@ -53,6 +53,12 @@ If the page is still blank, open DevTools → Console and copy the first error. 
 We use a single `OverlayEntry` controlled by `HudState` (ValueNotifiers). Toggling visibility or
 muting updates only the overlay subtree; the `PageView` feed is never rebuilt.
 
+Overlay now includes:
+- Top-left **Search** pill (opens stub sheet)
+- **Author header** under search (avatar + display + short npub)
+- **NPUB pill** bottom-left (tap to copy)
+All overlay elements still hide/show with long-press. Feed is not rebuilt when toggling HUD.
+
 ### Controller
 `FeedController` owns the current index and muted state. HUD buttons and keyboard shortcuts drive
 the controller; `FeedPager` listens and rebuilds only the visible page when mute changes.
@@ -65,7 +71,7 @@ Commands
 - flutter test
 
 Acceptance
-- Clicking “Unmute/Mute” actually toggles the playing video’s audio.
-- Double-tap anywhere on the video increments the like count shown in the HUD.
-- Keyboard: ↑/↓ scrolls feed; M toggles mute; L likes.
-- PageView remains mounted when toggling HUD or mute (previous tests still pass).
+- See search pill and author header in the top-left; npub pill above caption.
+- Tapping npub pill copies to clipboard (toast).
+- Long-press still hides/shows all overlays.
+- Console warning about mobile-web-app-capable is resolved.

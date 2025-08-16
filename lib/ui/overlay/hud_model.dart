@@ -7,6 +7,8 @@ class HudModel {
   final String repostCount;
   final String shareCount;
   final String zapCount;
+  final String authorDisplay;
+  final String authorNpub;
   const HudModel({
     required this.caption,
     this.likeCount = '0',
@@ -14,6 +16,8 @@ class HudModel {
     this.repostCount = '0',
     this.shareCount = '0',
     this.zapCount = '0',
+    this.authorDisplay = 'anon',
+    this.authorNpub = 'npub1xxxx',
   });
 
   HudModel copyWith({
@@ -23,6 +27,8 @@ class HudModel {
     String? repostCount,
     String? shareCount,
     String? zapCount,
+    String? authorDisplay,
+    String? authorNpub,
   }) => HudModel(
     caption: caption ?? this.caption,
     likeCount: likeCount ?? this.likeCount,
@@ -30,6 +36,8 @@ class HudModel {
     repostCount: repostCount ?? this.repostCount,
     shareCount: shareCount ?? this.shareCount,
     zapCount: zapCount ?? this.zapCount,
+    authorDisplay: authorDisplay ?? this.authorDisplay,
+    authorNpub: authorNpub ?? this.authorNpub,
   );
 }
 
