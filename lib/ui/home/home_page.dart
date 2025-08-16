@@ -26,14 +26,19 @@ class _HomePageState extends State<HomePage> {
   OverlayEntry? _entry;
   StreamSubscription<List<FeedItem>>? _sub;
 
-  // start with demo to render immediately; replace once data arrives
-  List<FeedItem> _items = demoFeed;
+  // Start with demo only if flag is OFF
+  List<FeedItem> _items = kNostrEnabled ? <FeedItem>[] : demoFeed;
   int _initialIndex = 0;
+  final bool _nostrActive = kNostrEnabled; // for UI banner
 
   late final HudState _hud = HudState(
     visible: ValueNotifier<bool>(true),
     muted: _controller.muted,
-    model: ValueNotifier<HudModel>(_modelFromItem(_items[0])),
+    model: ValueNotifier<HudModel>(
+      kNostrEnabled
+          ? const HudModel(caption: 'Loading Nostr…')
+          : _modelFromItem(_items[0]),
+    ),
   );
 
   HudModel _modelFromItem(FeedItem f) => HudModel(
@@ -50,15 +55,24 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    if (kNostrEnabled) {
+      debugPrint(
+        '[ShortLived] Data source: NOSTR (relays=${kDefaultRelays.length})',
+      );
+    } else {
+      debugPrint('[ShortLived] Data source: DEMO');
+    }
 
     // Deep link (v/id) against current list (will re-map after data arrives)
     final uri = urlShim.current();
     final id = uri.queryParameters['id'];
     final v = int.tryParse(uri.queryParameters['v'] ?? '');
-    if (v != null && v >= 0 && v < _items.length) _initialIndex = v;
-    if (id != null) {
-      final idx = _items.indexWhere((e) => e.id == id);
-      if (idx >= 0) _initialIndex = idx;
+    if (_items.isNotEmpty) {
+      if (v != null && v >= 0 && v < _items.length) _initialIndex = v;
+      if (id != null) {
+        final idx = _items.indexWhere((e) => e.id == id);
+        if (idx >= 0) _initialIndex = idx;
+      }
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,24 +90,31 @@ class _HomePageState extends State<HomePage> {
       overlay.insert(_entry!);
     });
 
-    // Subscribe to data source (will replace demo list once available)
+    // Subscribe to data source
     _sub = _ds.streamInitial().listen((list) {
-      if (list.isNotEmpty) {
-        setState(() {
-          _items = list;
+      debugPrint('[ShortLived] Nostr delivered ${list.length} items');
+      setState(() {
+        _items = list;
+        if (_items.isEmpty) {
+          // keep HUD model text but do not flip back to demo
+          _hud.model.value = _hud.model.value.copyWith(
+            caption:
+                'No Nostr videos found yet. Pull to refresh or try another relay.',
+          );
+          _initialIndex = 0;
+        } else {
           // re-derive initial index by id if present
+          final uri = urlShim.current();
           final idParam = uri.queryParameters['id'];
           if (idParam != null) {
             final idx = _items.indexWhere((e) => e.id == idParam);
-            if (idx >= 0) {
-              _initialIndex = idx;
-            }
+            if (idx >= 0) _initialIndex = idx;
           } else if (_initialIndex >= _items.length) {
             _initialIndex = 0;
           }
           _hud.model.value = _modelFromItem(_items[_initialIndex]);
-        });
-      }
+        }
+      });
     });
   }
 
@@ -110,9 +131,9 @@ class _HomePageState extends State<HomePage> {
     });
     await Clipboard.setData(ClipboardData(text: url));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Link copied')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Link copied')));
   }
 
   void _onIndexChanged(int i) {
@@ -146,15 +167,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: T.bg,
-      body: FeedPager(
-        items: _items,
-        controller: _controller,
-        onIndexChanged: _onIndexChanged,
-        onDoubleTapLike: (_) => _likeCurrent(),
-        initialIndex: _initialIndex,
-      ),
-    );
+    final body = _items.isEmpty && _nostrActive
+        ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'Loading Nostr… If this persists, check your relays in app_config.dart.',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
+        : FeedPager(
+            items: _items,
+            controller: _controller,
+            onIndexChanged: _onIndexChanged,
+            onDoubleTapLike: (_) => _likeCurrent(),
+            initialIndex: _initialIndex,
+          );
+
+    return Scaffold(backgroundColor: T.bg, body: body);
   }
 }

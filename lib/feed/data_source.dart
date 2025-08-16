@@ -23,27 +23,50 @@ class DemoFeedDataSource implements FeedDataSource {
 class NostrFeedDataSource implements FeedDataSource {
   final NostrRepo _repo;
   NostrFeedDataSource({List<String>? relays})
-      : _repo = NostrRepoWebSocket(
-            relays: relays ?? kDefaultRelays, limit: kNostrInitialLimit);
+    : _repo = NostrRepoWebSocket(
+        relays: relays ?? kDefaultRelays,
+        limit: kNostrInitialLimit,
+      );
 
   @override
   Stream<List<FeedItem>> streamInitial() {
     final items = <FeedItem>[];
     final controller = StreamController<List<FeedItem>>();
-    _repo.streamRecent(limit: kNostrInitialLimit).listen((e) {
-      final m = mapEventToFeedItem(e);
-      if (m != null) {
-        items.add(m);
-        if (items.length >= 10) {
-          controller.add(List<FeedItem>.from(items));
-        }
-      }
-    }, onError: (_) {
-      controller.add(items);
-    }, onDone: () {
-      controller.add(items);
-      controller.close();
+
+    final sub = _repo
+        .streamRecent(limit: kNostrInitialLimit)
+        .listen(
+          (e) {
+            final m = mapEventToFeedItem(e);
+            if (m != null) {
+              items.add(m);
+              if (items.length == 1) {
+                controller.add(
+                  List<FeedItem>.from(items),
+                ); // show first quickly
+              }
+              if (items.length % 5 == 0) {
+                controller.add(List<FeedItem>.from(items));
+              }
+            }
+          },
+          onDone: () {
+            controller.add(items);
+            controller.close();
+          },
+          onError: (_) {
+            controller.add(items);
+            controller.close();
+          },
+        );
+
+    controller.onCancel = sub.cancel;
+
+    // Time out to ensure we emit something even if relays quiet
+    Future.delayed(kNostrLoadTimeout, () {
+      if (!controller.isClosed) controller.add(items);
     });
+
     return controller.stream;
   }
 
