@@ -9,4 +9,9 @@ class T {
 
   static const Color bg = Colors.black;
   static const Color blue = Colors.blueAccent;
+
+  static const double btnSize = 48;      // min tap target
+  static const double btnGap = 10;       // gap between icon and count
+  static const double stackGap = 14;     // gap between action rows
+  static const double maxCaptionW = 520; // used elsewhere
 }

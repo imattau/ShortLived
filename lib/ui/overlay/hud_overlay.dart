@@ -117,24 +117,33 @@ class HudOverlay extends StatelessWidget {
                             ),
                           ),
                         ),
-                      Positioned(
-                        right: 20,
-                        bottom: MediaQuery.of(context).size.height * 0.16,
-                        child: ValueListenableBuilder<HudModel>(
-                          valueListenable: state.model,
-                          builder: (_, m, __) => OverlayCluster(
-                            onLike: onLikeLogical,
-                            onComment: () {},
-                            onRepost: () {},
-                            onShare: () => onShareLogical?.call(),
-                            onZap: () {},
-                            likeCount: m.likeCount,
-                            commentCount: m.commentCount,
-                            repostCount: m.repostCount,
-                            shareCount: m.shareCount,
-                            zapCount: m.zapCount,
-                          ),
-                        ),
+                      Builder(
+                        builder: (ctx) {
+                          final s = MediaQuery.of(ctx).size;
+                          final bottomSafe = MediaQuery.of(ctx).padding.bottom;
+                          // Keep centre bias; reserve ~120px for the Create button footprint.
+                          final baseBottom = (s.height * 0.22) + bottomSafe;
+                          return Positioned(
+                            right: 20,
+                            bottom: baseBottom.clamp(100.0, 260.0),
+                            child: ValueListenableBuilder<HudModel>(
+                              valueListenable: state.model,
+                              builder: (_, m, __) => OverlayCluster(
+                                onLike: onLikeLogical,
+                                onComment: () {},
+                                onRepost: () {},
+                                onShare: onShareLogical ?? () {},
+                                onCopyLink: () {},
+                                onZap: () {},
+                                likeCount: m.likeCount,
+                                commentCount: m.commentCount,
+                                repostCount: m.repostCount,
+                                shareCount: m.shareCount,
+                                zapCount: m.zapCount,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       Positioned(
                         left: T.s24,

@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:nostr_video/ui/home/home_feed_page.dart';
+import 'package:nostr_video/state/feed_controller.dart';
+import 'package:nostr_video/data/repos/feed_repository.dart';
+import 'package:nostr_video/core/di/locator.dart';
 import '../test_utils/test_services.dart';
 import '../test_helpers/test_video_scope.dart';
 import 'package:network_image_mock/network_image_mock.dart';
@@ -9,6 +12,7 @@ void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     await setupTestLocator();
+    Locator.I.put<FeedController>(FeedController(MockFeedRepository(count: 5)));
   });
   testWidgets('long-press hides and shows overlays', (tester) async {
     await mockNetworkImagesFor(() async {

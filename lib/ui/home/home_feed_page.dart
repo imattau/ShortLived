@@ -39,6 +39,7 @@ import '../../services/nostr/relay_directory.dart';
 import '../../web/pwa/pwa_service.dart';
 import '../../crypto/nip19.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../utils/count_format.dart';
 
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
@@ -373,6 +374,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                     onShare: _shareCurrent,
                     onCopyLink: _shareCurrent,
                     onZap: _openZap,
+                    likeCount:
+                        formatCount(_currentPost?.likeCount ?? 0),
+                    commentCount:
+                        formatCount(_currentPost?.commentCount ?? 0),
+                    repostCount:
+                        formatCount(_currentPost?.repostCount ?? 0),
+                    shareCount: '0',
+                    zapCount: '0',
                   ),
                 ),
                 Positioned(
