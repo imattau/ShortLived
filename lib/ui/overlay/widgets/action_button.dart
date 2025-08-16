@@ -40,7 +40,7 @@ class ActionButton extends StatelessWidget {
           Text(
             label!,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color.withOpacity(0.85),
+                  color: color.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.2,
                 ),
