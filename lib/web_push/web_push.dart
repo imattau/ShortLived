@@ -1,6 +1,8 @@
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
+
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:typed_data';
+import 'dart:js_util' as js_util;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/push_config.dart';
@@ -30,13 +32,14 @@ class WebPushManager {
     if (permission != 'granted') return false;
 
     // Subscribe
-    final sub = await reg.pushManager.subscribe(html.PushSubscriptionOptions(
-      userVisibleOnly: true,
-      applicationServerKey: base64UrlToBytes(PushConfig.vapidPublicKey),
-    ));
+    final sub = await reg.pushManager?.subscribe({
+      'userVisibleOnly': true,
+      'applicationServerKey': base64UrlToBytes(PushConfig.vapidPublicKey),
+    });
+    if (sub == null) return false;
 
     // Send subscription to server
-    final body = sub.toJson();
+    final body = js_util.callMethod(sub, 'toJSON', []);
     final resp = await http.post(
       Uri.parse(PushConfig.subscriptionEndpoint),
       headers: {'content-type': 'application/json'},
