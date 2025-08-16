@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../notifications/notifications_prefs.dart';
 import '../../../notifications/notifications_store.dart';
 import '../../design/tokens.dart';
+import '../../../web_push/web_push.dart';
 
 /// Bottom sheet allowing users to toggle notification visibility and badge
 /// behaviour.
@@ -31,6 +32,20 @@ class _NSSState extends State<NotificationsSettingsSheet> {
           const Text('Notifications',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           const SizedBox(height: T.s16),
+          ListTile(
+            title: const Text('Enable Web Push (PWA)'),
+            subtitle: const Text('Receive notifications when the app is closed'),
+            trailing: ElevatedButton(
+              onPressed: () async {
+                final ok = await WebPushManager.enable();
+                if (!context.mounted) return;
+                final snack = SnackBar(content: Text(ok ? 'Web Push enabled' : 'Web Push failed'));
+                ScaffoldMessenger.of(context).showSnackBar(snack);
+                setState((){}); // reflect any UI change you want
+              },
+              child: const Text('Enable'),
+            ),
+          ),
           _tile('Show replies', NotifPrefsKeys.includeReply),
           _tile('Show likes', NotifPrefsKeys.includeLike),
           _tile('Show reposts', NotifPrefsKeys.includeRepost),
