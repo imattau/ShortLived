@@ -48,3 +48,17 @@ If you see a blank page on `flutter run -d chrome`:
 If the page is still blank, open DevTools → Console and copy the first error. Common issues:
 - Missing vector icon assets (`assets/icons/*.svg` not compiled to `.svg.vec`).
 - A custom script added outside of this PR that throws early.
+
+### Overlays
+We use a single `OverlayEntry` controlled by `HudState` (ValueNotifiers). Toggling visibility or
+muting updates only the overlay subtree; the `PageView` feed is never rebuilt.
+
+Commands
+- flutter clean && flutter pub get
+- flutter run -d chrome
+- flutter test
+
+Acceptance
+- Long-press hides/shows overlays smoothly.
+- Scrolling feed remains uninterrupted; PageView stays mounted.
+- No rebuilds of the feed when toggling HUD (tests pass).
