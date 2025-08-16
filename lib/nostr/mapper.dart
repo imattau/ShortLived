@@ -12,19 +12,33 @@ String _shortPk(String hex) {
   return '${hex.substring(0, 6)}…${hex.substring(hex.length - 6)}';
 }
 
+// Look for common patterns: ["video","<url>"], ["media","<url>"],
+// NIP-94: ["url","<url>"] with ["m","video/mp4"] or ["imeta","url <url> ..."]
 String? _extractVideoUrl(NostrEvent e) {
-  // Prefer tags: ["video","<url>"] or ["media","<url>"]
-  for (final t in e.tags) {
-    if (t.isNotEmpty) {
+  String? fromTags() {
+    for (final t in e.tags) {
+      if (t.isEmpty) continue;
       final k = (t[0] ?? '').toString().toLowerCase();
       if ((k == 'video' || k == 'media') && t.length >= 2) {
         final v = t[1].toString();
         if (v.startsWith('http')) return v;
       }
+      if (k == 'url' && t.length >= 2) {
+        final v = t[1].toString();
+        if (v.contains('.mp4') || v.contains('.webm') || v.contains('.m3u8')) {
+          return v;
+        }
+      }
+      if (k == 'imeta' && t.length >= 2) {
+        final s = t.sublist(1).join(' ');
+        final m = _urlRegex.firstMatch(s);
+        if (m != null) return m.group(1);
+      }
     }
+    return null;
   }
-  final m = _urlRegex.firstMatch(e.content);
-  return m?.group(1);
+
+  return fromTags() ?? _urlRegex.firstMatch(e.content)?.group(1);
 }
 
 FeedItem? mapEventToFeedItem(NostrEvent e) {
