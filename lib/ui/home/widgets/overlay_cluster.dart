@@ -40,7 +40,7 @@ class OverlayCluster extends StatelessWidget {
               width: actionSize,
               height: actionSize,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.10),
+                color: Colors.white.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(actionSize / 2),
               ),
               alignment: Alignment.center,
