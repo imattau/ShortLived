@@ -1,16 +1,12 @@
-(function() {
-  let deferred;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferred = e;
-    window.dispatchEvent(new Event('__pwa-install-available'));
-  });
-
-  window.__pwaPrompt = async function() {
-    if (!deferred) return { ok: false, reason: 'not-available' };
-    deferred.prompt();
-    const { outcome } = await deferred.userChoice;
-    deferred = null;
-    return { ok: outcome === 'accepted', outcome };
-  };
+/* Non-blocking PWA install prompt stub for debug and release. */
+(function () {
+  try {
+    window.__pwaDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.__pwaDeferredPrompt = e; // call prompt() later from UI
+    });
+  } catch (_) {
+    // Never block startup
+  }
 })();
