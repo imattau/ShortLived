@@ -110,6 +110,7 @@ class _FeedPageState extends State<_FeedPage>
         autoplay: widget.autoplay,
         muted: widget.muted,
         fit: BoxFit.cover,
+        onReady: () {},
       ),
     );
   }
