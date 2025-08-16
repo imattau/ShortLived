@@ -1,5 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
 import 'package:nostr_video/notifications/notification_models.dart';
 import 'package:nostr_video/notifications/notifications_store.dart';
 import 'package:nostr_video/notifications/notifications_controller.dart';
@@ -22,7 +24,8 @@ class _NoopClient implements INostrClient {
 
 void main() {
   test('unread respects filters and persists', () async {
-    await Hive.initFlutter();
+    final tempDir = await Directory.systemTemp.createTemp();
+    Hive.init(tempDir.path);
     final store = NotificationsStore();
     await store.init();
     final svc = _FakeSvc();
@@ -52,5 +55,8 @@ void main() {
     // Recalc
     await ctrl.markAllRead(); // mark as read then no unread
     expect(ctrl.unread, 0);
+
+    await Hive.close();
+    await tempDir.delete(recursive: true);
   });
 }
