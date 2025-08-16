@@ -4,6 +4,7 @@ import 'widgets/feed_pager.dart';
 import '../../feed/demo_feed.dart';
 import '../overlay/hud_overlay.dart';
 import '../overlay/hud_model.dart';
+import 'feed_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,37 +13,49 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final FeedController _controller = FeedController();
+
   late final HudState _hud = HudState(
     visible: ValueNotifier<bool>(true),
-    muted: ValueNotifier<bool>(true),
-    model: ValueNotifier<HudModel>(HudModel(
-      caption: demoFeed[0].caption,
-      likeCount: demoFeed[0].likeCount,
-      commentCount: demoFeed[0].commentCount,
-      repostCount: demoFeed[0].repostCount,
-      shareCount: demoFeed[0].shareCount,
-      zapCount: demoFeed[0].zapCount,
-    )),
+    muted: _controller.muted,
+    model: ValueNotifier<HudModel>(_modelFromItem(demoFeed[0])),
   );
 
   OverlayEntry? _entry;
 
+  HudModel _modelFromItem(FeedItem f) => HudModel(
+        caption: f.caption,
+        likeCount: f.likeCount,
+        commentCount: f.commentCount,
+        repostCount: f.repostCount,
+        shareCount: f.shareCount,
+        zapCount: f.zapCount,
+      );
+
+  void _onIndexChanged(int i) {
+    _hud.model.value = _modelFromItem(demoFeed[i]);
+  }
+
+  void _likeCurrent() {
+    final i = _controller.index.value;
+    final item = demoFeed[i];
+    int asInt(String s) => int.tryParse(s.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    var v = asInt(item.likeCount) + 1;
+    item.likeCount = v >= 1000 ? '${(v / 1000).toStringAsFixed(1)}k' : '$v';
+    _hud.model.value = _modelFromItem(item);
+  }
+
   @override
   void initState() {
     super.initState();
-    // Insert overlay once at startup.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final overlay = Overlay.of(context);
       _entry = OverlayEntry(
         builder: (ctx) => Positioned.fill(
           child: HudOverlay(
             state: _hud,
-            onLike: () {},
-            onComment: () {},
-            onRepost: () {},
-            onShare: () {},
-            onSave: () {},
-            onZap: () {},
+            controller: _controller,
+            onLikeLogical: _likeCurrent,
           ),
         ),
       );
@@ -53,36 +66,21 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _entry?.remove();
+    _controller.dispose();
     _hud.visible.dispose();
-    _hud.muted.dispose();
     _hud.model.dispose();
     super.dispose();
   }
 
-  void _onIndexChanged(int i) {
-    final f = demoFeed[i];
-    _hud.model.value = HudModel(
-      caption: f.caption,
-      likeCount: f.likeCount,
-      commentCount: f.commentCount,
-      repostCount: f.repostCount,
-      shareCount: f.shareCount,
-      zapCount: f.zapCount,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Feed is the only child of Scaffold; overlays live in OverlayEntry above it.
     return Scaffold(
       backgroundColor: T.bg,
-      body: ValueListenableBuilder<bool>(
-        valueListenable: _hud.muted,
-        builder: (_, muted, __) => FeedPager(
-          items: demoFeed,
-          muted: muted,
-          onIndexChanged: _onIndexChanged,
-        ),
+      body: FeedPager(
+        items: demoFeed,
+        controller: _controller,
+        onIndexChanged: _onIndexChanged,
+        onDoubleTapLike: (_) => _likeCurrent(),
       ),
     );
   }

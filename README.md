@@ -53,12 +53,19 @@ If the page is still blank, open DevTools → Console and copy the first error. 
 We use a single `OverlayEntry` controlled by `HudState` (ValueNotifiers). Toggling visibility or
 muting updates only the overlay subtree; the `PageView` feed is never rebuilt.
 
+### Controller
+`FeedController` owns the current index and muted state. HUD buttons and keyboard shortcuts drive
+the controller; `FeedPager` listens and rebuilds only the visible page when mute changes.
+Double-tap on a video likes the current item (demo increments count).
+
 Commands
-- flutter clean && flutter pub get
+- flutter clean
+- flutter pub get
 - flutter run -d chrome
 - flutter test
 
 Acceptance
-- Long-press hides/shows overlays smoothly.
-- Scrolling feed remains uninterrupted; PageView stays mounted.
-- No rebuilds of the feed when toggling HUD (tests pass).
+- Clicking “Unmute/Mute” actually toggles the playing video’s audio.
+- Double-tap anywhere on the video increments the like count shown in the HUD.
+- Keyboard: ↑/↓ scrolls feed; M toggles mute; L likes.
+- PageView remains mounted when toggling HUD or mute (previous tests still pass).
