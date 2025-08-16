@@ -20,7 +20,7 @@ dependencies:
   shared_preferences: any
   collection: any
   equatable: any
-  web_socket_channel: ^2.4.0
+  web_socket_channel: ^2.4.5
   url_launcher: ^6.3.0
   uuid: any
   flutter_secure_storage: ^9.0.0
