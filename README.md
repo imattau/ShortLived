@@ -79,3 +79,21 @@ Acceptance
 - Navigate to `/?v=1` or `/?id=butterfly` and the second item is initial.
 - Scrolling updates the URL without reload.
 - Using Copy Link copies a URL that re-opens to the same item.
+
+### Nostr (read-only) adapter
+- Enable via build flag:  
+  `flutter run -d chrome --dart-define=NOSTR_ENABLED=true`
+- Edit default relays in `lib/config/app_config.dart`.
+- We subscribe to recent kind-1 notes and try to extract a playable video URL
+  from tags `["video" | "media", "<url>"]` or the first `mp4/webm/m3u8` link in content.
+- Author display is a short pubkey for now. Proper npub encoding and reaction counts can be added later.
+
+Commands
+- flutter clean && flutter pub get
+- flutter test
+- flutter run -d chrome --dart-define=NOSTR_ENABLED=true
+
+Acceptance
+- With flag OFF, the demo feed behaves as before.
+- With flag ON and reachable relays, the app loads a list of notes that include video links and displays them as a vertical feed.
+- Deep links (`?v=&id=`) still work with the Nostr list.
