@@ -99,7 +99,11 @@ class _FeedPage extends StatefulWidget {
   final FeedItem item;
   final bool autoplay;
   final bool muted;
-  const _FeedPage({super.key, required this.item, required this.autoplay, required this.muted});
+  const _FeedPage(
+      {super.key,
+      required this.item,
+      required this.autoplay,
+      required this.muted});
 
   @override
   State<_FeedPage> createState() => _FeedPageState();
@@ -113,7 +117,7 @@ class _FeedPageState extends State<_FeedPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Positioned.fill(
+    return SizedBox.expand(
       child: VideoPlayerView(
         url: widget.item.url,
         autoplay: widget.autoplay,
@@ -124,4 +128,3 @@ class _FeedPageState extends State<_FeedPage>
     );
   }
 }
-
