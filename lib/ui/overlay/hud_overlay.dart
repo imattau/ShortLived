@@ -184,10 +184,9 @@ class HudOverlay extends StatelessWidget {
               ),
             );
 
-            return AnimatedOpacity(
+            return AnimatedSwitcher(
               duration: const Duration(milliseconds: 150),
-              opacity: visible ? 1 : 0,
-              child: overlay,
+              child: visible ? overlay : const SizedBox.shrink(),
             );
           },
         ),
