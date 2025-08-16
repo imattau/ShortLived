@@ -14,12 +14,14 @@ class HudOverlay extends StatelessWidget {
   final HudState state;
   final FeedController controller;
   final VoidCallback onLikeLogical;
+  final VoidCallback onCopyLink;
 
   const HudOverlay({
     super.key,
     required this.state,
     required this.controller,
     required this.onLikeLogical,
+    required this.onCopyLink,
   });
 
   void _openSearch(BuildContext context) {
@@ -112,7 +114,10 @@ class HudOverlay extends StatelessWidget {
                             onAvatarTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text('Open profile for ${m.authorDisplay}')),
+                                  content: Text(
+                                    'Open profile for ${m.authorDisplay}',
+                                  ),
+                                ),
                               );
                             },
                           ),
@@ -120,8 +125,7 @@ class HudOverlay extends StatelessWidget {
                       ),
                       Positioned(
                         right: 20,
-                        bottom:
-                            MediaQuery.of(context).size.height * 0.16,
+                        bottom: MediaQuery.of(context).size.height * 0.16,
                         child: ValueListenableBuilder<HudModel>(
                           valueListenable: state.model,
                           builder: (_, m, __) => OverlayCluster(
@@ -129,7 +133,7 @@ class HudOverlay extends StatelessWidget {
                             onComment: () {},
                             onRepost: () {},
                             onShare: () {},
-                            onCopyLink: () {},
+                            onCopyLink: onCopyLink,
                             onZap: () {},
                             likeCount: m.likeCount,
                             commentCount: m.commentCount,
@@ -142,8 +146,7 @@ class HudOverlay extends StatelessWidget {
                       Positioned(
                         left: T.s24,
                         right: T.s24,
-                        bottom:
-                            MediaQuery.of(context).size.height * 0.22,
+                        bottom: MediaQuery.of(context).size.height * 0.22,
                         child: ValueListenableBuilder<HudModel>(
                           valueListenable: state.model,
                           builder: (_, m, __) => Container(
@@ -161,8 +164,7 @@ class HudOverlay extends StatelessWidget {
                       ),
                       Positioned(
                         left: T.s24,
-                        bottom:
-                            MediaQuery.of(context).size.height * 0.30,
+                        bottom: MediaQuery.of(context).size.height * 0.30,
                         child: ValueListenableBuilder<HudModel>(
                           valueListenable: state.model,
                           builder: (_, m, __) => NpubPill(npub: m.authorNpub),
@@ -171,8 +173,7 @@ class HudOverlay extends StatelessWidget {
                       if (kIsWeb)
                         Positioned(
                           left: T.s24,
-                          bottom:
-                              MediaQuery.of(context).size.height * 0.28,
+                          bottom: MediaQuery.of(context).size.height * 0.28,
                           child: ValueListenableBuilder<bool>(
                             valueListenable: controller.muted,
                             builder: (_, muted, __) => ElevatedButton(
@@ -194,15 +195,16 @@ class HudOverlay extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(28),
                                 border: Border.all(
-                                  color:
-                                      Colors.white.withValues(alpha: 0.85),
+                                  color: Colors.white.withValues(alpha: 0.85),
                                   width: 2,
                                 ),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text('Create',
-                                style: TextStyle(color: Colors.white)),
+                            const Text(
+                              'Create',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ],
                         ),
                       ),

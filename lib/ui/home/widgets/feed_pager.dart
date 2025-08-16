@@ -11,12 +11,15 @@ class FeedPager extends StatefulWidget {
   final OnIndexChanged onIndexChanged;
   final FeedController controller;
   final void Function(int index)? onDoubleTapLike;
+  final int initialIndex;
+
   const FeedPager({
     super.key,
     required this.items,
     required this.onIndexChanged,
     required this.controller,
     this.onDoubleTapLike,
+    this.initialIndex = 0,
   });
 
   @override
@@ -24,8 +27,10 @@ class FeedPager extends StatefulWidget {
 }
 
 class _FeedPagerState extends State<FeedPager> {
-  late final PageController _controller = PageController();
-  int _index = 0;
+  late final PageController _controller = PageController(
+    initialPage: widget.initialIndex,
+  );
+  late int _index = widget.initialIndex;
   bool _didWarmUp = false;
 
   @override
@@ -99,11 +104,12 @@ class _FeedPage extends StatefulWidget {
   final FeedItem item;
   final bool autoplay;
   final bool muted;
-  const _FeedPage(
-      {super.key,
-      required this.item,
-      required this.autoplay,
-      required this.muted});
+  const _FeedPage({
+    super.key,
+    required this.item,
+    required this.autoplay,
+    required this.muted,
+  });
 
   @override
   State<_FeedPage> createState() => _FeedPageState();

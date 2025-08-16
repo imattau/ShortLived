@@ -1,4 +1,5 @@
 class FeedItem {
+  final String id;
   final String url;
   final String caption;
   String likeCount;
@@ -8,7 +9,9 @@ class FeedItem {
   String zapCount;
   final String authorDisplay;
   final String authorNpub;
+
   FeedItem({
+    required this.id,
     required this.url,
     required this.caption,
     this.likeCount = '0',
@@ -23,6 +26,7 @@ class FeedItem {
 
 final demoFeed = <FeedItem>[
   FeedItem(
+    id: 'bee',
     url: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
     caption: 'Enjoying a sunny day #nature #sydney #nostr',
     likeCount: '12.3k',
@@ -30,21 +34,24 @@ final demoFeed = <FeedItem>[
     repostCount: '97',
     shareCount: '87',
     zapCount: '42',
-    authorDisplay: 'Fiona',
-    authorNpub: 'npub1fiona1234567890',
+    authorDisplay: 'Bee Keeper',
+    authorNpub: 'npub1beekeeperxxxx',
   ),
   FeedItem(
-    url: 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
+    id: 'butterfly',
+    url:
+        'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
     caption: 'Moments in the garden #macro #nostr',
     likeCount: '9.1k',
     commentCount: '431',
     repostCount: '51',
     shareCount: '32',
     zapCount: '15',
-    authorDisplay: 'George',
-    authorNpub: 'npub1george1234567',
+    authorDisplay: 'MacroFan',
+    authorNpub: 'npub1macrofanyyyy',
   ),
   FeedItem(
+    id: 'bee2',
     url: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
     caption: 'Looping demo clip #dev',
     likeCount: '2.0k',
@@ -52,8 +59,7 @@ final demoFeed = <FeedItem>[
     repostCount: '10',
     shareCount: '8',
     zapCount: '3',
-    authorDisplay: 'Dev Demo',
-    authorNpub: 'npub1devdemo12345',
+    authorDisplay: 'DevLoop',
+    authorNpub: 'npub1devloopzzzz',
   ),
 ];
-
