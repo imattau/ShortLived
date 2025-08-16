@@ -4,9 +4,7 @@ abstract class UrlShim {
   String buildUrl(Map<String, String> params);
 }
 
-UrlShim get urlShim => _urlShim;
-
-final UrlShim _urlShim = _StubUrlShim();
+final UrlShim urlShim = _StubUrlShim();
 
 class _StubUrlShim implements UrlShim {
   @override

@@ -1,7 +1,7 @@
-import 'dart:html' as html;
+import 'package:web/web.dart' as html;
 import 'url_shim.dart';
 
-final UrlShim _urlShim = _WebUrlShim();
+final UrlShim urlShim = _WebUrlShim();
 
 class _WebUrlShim implements UrlShim {
   @override

@@ -87,9 +87,10 @@ class _HomePageState extends State<HomePage> {
       'id': f.id,
     });
     await Clipboard.setData(ClipboardData(text: url));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Link copied')));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link copied')),
+    );
   }
 
   void _onIndexChanged(int i) {
