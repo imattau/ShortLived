@@ -7,7 +7,7 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onComment;
   final VoidCallback onRepost;
   final VoidCallback onShare;
-  final VoidCallback onCopyLink;
+  final VoidCallback? onCopyLink;
   final VoidCallback onZap;
   final String likeCount;
   final String commentCount;
@@ -21,7 +21,7 @@ class OverlayCluster extends StatelessWidget {
     required this.onComment,
     required this.onRepost,
     required this.onShare,
-    required this.onCopyLink,
+    this.onCopyLink,
     required this.onZap,
     this.likeCount = '12.3k',
     this.commentCount = '885',
@@ -66,23 +66,29 @@ class OverlayCluster extends StatelessWidget {
       );
     }
 
+    final children = <Widget>[
+      item('heart_24', likeCount, onLike),
+      SizedBox(height: gap),
+      item('comment_24', commentCount, onComment),
+      SizedBox(height: gap),
+      item('repost_24', repostCount, onRepost),
+      SizedBox(height: gap),
+      item('share_24', shareCount, onShare),
+    ];
+
+    if (onCopyLink != null) {
+      children.add(SizedBox(height: gap));
+      children.add(item('bookmark_24', '—', onCopyLink!));
+    }
+
+    children.add(SizedBox(height: gap));
+    children.add(item('zap_24', zapCount, onZap));
+
     return SizedBox(
       width: actionSize,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          item('heart_24', likeCount, onLike),
-          SizedBox(height: gap),
-          item('comment_24', commentCount, onComment),
-          SizedBox(height: gap),
-          item('repost_24', repostCount, onRepost),
-          SizedBox(height: gap),
-          item('share_24', shareCount, onShare),
-          SizedBox(height: gap),
-          item('bookmark_24', '—', onCopyLink),
-          SizedBox(height: gap),
-          item('zap_24', zapCount, onZap),
-        ],
+        children: children,
       ),
     );
   }

@@ -11,6 +11,9 @@ import 'package:flutter/services.dart';
 import '../../config/app_config.dart';
 import '../../web/url_shim.dart'
     if (dart.library.html) '../../web/url_shim_web.dart';
+import '../../utils/count_format.dart';
+import '../../platform/share_shim.dart'
+    if (dart.library.html) '../../platform/share_shim_web.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -83,7 +86,7 @@ class _HomePageState extends State<HomePage> {
             state: _hud,
             controller: _controller,
             onLikeLogical: _likeCurrent,
-            onCopyLink: _copyLinkCurrent,
+            onShareLogical: _shareCurrent,
           ),
         ),
       );
@@ -123,19 +126,6 @@ class _HomePageState extends State<HomePage> {
     urlShim.replaceQuery({'v': '$i', 'id': f.id});
   }
 
-  void _copyLinkCurrent() async {
-    final f = _items[_controller.index.value];
-    final url = urlShim.buildUrl({
-      'v': '${_controller.index.value}',
-      'id': f.id,
-    });
-    await Clipboard.setData(ClipboardData(text: url));
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Link copied')));
-  }
-
   void _onIndexChanged(int i) {
     final f = _items[i];
     _hud.model.value = _modelFromItem(f);
@@ -147,11 +137,35 @@ class _HomePageState extends State<HomePage> {
     final i = _controller.index.value;
     if (i < 0 || i >= _items.length) return;
     final item = _items[i];
-    int asInt(String s) =>
-        int.tryParse(s.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-    var v = asInt(item.likeCount) + 1;
-    item.likeCount = v >= 1000 ? '${(v / 1000).toStringAsFixed(1)}k' : '$v';
+    var v = parseCount(item.likeCount) + 1;
+    item.likeCount = formatCount(v);
     _hud.model.value = _modelFromItem(item);
+  }
+
+  Future<void> _shareCurrent() async {
+    final i = _controller.index.value;
+    if (i < 0 || i >= _items.length) return;
+    final f = _items[i];
+
+    final url = urlShim.buildUrl({'v': '$i', 'id': f.id});
+    final text = f.caption.isEmpty ? 'Watch on ShortLived' : f.caption;
+
+    bool ok = await shareShim.share(url: url, text: text, title: 'ShortLived');
+    if (!ok) {
+      await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Link copied')),
+        );
+      }
+      ok = true; // still count as a "share" when copied
+    }
+
+    if (ok) {
+      var v = parseCount(f.shareCount) + 1;
+      f.shareCount = formatCount(v);
+      _hud.model.value = _modelFromItem(f);
+    }
   }
 
   @override
