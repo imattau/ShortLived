@@ -55,9 +55,9 @@ muting updates only the overlay subtree; the `PageView` feed is never rebuilt.
 
 Overlay now includes:
 - Top-left **Search** pill (opens stub sheet)
-- **Author header** under search (avatar + display + short npub)
-- **NPUB pill** bottom-left (tap to copy)
-All overlay elements still hide/show with long-press. Feed is not rebuilt when toggling HUD.
+- Bottom-left **BottomInfoBar** (avatar, display, npub, caption)
+- **Mute** (web-only) under Search
+All overlay elements still hide/show with long-press. Opening Search hides the HUD so sheets never overlap Create.
 
 ### Controller
 `FeedController` owns the current index and muted state. HUD buttons and keyboard shortcuts drive

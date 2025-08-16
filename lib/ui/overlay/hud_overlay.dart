@@ -7,8 +7,7 @@ import '../home/widgets/overlay_cluster.dart';
 import 'hud_model.dart';
 import '../home/feed_controller.dart';
 import 'widgets/search_pill.dart';
-import 'widgets/author_header.dart';
-import 'widgets/npub_pill.dart';
+import 'widgets/bottom_info_bar.dart';
 
 class HudOverlay extends StatelessWidget {
   final HudState state;
@@ -24,11 +23,13 @@ class HudOverlay extends StatelessWidget {
     required this.onCopyLink,
   });
 
-  void _openSearch(BuildContext context) {
-    showModalBottomSheet(
+  void _openSearch(BuildContext context) async {
+    state.visible.value = false;
+    await showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0E0E11),
+      useRootNavigator: true,
       isScrollControlled: true,
+      backgroundColor: const Color(0xFF0E0E11),
       builder: (ctx) => Padding(
         padding: MediaQuery.of(ctx).viewInsets.add(const EdgeInsets.all(16)),
         child: Column(
@@ -66,6 +67,7 @@ class HudOverlay extends StatelessWidget {
         ),
       ),
     );
+    state.visible.value = true;
   }
 
   @override
@@ -103,26 +105,18 @@ class HudOverlay extends StatelessWidget {
                           child: Center(child: AppIcon('bell_24')),
                         ),
                       ),
-                      Positioned(
-                        left: T.s24,
-                        top: T.s24 + 56,
-                        child: ValueListenableBuilder<HudModel>(
-                          valueListenable: state.model,
-                          builder: (_, m, __) => AuthorHeader(
-                            display: m.authorDisplay,
-                            npubShort: m.authorNpub,
-                            onAvatarTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Open profile for ${m.authorDisplay}',
-                                  ),
-                                ),
-                              );
-                            },
+                      if (kIsWeb)
+                        Positioned(
+                          left: T.s24,
+                          top: T.s24 + 56,
+                          child: ValueListenableBuilder<bool>(
+                            valueListenable: controller.muted,
+                            builder: (_, muted, __) => ElevatedButton(
+                              onPressed: controller.toggleMute,
+                              child: Text(muted ? 'Unmute' : 'Mute'),
+                            ),
                           ),
                         ),
-                      ),
                       Positioned(
                         right: 20,
                         bottom: MediaQuery.of(context).size.height * 0.16,
@@ -145,43 +139,12 @@ class HudOverlay extends StatelessWidget {
                       ),
                       Positioned(
                         left: T.s24,
-                        right: T.s24,
                         bottom: MediaQuery.of(context).size.height * 0.22,
                         child: ValueListenableBuilder<HudModel>(
                           valueListenable: state.model,
-                          builder: (_, m, __) => Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(T.r16),
-                            ),
-                            child: Text(
-                              m.caption,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
+                          builder: (_, m, __) => BottomInfoBar(model: m),
                         ),
                       ),
-                      Positioned(
-                        left: T.s24,
-                        bottom: MediaQuery.of(context).size.height * 0.30,
-                        child: ValueListenableBuilder<HudModel>(
-                          valueListenable: state.model,
-                          builder: (_, m, __) => NpubPill(npub: m.authorNpub),
-                        ),
-                      ),
-                      if (kIsWeb)
-                        Positioned(
-                          left: T.s24,
-                          bottom: MediaQuery.of(context).size.height * 0.28,
-                          child: ValueListenableBuilder<bool>(
-                            valueListenable: controller.muted,
-                            builder: (_, muted, __) => ElevatedButton(
-                              onPressed: controller.toggleMute,
-                              child: Text(muted ? 'Unmute' : 'Mute'),
-                            ),
-                          ),
-                        ),
                       Positioned(
                         left: 0,
                         right: 0,
