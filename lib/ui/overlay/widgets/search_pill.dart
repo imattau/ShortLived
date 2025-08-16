@@ -7,7 +7,7 @@ class SearchPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withOpacity(0.08),
+      color: Colors.white.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
         onTap: onTap,

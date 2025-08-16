@@ -13,12 +13,13 @@ class NpubPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withOpacity(0.10),
+      color: Colors.white.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () async {
+          final messenger = ScaffoldMessenger.of(context);
           await Clipboard.setData(ClipboardData(text: npub));
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             const SnackBar(content: Text('npub copied')),
           );
         },
@@ -32,7 +33,7 @@ class NpubPill extends StatelessWidget {
                 width: 16,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),

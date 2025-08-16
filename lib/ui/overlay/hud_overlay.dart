@@ -46,7 +46,7 @@ class HudOverlay extends StatelessWidget {
                 hintText: 'Type to search…',
                 hintStyle: TextStyle(color: Colors.white54),
                 filled: true,
-                fillColor: Color(0x221FFFFFF),
+                fillColor: const Color(0x22FFFFFF),
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(12)),
