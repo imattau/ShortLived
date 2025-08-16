@@ -30,10 +30,12 @@ class HudOverlay extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: state.visible,
       builder: (_, visible, __) {
-        final overlay = IgnorePointer(
-          ignoring: !visible,
-          child: SafeArea(
-            child: Stack(
+        final overlay = Material(
+          type: MaterialType.transparency,
+          child: IgnorePointer(
+            ignoring: !visible,
+            child: SafeArea(
+              child: Stack(
               children: [
                 // Bell
                 Positioned(
@@ -131,6 +133,7 @@ class HudOverlay extends StatelessWidget {
                   ),
                 ),
               ],
+              ),
             ),
           ),
         );
