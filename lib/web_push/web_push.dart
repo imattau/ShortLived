@@ -6,12 +6,7 @@ import 'dart:js_util' as js_util;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/push_config.dart';
-
-Uint8List base64UrlToBytes(String s) {
-  var b64 = s.replaceAll('-', '+').replaceAll('_', '/');
-  while (b64.length % 4 != 0) { b64 += '='; }
-  return Uint8List.fromList(base64Decode(b64));
-}
+import 'base64_url.dart';
 
 class WebPushManager {
   static bool get supported =>
