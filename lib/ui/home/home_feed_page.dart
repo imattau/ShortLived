@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, unused_element
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'widgets/feed_video_player_view.dart';
@@ -51,7 +53,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   late final RelayService relay;
   StreamSubscription<Map<String, dynamic>>? _zapSub;
   late SettingsService settings;
-  late ContentSafetyService safety; // ignore: unused_field
+  late ContentSafetyService safety;
   late ActionQueue queue;
   late RelayDirectory relayDir;
   late final PwaService _pwa;
@@ -80,12 +82,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     }
     if (Locator.I.tryGet<NotificationsRepository>() == null) {
       Locator.I.put<NotificationsRepository>(
-          NotificationsRepository(relay, signer, meta));
+        NotificationsRepository(relay, signer, meta),
+      );
     }
     Locator.I.get<NotificationsRepository>().start();
     final seenAt = settings.notifLastSeen();
-    _notifSub =
-        Locator.I.get<NotificationsRepository>().stream().listen((list) {
+    _notifSub = Locator.I.get<NotificationsRepository>().stream().listen((
+      list,
+    ) {
       final c = list.where((n) => n.createdAt > seenAt).length;
       if (mounted) setState(() => _unread = c);
     });
@@ -98,11 +102,11 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     // Use a stub if no PwaService has been registered. Tests typically do not
     // bootstrap the service locator, so falling back keeps them isolated.
     _pwa = Locator.I.tryGet<PwaService>() ?? PwaServiceStub();
-      if (Locator.I.tryGet<KeyService>() == null) {
-        Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
-      }
-      relay = Locator.I.tryGet<RelayService>() ??
-          RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
+    if (Locator.I.tryGet<KeyService>() == null) {
+      Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
+    }
+    relay = Locator.I.tryGet<RelayService>() ??
+        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
     if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
@@ -117,8 +121,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
         final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
         final sats = (msats / 1000).round();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Received zap: $sats sats')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Received zap: $sats sats')));
         }
       }
     });
@@ -158,10 +163,12 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       });
     }
     if (Locator.I.tryGet<MuteService>() == null) {
-      Locator.I.put<MuteService>(MuteService(
-        Locator.I.get<SettingsService>(),
-        Locator.I.get<RelayService>(),
-      ));
+      Locator.I.put<MuteService>(
+        MuteService(
+          Locator.I.get<SettingsService>(),
+          Locator.I.get<RelayService>(),
+        ),
+      );
     }
   }
 
@@ -285,10 +292,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
-      builder: (_) => DetailsSheet(
-        post: p,
-        settings: settings,
-      ),
+      builder: (_) => DetailsSheet(post: p, settings: settings),
     );
     _pausedBySheet.value = false;
   }
@@ -320,8 +324,10 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void _shareCurrent() {
     final p = Locator.I.get<FeedController>().currentOrNull;
     if (p == null) return;
-    final link =
-        neventEncode(eventIdHex: p.id, authorPubkeyHex: p.author.pubkey);
+    final link = neventEncode(
+      eventIdHex: p.id,
+      authorPubkeyHex: p.author.pubkey,
+    );
     Share.share('nostr:$link');
   }
 
@@ -356,28 +362,44 @@ class _HomeFeedPageState extends State<HomeFeedPage>
             key: const Key('overlay-visibility'),
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
-            child: ValueListenableBuilder<bool>(
-              valueListenable: _pwa.installAvailable,
-              builder: (_, avail, __) => OverlayCluster(
-                onCreateTap: _openCreate,
-                onLikeTap: _like,
-                onCommentTap: _openComments,
-                onRepostTap: _repost,
-                onQuoteTap: _openQuote,
-                onZapTap: _openZap,
-                onProfileTap: _openProfile,
-                onDetailsTap: _openDetails,
-                onRelaysLongPress: _openRelays,
-                onSearchTap: _openSearch,
-                onSettingsTap: _openSettings,
-                onNotificationsTap: _openNotifications,
-                unreadCount: _unread,
-                safetyOn: settings.sensitiveBlurEnabled(),
-                onSafetyToggle: _toggleSafety,
-                onShareTap: _shareCurrent,
-                showInstall: avail,
-                onInstallTap: avail ? _promptInstall : null,
-              ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OverlayCluster(
+                    onLike: _like,
+                    onComment: _openComments,
+                    onRepost: _repost,
+                    onShare: _shareCurrent,
+                    onCopyLink: _shareCurrent,
+                    onZap: _openZap,
+                  ),
+                ),
+                Positioned(
+                  right: 12,
+                  top: 8,
+                  child: IconButton(
+                    tooltip: 'Safety mode',
+                    icon: Icon(
+                      settings.sensitiveBlurEnabled()
+                          ? Icons.shield
+                          : Icons.shield_outlined,
+                    ),
+                    onPressed: _toggleSafety,
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 16,
+                  child: Center(
+                    child: FloatingActionButton.large(
+                      onPressed: _openCreate,
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           ValueListenableBuilder<bool>(

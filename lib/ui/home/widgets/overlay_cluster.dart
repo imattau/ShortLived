@@ -1,205 +1,126 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/app_icon.dart';
+
+/// Vertical list of actions shown on the right side of the video.
+///
+/// The widget is given a finite width via [SizedBox] to avoid the
+/// unconstrained `Stack` that previously caused layout exceptions on web.
 class OverlayCluster extends StatelessWidget {
+  final VoidCallback onLike;
+  final VoidCallback onComment;
+  final VoidCallback onRepost;
+  final VoidCallback onShare;
+  final VoidCallback onCopyLink;
+  final VoidCallback onZap;
+
   const OverlayCluster({
     super.key,
-    required this.onCreateTap,
-    required this.onLikeTap,
-    required this.onCommentTap,
-    required this.onRepostTap,
-    required this.onQuoteTap,
-    required this.onZapTap,
-    required this.onProfileTap,
-    required this.onDetailsTap,
-    required this.onRelaysLongPress,
-    required this.onSearchTap,
-    required this.onSettingsTap,
-    required this.safetyOn,
-    required this.onSafetyToggle,
-    required this.onShareTap,
-    this.showInstall = false,
-    this.onInstallTap,
-    this.onNotificationsTap,
-    this.unreadCount = 0,
+    required this.onLike,
+    required this.onComment,
+    required this.onRepost,
+    required this.onShare,
+    required this.onCopyLink,
+    required this.onZap,
   });
-  final VoidCallback onCreateTap;
-  final VoidCallback onLikeTap;
-  final VoidCallback onCommentTap;
-  final VoidCallback onRepostTap;
-  final VoidCallback onQuoteTap;
-  final VoidCallback onZapTap;
-  final VoidCallback onProfileTap;
-  final VoidCallback onDetailsTap;
-  final VoidCallback onRelaysLongPress;
-  final VoidCallback onSearchTap;
-  final VoidCallback onSettingsTap;
-  final bool safetyOn;
-  final VoidCallback onSafetyToggle;
-  final VoidCallback onShareTap;
-  final bool showInstall;
-  final VoidCallback? onInstallTap;
-  final VoidCallback? onNotificationsTap;
-  final int unreadCount;
+
+  /// Size of each square action button.
+  static const double kActionSize = 44;
+
+  /// Gap between action buttons.
+  static const double kGap = 14;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
+    // Bounded width ensures finite constraints; height is determined by content.
+    return SizedBox(
+      width: kActionSize,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Positioned(
-            top: 8,
-            left: 8,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: showInstall ? 1 : 0,
-              child: ActionChip(
-                label: const Text('Install app'),
-                onPressed: onInstallTap,
-              ),
-            ),
+          _Action(
+            icon: 'heart_24',
+            label: '12.3k',
+            keyName: 'like',
+            onTap: onLike,
           ),
-          // Top-left glyph (long-press later to open Relays sheet)
-          Positioned(
-            left: 12,
-            top: 8,
-            child: GestureDetector(
-              onLongPress: onRelaysLongPress,
-              child: IconButton(
-                icon: const Icon(Icons.blur_on),
-                tooltip: 'App',
-                onPressed: onSettingsTap,
-              ),
-            ),
+          const SizedBox(height: kGap),
+          _Action(
+            icon: 'comment_24',
+            label: '885',
+            keyName: 'comment',
+            onTap: onComment,
           ),
-          // Top-right notifications and search
-          Positioned(
-            right: 12,
-            top: 8,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications),
-                  onPressed: onNotificationsTap,
+          const SizedBox(height: kGap),
+          _Action(
+            icon: 'repost_24',
+            label: '97',
+            keyName: 'repost',
+            onTap: onRepost,
+          ),
+          const SizedBox(height: kGap),
+          _Action(
+            icon: 'share_24',
+            label: '87',
+            keyName: 'share',
+            onTap: onShare,
+          ),
+          const SizedBox(height: kGap),
+          _Action(
+            icon: 'bookmark_24',
+            label: '—',
+            keyName: 'save',
+            onTap: onCopyLink,
+          ),
+          const SizedBox(height: kGap),
+          _Action(icon: 'bolt_24', label: '42', keyName: 'zap', onTap: onZap),
+        ],
+      ),
+    );
+  }
+}
+
+class _Action extends StatelessWidget {
+  final String icon;
+  final String label;
+  final String keyName;
+  final VoidCallback onTap;
+
+  const _Action({
+    required this.icon,
+    required this.label,
+    required this.keyName,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: OverlayCluster.kActionSize,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: OverlayCluster.kActionSize,
+              height: OverlayCluster.kActionSize,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(
+                  OverlayCluster.kActionSize / 2,
                 ),
-                if (unreadCount > 0)
-                  Positioned(
-                    right: 4,
-                    top: 4,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text('$unreadCount',
-                          style: const TextStyle(fontSize: 10)),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 12 + 40,
-            top: 8,
-            child: IconButton(
-              icon: const Icon(Icons.search),
-              tooltip: 'Search',
-              onPressed: onSearchTap,
-            ),
-          ),
-          Positioned(
-            right: 12,
-            top: 8 + 28,
-            child: IconButton(
-              tooltip: 'Safety mode',
-              icon: Icon(safetyOn ? Icons.shield : Icons.shield_outlined),
-              onPressed: onSafetyToggle,
-            ),
-          ),
-          // Centre-right action rail
-          Positioned.fill(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.favorite_border),
-                      onPressed: onLikeTap,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chat_bubble_outline),
-                      onPressed: onCommentTap,
-                    ),
-                  GestureDetector(
-                    onLongPress: onQuoteTap,
-                    child: IconButton(
-                      icon: const Icon(Icons.repeat),
-                      onPressed: onRepostTap,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.bolt_outlined),
-                    onPressed: onZapTap,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.ios_share),
-                    onPressed: onShareTap,
-                  ),
-                ],
               ),
+              alignment: Alignment.center,
+              child: AppIcon(icon),
             ),
           ),
-          ),
-          // Bottom-left author + caption
-          Positioned(
-            left: 12,
-            right: 96,
-            bottom: 84,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: onProfileTap,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      CircleAvatar(radius: 12, child: Text('A')),
-                      SizedBox(width: 8),
-                      Text(
-                        '@author',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                GestureDetector(
-                  onTap: onDetailsTap,
-                  child: const Text(
-                    'Caption goes here #tags',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Bottom-centre Create FAB
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 16,
-            child: Center(
-              child: FloatingActionButton.large(
-                onPressed: onCreateTap,
-                child: const Icon(Icons.add),
-              ),
-            ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            key: Key('count_$keyName'),
+            style: const TextStyle(fontSize: 12, color: Colors.white70),
           ),
         ],
       ),

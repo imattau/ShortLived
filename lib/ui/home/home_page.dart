@@ -19,6 +19,8 @@ class _HomePageState extends State<HomePage> {
   bool _overlaysVisible = true;
   bool _muted = true;
 
+  static void _noop() {}
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -56,29 +58,19 @@ class _HomePageState extends State<HomePage> {
                       Positioned(
                         right: T.s24,
                         bottom: MediaQuery.of(context).size.height * 0.18,
-                        child: OverlayCluster(
-                          onCreateTap: () {},
-                          onLikeTap: () {},
-                          onCommentTap: () {},
-                          onRepostTap: () {},
-                          onQuoteTap: () {},
-                          onZapTap: () {},
-                          onProfileTap: () {},
-                          onDetailsTap: () {},
-                          onRelaysLongPress: () {},
-                          onSearchTap: () {},
-                          onSettingsTap: () {},
-                          safetyOn: true,
-                          onSafetyToggle: () {},
-                          onShareTap: () {},
-                          onNotificationsTap: () {},
+                        child: const OverlayCluster(
+                          onLike: _noop,
+                          onComment: _noop,
+                          onRepost: _noop,
+                          onShare: _noop,
+                          onCopyLink: _noop,
+                          onZap: _noop,
                         ),
                       ),
                       Positioned(
                         left: T.s24,
                         right: T.s24,
-                        bottom:
-                            MediaQuery.of(context).size.height * 0.22,
+                        bottom: MediaQuery.of(context).size.height * 0.22,
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -91,14 +83,17 @@ class _HomePageState extends State<HomePage> {
                               children: const [
                                 TextSpan(text: 'Enjoying a sunny day '),
                                 TextSpan(
-                                    text: '#nature ',
-                                    style: TextStyle(color: T.blue)),
+                                  text: '#nature ',
+                                  style: TextStyle(color: T.blue),
+                                ),
                                 TextSpan(
-                                    text: '#sydney ',
-                                    style: TextStyle(color: T.blue)),
+                                  text: '#sydney ',
+                                  style: TextStyle(color: T.blue),
+                                ),
                                 TextSpan(
-                                    text: '#nostr',
-                                    style: TextStyle(color: T.blue)),
+                                  text: '#nostr',
+                                  style: TextStyle(color: T.blue),
+                                ),
                               ],
                             ),
                           ),
@@ -107,11 +102,9 @@ class _HomePageState extends State<HomePage> {
                       if (kIsWeb)
                         Positioned(
                           left: T.s24,
-                          bottom:
-                              MediaQuery.of(context).size.height * 0.28,
+                          bottom: MediaQuery.of(context).size.height * 0.28,
                           child: ElevatedButton(
-                            onPressed: () =>
-                                setState(() => _muted = !_muted),
+                            onPressed: () => setState(() => _muted = !_muted),
                             child: Text(_muted ? 'Unmute' : 'Mute'),
                           ),
                         ),
@@ -128,13 +121,16 @@ class _HomePageState extends State<HomePage> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(28),
                                 border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                    width: 2),
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  width: 2,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text('Create',
-                                style: TextStyle(color: Colors.white)),
+                            const Text(
+                              'Create',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ],
                         ),
                       ),
