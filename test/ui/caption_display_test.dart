@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('caption clamps to 3 lines and shows More when cleaned differs', (t) async {
-    final long = 'nostr:npub1'.padRight(200, 'x') + ' https://a.dev/v.mp4 ' + List.filled(50, 'word').join(' ');
+    final long = '${'nostr:npub1'.padRight(200, 'x')} https://a.dev/v.mp4 ${List.filled(50, 'word').join(' ')}';
     final m = HudModel(
       caption: 'short',
       fullCaption: long,

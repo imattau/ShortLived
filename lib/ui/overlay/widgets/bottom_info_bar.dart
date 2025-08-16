@@ -32,7 +32,7 @@ class BottomInfoBar extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                 ),
                 child: const Icon(Icons.person, size: 18, color: Colors.white),
               ),
@@ -64,7 +64,7 @@ class BottomInfoBar extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.30),
+                    color: Colors.black.withValues(alpha: 0.30),
                     borderRadius: BorderRadius.circular(T.r16),
                   ),
                   child: Text(
@@ -86,7 +86,7 @@ class BottomInfoBar extends StatelessWidget {
                   child: TextButton(
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Colors.black.withOpacity(0.35),
+                      backgroundColor: Colors.black.withValues(alpha: 0.35),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
