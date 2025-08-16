@@ -362,16 +362,44 @@ class _HomeFeedPageState extends State<HomeFeedPage>
             key: const Key('overlay-visibility'),
             duration: const Duration(milliseconds: 220),
             opacity: overlaysVisible ? 1 : 0,
-            child: ValueListenableBuilder<bool>(
-              valueListenable: _pwa.installAvailable,
-              builder: (_, __, ___) => OverlayCluster(
-                onLike: _like,
-                onComment: _openComments,
-                onRepost: _repost,
-                onShare: _shareCurrent,
-                onCopyLink: _shareCurrent,
-                onZap: _openZap,
-              ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OverlayCluster(
+                    onLike: _like,
+                    onComment: _openComments,
+                    onRepost: _repost,
+                    onShare: _shareCurrent,
+                    onCopyLink: _shareCurrent,
+                    onZap: _openZap,
+                  ),
+                ),
+                Positioned(
+                  right: 12,
+                  top: 8,
+                  child: IconButton(
+                    tooltip: 'Safety mode',
+                    icon: Icon(
+                      settings.sensitiveBlurEnabled()
+                          ? Icons.shield
+                          : Icons.shield_outlined,
+                    ),
+                    onPressed: _toggleSafety,
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 16,
+                  child: Center(
+                    child: FloatingActionButton.large(
+                      onPressed: _openCreate,
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           ValueListenableBuilder<bool>(
