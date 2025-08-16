@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, unused_element
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'widgets/feed_video_player_view.dart';
@@ -51,7 +53,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   late final RelayService relay;
   StreamSubscription<Map<String, dynamic>>? _zapSub;
   late SettingsService settings;
-  late ContentSafetyService safety; // ignore: unused_field
+  late ContentSafetyService safety;
   late ActionQueue queue;
   late RelayDirectory relayDir;
   late final PwaService _pwa;
@@ -103,15 +105,13 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     if (Locator.I.tryGet<KeyService>() == null) {
       Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
     }
-    relay =
-        Locator.I.tryGet<RelayService>() ??
+    relay = Locator.I.tryGet<RelayService>() ??
         RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
     if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
     }
-    relayDir =
-        Locator.I.tryGet<RelayDirectory>() ??
+    relayDir = Locator.I.tryGet<RelayDirectory>() ??
         RelayDirectory(Locator.I.get(), Locator.I.get(), Locator.I.get());
     Locator.I.put<RelayDirectory>(relayDir);
     // On production runs, apply NIP-65; tests have disableRelays = true.

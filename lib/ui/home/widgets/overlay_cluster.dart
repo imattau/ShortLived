@@ -107,7 +107,7 @@ class _Action extends StatelessWidget {
               width: OverlayCluster.kActionSize,
               height: OverlayCluster.kActionSize,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.10),
+                color: Colors.white.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(
                   OverlayCluster.kActionSize / 2,
                 ),
