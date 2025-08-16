@@ -3,6 +3,9 @@
 A privacy-first short-video client:
 - One screen (full-bleed video) with overlays
 - Long-press toggles overlays (cinema mode)
+- Vertical feed uses PageView.builder with off-window pages disposed
+- Only the current page autoplays; neighbours initialise paused
+- At most three video widgets exist at any time
 - NIP-96 upload → NIP-94 tags on posts
 - Likes (kind 7), comments (kind 1 replies), zaps (9734/9735)
 - Offline queue + relay backoff

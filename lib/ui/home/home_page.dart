@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import '../design/tokens.dart';
 import '../widgets/app_icon.dart';
 import 'widgets/overlay_cluster.dart';
-import 'widgets/video_player_view.dart';
-
-/// CORS-safe demo video for web; replace with real feed when plugged in.
-const _demoVideo =
-    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+import 'widgets/feed_pager.dart';
+import '../../feed/demo_feed.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,24 +15,26 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _overlaysVisible = true;
   bool _muted = true;
+  int _current = 0;
 
-  static void _noop() {}
+  void _onChanged(int i) => setState(() => _current = i);
 
   @override
   Widget build(BuildContext context) {
+    final item = demoFeed[_current];
     return GestureDetector(
+      key: const Key('feed-gesture'),
       onLongPress: () => setState(() => _overlaysVisible = !_overlaysVisible),
       child: Scaffold(
         backgroundColor: T.bg,
         body: Stack(
           children: [
+            // FEED
             Positioned.fill(
-              child: VideoPlayerView(
-                url: _demoVideo,
-                autoplay: true,
+              child: FeedPager(
+                items: demoFeed,
                 muted: _muted,
-                fit: BoxFit.cover,
-                onReady: () {},
+                onIndexChanged: _onChanged,
               ),
             ),
             AnimatedOpacity(
@@ -58,13 +57,18 @@ class _HomePageState extends State<HomePage> {
                       Positioned(
                         right: T.s24,
                         bottom: MediaQuery.of(context).size.height * 0.16,
-                        child: const OverlayCluster(
-                          onLike: _noop,
-                          onComment: _noop,
-                          onRepost: _noop,
-                          onShare: _noop,
-                          onCopyLink: _noop,
-                          onZap: _noop,
+                        child: OverlayCluster(
+                          onLike: () {},
+                          onComment: () {},
+                          onRepost: () {},
+                          onShare: () {},
+                          onCopyLink: () {},
+                          onZap: () {},
+                          likeCount: item.likeCount,
+                          commentCount: item.commentCount,
+                          repostCount: item.repostCount,
+                          shareCount: item.shareCount,
+                          zapCount: item.zapCount,
                         ),
                       ),
                       Positioned(
@@ -77,25 +81,9 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.white.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(T.r16),
                           ),
-                          child: RichText(
-                            text: TextSpan(
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              children: const [
-                                TextSpan(text: 'Enjoying a sunny day '),
-                                TextSpan(
-                                  text: '#nature ',
-                                  style: TextStyle(color: T.blue),
-                                ),
-                                TextSpan(
-                                  text: '#sydney ',
-                                  style: TextStyle(color: T.blue),
-                                ),
-                                TextSpan(
-                                  text: '#nostr',
-                                  style: TextStyle(color: T.blue),
-                                ),
-                              ],
-                            ),
+                          child: Text(
+                            item.caption,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ),
                       ),

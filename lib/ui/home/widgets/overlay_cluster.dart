@@ -9,6 +9,11 @@ class OverlayCluster extends StatelessWidget {
   final VoidCallback onShare;
   final VoidCallback onCopyLink;
   final VoidCallback onZap;
+  final String likeCount;
+  final String commentCount;
+  final String repostCount;
+  final String shareCount;
+  final String zapCount;
 
   const OverlayCluster({
     super.key,
@@ -18,6 +23,11 @@ class OverlayCluster extends StatelessWidget {
     required this.onShare,
     required this.onCopyLink,
     required this.onZap,
+    this.likeCount = '12.3k',
+    this.commentCount = '885',
+    this.repostCount = '97',
+    this.shareCount = '87',
+    this.zapCount = '42',
   });
 
   @override
@@ -61,17 +71,17 @@ class OverlayCluster extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          item('heart_24', '12.3k', onLike),
+          item('heart_24', likeCount, onLike),
           SizedBox(height: gap),
-          item('comment_24', '885', onComment),
+          item('comment_24', commentCount, onComment),
           SizedBox(height: gap),
-          item('repost_24', '97', onRepost),
+          item('repost_24', repostCount, onRepost),
           SizedBox(height: gap),
-          item('share_24', '87', onShare),
+          item('share_24', shareCount, onShare),
           SizedBox(height: gap),
           item('bookmark_24', '—', onCopyLink),
           SizedBox(height: gap),
-          item('zap_24', '42', onZap),
+          item('zap_24', zapCount, onZap),
         ],
       ),
     );
