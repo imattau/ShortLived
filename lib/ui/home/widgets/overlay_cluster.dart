@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/app_icon.dart';
 
-/// Vertical list of actions shown on the right side of the video.
-///
-/// The widget is given a finite width via [SizedBox] to avoid the
-/// unconstrained `Stack` that previously caused layout exceptions on web.
 class OverlayCluster extends StatelessWidget {
   final VoidCallback onLike;
   final VoidCallback onComment;
@@ -24,106 +20,61 @@ class OverlayCluster extends StatelessWidget {
     required this.onZap,
   });
 
-  /// Size of each square action button.
-  static const double kActionSize = 44;
-
-  /// Gap between action buttons.
-  static const double kGap = 14;
-
   @override
   Widget build(BuildContext context) {
-    // Bounded width ensures finite constraints; height is determined by content.
-    return SizedBox(
-      width: kActionSize,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _Action(
-            icon: 'heart_24',
-            label: '12.3k',
-            keyName: 'like',
-            onTap: onLike,
-          ),
-          const SizedBox(height: kGap),
-          _Action(
-            icon: 'comment_24',
-            label: '885',
-            keyName: 'comment',
-            onTap: onComment,
-          ),
-          const SizedBox(height: kGap),
-          _Action(
-            icon: 'repost_24',
-            label: '97',
-            keyName: 'repost',
-            onTap: onRepost,
-          ),
-          const SizedBox(height: kGap),
-          _Action(
-            icon: 'share_24',
-            label: '87',
-            keyName: 'share',
-            onTap: onShare,
-          ),
-          const SizedBox(height: kGap),
-          _Action(
-            icon: 'bookmark_24',
-            label: '—',
-            keyName: 'save',
-            onTap: onCopyLink,
-          ),
-          const SizedBox(height: kGap),
-          _Action(icon: 'bolt_24', label: '42', keyName: 'zap', onTap: onZap),
-        ],
-      ),
-    );
-  }
-}
+    // Responsive scaling around iPhone 12 width (≈390).
+    final w = MediaQuery.of(context).size.shortestSide;
+    double scale = (w / 390).clamp(0.85, 1.05);
+    final actionSize = 44.0 * scale; // button circle
+    final gap = 10.0 * scale; // vertical gap
+    final labelSize = 11.0 * scale;
 
-class _Action extends StatelessWidget {
-  final String icon;
-  final String label;
-  final String keyName;
-  final VoidCallback onTap;
-
-  const _Action({
-    required this.icon,
-    required this.label,
-    required this.keyName,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: OverlayCluster.kActionSize,
-      child: Column(
+    Widget item(String icon, String count, VoidCallback onTap) {
+      return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
+          InkWell(
             onTap: onTap,
+            borderRadius: BorderRadius.circular(actionSize / 2),
             child: Container(
-              width: OverlayCluster.kActionSize,
-              height: OverlayCluster.kActionSize,
+              width: actionSize,
+              height: actionSize,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(
-                  OverlayCluster.kActionSize / 2,
-                ),
+                color: Colors.white.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(actionSize / 2),
               ),
               alignment: Alignment.center,
-              child: AppIcon(icon),
+              child: AppIcon(icon, size: 22 * scale, color: Colors.white),
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            label,
-            key: Key('count_$keyName'),
-            style: const TextStyle(fontSize: 12, color: Colors.white70),
+            count,
+            style: TextStyle(fontSize: labelSize, color: Colors.white70),
           ),
+        ],
+      );
+    }
+
+    return SizedBox(
+      width: actionSize,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          item('heart_24', '12.3k', onLike),
+          SizedBox(height: gap),
+          item('comment_24', '885', onComment),
+          SizedBox(height: gap),
+          item('repost_24', '97', onRepost),
+          SizedBox(height: gap),
+          item('share_24', '87', onShare),
+          SizedBox(height: gap),
+          item('bookmark_24', '—', onCopyLink),
+          SizedBox(height: gap),
+          item('zap_24', '42', onZap),
         ],
       ),
     );
   }
 }
+
