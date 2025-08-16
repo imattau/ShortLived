@@ -1,0 +1,1 @@
+Future<void> killServiceWorkersInDebug() async {}

@@ -25,3 +25,14 @@ flutter run
 * docs/NIPs.md
 * docs/PRIVACY.md
 * docs/ADR/
+
+## Flutter Web white screen (debug)
+If you see a blank page on `flutter run -d chrome`:
+
+1. This repo unregisters service workers in debug web automatically.
+2. `web/index.html` contains a localhost bootstrap via `flutter.js` to start the engine when injection fails.
+3. `web/install_prompt.js` is a no-throw stub and cannot block startup.
+
+If the page is still blank, open DevTools → Console and copy the first error. Common issues:
+- Missing vector icon assets (`assets/icons/*.svg` not compiled to `.svg.vec`).
+- A custom script added outside of this PR that throws early.
