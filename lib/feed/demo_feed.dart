@@ -1,12 +1,12 @@
 class FeedItem {
   final String url;
   final String caption;
-  final String likeCount;
-  final String commentCount;
-  final String repostCount;
-  final String shareCount;
-  final String zapCount;
-  const FeedItem({
+  String likeCount;
+  String commentCount;
+  String repostCount;
+  String shareCount;
+  String zapCount;
+  FeedItem({
     required this.url,
     required this.caption,
     this.likeCount = '0',
@@ -17,7 +17,7 @@ class FeedItem {
   });
 }
 
-const demoFeed = <FeedItem>[
+final demoFeed = <FeedItem>[
   FeedItem(
     url: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
     caption: 'Enjoying a sunny day #nature #sydney #nostr',
