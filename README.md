@@ -30,6 +30,11 @@ empty slots.
 - Counts are formatted consistently via `utils/count_format.dart`.
 - No permissions required; works in PWA too.
 
+### Action stack
+- Buttons use 48 px tap targets with compact spacing and baseline-aligned counts.
+- Tooltips appear on web/desktop.
+- The stack anchors responsively so it doesn’t drift too close to the screen edge or collide with the Create button.
+
 ### Deterministic widget tests for video
 Widget tests run with a `FakeVideoAdapter` via `TestVideoApp`, so no plugin timers are created.
 The app itself uses `RealVideoAdapter` (video_player) at runtime via `VideoScope`.

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/app_icon.dart';
+import '../../design/tokens.dart';
+import '../../overlay/widgets/action_button.dart';
 
 class OverlayCluster extends StatelessWidget {
   final VoidCallback onLike;
   final VoidCallback onComment;
   final VoidCallback onRepost;
   final VoidCallback onShare;
-  final VoidCallback? onCopyLink;
+  final VoidCallback onCopyLink;
   final VoidCallback onZap;
+
   final String likeCount;
   final String commentCount;
   final String repostCount;
@@ -21,76 +23,32 @@ class OverlayCluster extends StatelessWidget {
     required this.onComment,
     required this.onRepost,
     required this.onShare,
-    this.onCopyLink,
+    required this.onCopyLink,
     required this.onZap,
-    this.likeCount = '12.3k',
-    this.commentCount = '885',
-    this.repostCount = '97',
-    this.shareCount = '87',
-    this.zapCount = '42',
+    required this.likeCount,
+    required this.commentCount,
+    required this.repostCount,
+    required this.shareCount,
+    required this.zapCount,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Responsive scaling around iPhone 12 width (≈390).
-    final w = MediaQuery.of(context).size.shortestSide;
-    double scale = (w / 390).clamp(0.85, 1.05);
-    final actionSize = 44.0 * scale; // button circle
-    final gap = 10.0 * scale; // vertical gap
-    final labelSize = 11.0 * scale;
-
-    Widget item(String icon, String count, VoidCallback onTap) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(actionSize / 2),
-            child: Container(
-              width: actionSize,
-              height: actionSize,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(actionSize / 2),
-              ),
-              alignment: Alignment.center,
-              child: AppIcon(icon, size: 22 * scale, color: Colors.white),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            count,
-            style: TextStyle(fontSize: labelSize, color: Colors.white70),
-          ),
-        ],
-      );
-    }
-
-    final children = <Widget>[
-      item('heart_24', likeCount, onLike),
-      SizedBox(height: gap),
-      item('comment_24', commentCount, onComment),
-      SizedBox(height: gap),
-      item('repost_24', repostCount, onRepost),
-      SizedBox(height: gap),
-      item('share_24', shareCount, onShare),
-    ];
-
-    if (onCopyLink != null) {
-      children.add(SizedBox(height: gap));
-      children.add(item('bookmark_24', '—', onCopyLink!));
-    }
-
-    children.add(SizedBox(height: gap));
-    children.add(item('zap_24', zapCount, onZap));
-
-    return SizedBox(
-      width: actionSize,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ActionButton(icon: 'heart_24', label: likeCount, onTap: onLike, tooltip: 'Like'),
+        const SizedBox(height: T.stackGap),
+        ActionButton(icon: 'comment_24', label: commentCount, onTap: onComment, tooltip: 'Comments'),
+        const SizedBox(height: T.stackGap),
+        ActionButton(icon: 'repost_24', label: repostCount, onTap: onRepost, tooltip: 'Repost'),
+        const SizedBox(height: T.stackGap),
+        ActionButton(icon: 'bookmark_24', label: null, onTap: onCopyLink, tooltip: 'Save'),
+        const SizedBox(height: T.stackGap),
+        ActionButton(icon: 'share_24', label: shareCount, onTap: onShare, tooltip: 'Share'),
+        const SizedBox(height: T.stackGap),
+        ActionButton(icon: 'zap_24', label: zapCount, onTap: onZap, tooltip: 'Zap'),
+      ],
     );
   }
 }
-
