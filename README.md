@@ -13,6 +13,10 @@ flutter pub get
 flutter run
 ```
 
+Vector icons are loaded from `assets/icons/*.svg.vec`. In dev, if the `.vec` isn't
+present yet, `AppIcon` falls back to a Material icon so the UI never shows
+empty slots.
+
 ### Deterministic widget tests for video
 Widget tests run with a `FakeVideoAdapter` via `TestVideoApp`, so no plugin timers are created.
 The app itself uses `RealVideoAdapter` (video_player) at runtime via `VideoScope`.

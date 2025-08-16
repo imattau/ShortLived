@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Positioned(
                         right: T.s24,
-                        bottom: MediaQuery.of(context).size.height * 0.18,
+                        bottom: MediaQuery.of(context).size.height * 0.16,
                         child: const OverlayCluster(
                           onLike: _noop,
                           onComment: _noop,

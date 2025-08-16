@@ -31,6 +31,7 @@ dependencies:
   qr_flutter: ^4.1.0
   share_plus: ^10.0.0
   http: ^1.2.2
+  vector_graphics: ^1.1.7
 
 dev_dependencies:
   flutter_test:
@@ -41,6 +42,7 @@ dev_dependencies:
   flutter_lints: any
   network_image_mock: any
   stream_channel: ^2.1.2
+  vector_graphics_compiler: ^1.1.7
 
 flutter:
   uses-material-design: true
