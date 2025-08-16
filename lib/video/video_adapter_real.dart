@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'video_adapter.dart';
 
-class RealVideoAdapter implements VideoAdapter {
+class RealVideoAdapter extends VideoAdapter {
   @override
   Widget build({
     required String url,

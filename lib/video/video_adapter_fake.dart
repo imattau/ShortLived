@@ -3,7 +3,7 @@ import 'video_adapter.dart';
 
 /// Fake video widget for tests: paints a solid box and calls onReady synchronously.
 /// No timers, no async plugin, fully deterministic for widget tests.
-class FakeVideoAdapter implements VideoAdapter {
+class FakeVideoAdapter extends VideoAdapter {
   @override
   Widget build({
     required String url,
