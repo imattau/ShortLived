@@ -80,12 +80,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     }
     if (Locator.I.tryGet<NotificationsRepository>() == null) {
       Locator.I.put<NotificationsRepository>(
-          NotificationsRepository(relay, signer, meta));
+        NotificationsRepository(relay, signer, meta),
+      );
     }
     Locator.I.get<NotificationsRepository>().start();
     final seenAt = settings.notifLastSeen();
-    _notifSub =
-        Locator.I.get<NotificationsRepository>().stream().listen((list) {
+    _notifSub = Locator.I.get<NotificationsRepository>().stream().listen((
+      list,
+    ) {
       final c = list.where((n) => n.createdAt > seenAt).length;
       if (mounted) setState(() => _unread = c);
     });
@@ -98,16 +100,18 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     // Use a stub if no PwaService has been registered. Tests typically do not
     // bootstrap the service locator, so falling back keeps them isolated.
     _pwa = Locator.I.tryGet<PwaService>() ?? PwaServiceStub();
-      if (Locator.I.tryGet<KeyService>() == null) {
-        Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
-      }
-      relay = Locator.I.tryGet<RelayService>() ??
-          RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
+    if (Locator.I.tryGet<KeyService>() == null) {
+      Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
+    }
+    relay =
+        Locator.I.tryGet<RelayService>() ??
+        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
     if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
       relay.init(NetworkConfig.relays);
       Locator.I.put<RelayService>(relay);
     }
-    relayDir = Locator.I.tryGet<RelayDirectory>() ??
+    relayDir =
+        Locator.I.tryGet<RelayDirectory>() ??
         RelayDirectory(Locator.I.get(), Locator.I.get(), Locator.I.get());
     Locator.I.put<RelayDirectory>(relayDir);
     // On production runs, apply NIP-65; tests have disableRelays = true.
@@ -117,8 +121,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
         final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
         final sats = (msats / 1000).round();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Received zap: $sats sats')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Received zap: $sats sats')));
         }
       }
     });
@@ -158,10 +163,12 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       });
     }
     if (Locator.I.tryGet<MuteService>() == null) {
-      Locator.I.put<MuteService>(MuteService(
-        Locator.I.get<SettingsService>(),
-        Locator.I.get<RelayService>(),
-      ));
+      Locator.I.put<MuteService>(
+        MuteService(
+          Locator.I.get<SettingsService>(),
+          Locator.I.get<RelayService>(),
+        ),
+      );
     }
   }
 
@@ -285,10 +292,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
-      builder: (_) => DetailsSheet(
-        post: p,
-        settings: settings,
-      ),
+      builder: (_) => DetailsSheet(post: p, settings: settings),
     );
     _pausedBySheet.value = false;
   }
@@ -320,8 +324,10 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void _shareCurrent() {
     final p = Locator.I.get<FeedController>().currentOrNull;
     if (p == null) return;
-    final link =
-        neventEncode(eventIdHex: p.id, authorPubkeyHex: p.author.pubkey);
+    final link = neventEncode(
+      eventIdHex: p.id,
+      authorPubkeyHex: p.author.pubkey,
+    );
     Share.share('nostr:$link');
   }
 
@@ -358,25 +364,13 @@ class _HomeFeedPageState extends State<HomeFeedPage>
             opacity: overlaysVisible ? 1 : 0,
             child: ValueListenableBuilder<bool>(
               valueListenable: _pwa.installAvailable,
-              builder: (_, avail, __) => OverlayCluster(
-                onCreateTap: _openCreate,
-                onLikeTap: _like,
-                onCommentTap: _openComments,
-                onRepostTap: _repost,
-                onQuoteTap: _openQuote,
-                onZapTap: _openZap,
-                onProfileTap: _openProfile,
-                onDetailsTap: _openDetails,
-                onRelaysLongPress: _openRelays,
-                onSearchTap: _openSearch,
-                onSettingsTap: _openSettings,
-                onNotificationsTap: _openNotifications,
-                unreadCount: _unread,
-                safetyOn: settings.sensitiveBlurEnabled(),
-                onSafetyToggle: _toggleSafety,
-                onShareTap: _shareCurrent,
-                showInstall: avail,
-                onInstallTap: avail ? _promptInstall : null,
+              builder: (_, __, ___) => OverlayCluster(
+                onLike: _like,
+                onComment: _openComments,
+                onRepost: _repost,
+                onShare: _shareCurrent,
+                onCopyLink: _shareCurrent,
+                onZap: _openZap,
               ),
             ),
           ),
