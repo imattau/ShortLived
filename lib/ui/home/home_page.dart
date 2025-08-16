@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
         repostCount: f.repostCount,
         shareCount: f.shareCount,
         zapCount: f.zapCount,
+        authorDisplay: f.authorDisplay,
+        authorNpub: f.authorNpub,
       );
 
   void _onIndexChanged(int i) {
