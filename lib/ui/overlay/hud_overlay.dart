@@ -13,14 +13,14 @@ class HudOverlay extends StatelessWidget {
   final HudState state;
   final FeedController controller;
   final VoidCallback onLikeLogical;
-  final VoidCallback onCopyLink;
+  final VoidCallback? onShareLogical;
 
   const HudOverlay({
     super.key,
     required this.state,
     required this.controller,
     required this.onLikeLogical,
-    required this.onCopyLink,
+    this.onShareLogical,
   });
 
   void _openSearch(BuildContext context) async {
@@ -126,8 +126,7 @@ class HudOverlay extends StatelessWidget {
                             onLike: onLikeLogical,
                             onComment: () {},
                             onRepost: () {},
-                            onShare: () {},
-                            onCopyLink: onCopyLink,
+                            onShare: () => onShareLogical?.call(),
                             onZap: () {},
                             likeCount: m.likeCount,
                             commentCount: m.commentCount,

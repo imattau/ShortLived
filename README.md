@@ -20,6 +20,11 @@ Vector icons are loaded from `assets/icons/*.svg.vec`. In dev, if the `.vec` isn
 present yet, `AppIcon` falls back to a Material icon so the UI never shows
 empty slots.
 
+### Sharing
+- Share button uses the Web Share API when available; otherwise it copies a deep link to the clipboard.
+- Counts are formatted consistently via `utils/count_format.dart`.
+- No permissions required; works in PWA too.
+
 ### Deterministic widget tests for video
 Widget tests run with a `FakeVideoAdapter` via `TestVideoApp`, so no plugin timers are created.
 The app itself uses `RealVideoAdapter` (video_player) at runtime via `VideoScope`.
