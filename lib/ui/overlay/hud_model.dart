@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class HudModel {
   final String caption;
+  final String fullCaption;
   final String likeCount;
   final String commentCount;
   final String repostCount;
@@ -11,6 +12,7 @@ class HudModel {
   final String authorNpub;
   const HudModel({
     required this.caption,
+    required this.fullCaption,
     this.likeCount = '0',
     this.commentCount = '0',
     this.repostCount = '0',
@@ -22,6 +24,7 @@ class HudModel {
 
   HudModel copyWith({
     String? caption,
+    String? fullCaption,
     String? likeCount,
     String? commentCount,
     String? repostCount,
@@ -31,6 +34,7 @@ class HudModel {
     String? authorNpub,
   }) => HudModel(
     caption: caption ?? this.caption,
+    fullCaption: fullCaption ?? this.fullCaption,
     likeCount: likeCount ?? this.likeCount,
     commentCount: commentCount ?? this.commentCount,
     repostCount: repostCount ?? this.repostCount,

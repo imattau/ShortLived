@@ -20,6 +20,11 @@ Vector icons are loaded from `assets/icons/*.svg.vec`. In dev, if the `.vec` isn
 present yet, `AppIcon` falls back to a Material icon so the UI never shows
 empty slots.
 
+### Caption behaviour
+- Overlay caption is clamped to 3 lines with a subtle backdrop and max width (≤ 78% of viewport, capped at 520 px).
+- Very long tokens and bech32 refs are wrapped/trimmed for readability.
+- Tap **More** to read the full caption in a bottom sheet.
+
 ### Sharing
 - Share button uses the Web Share API when available; otherwise it copies a deep link to the clipboard.
 - Counts are formatted consistently via `utils/count_format.dart`.
