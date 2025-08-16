@@ -6,6 +6,8 @@ class FeedItem {
   String repostCount;
   String shareCount;
   String zapCount;
+  final String authorDisplay;
+  final String authorNpub;
   FeedItem({
     required this.url,
     required this.caption,
@@ -14,6 +16,8 @@ class FeedItem {
     this.repostCount = '0',
     this.shareCount = '0',
     this.zapCount = '0',
+    this.authorDisplay = 'ShortLived User',
+    this.authorNpub = 'npub1xxxxxxdemo',
   });
 }
 
@@ -26,6 +30,8 @@ final demoFeed = <FeedItem>[
     repostCount: '97',
     shareCount: '87',
     zapCount: '42',
+    authorDisplay: 'Fiona',
+    authorNpub: 'npub1fiona1234567890',
   ),
   FeedItem(
     url: 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
@@ -35,6 +41,8 @@ final demoFeed = <FeedItem>[
     repostCount: '51',
     shareCount: '32',
     zapCount: '15',
+    authorDisplay: 'George',
+    authorNpub: 'npub1george1234567',
   ),
   FeedItem(
     url: 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
@@ -44,6 +52,8 @@ final demoFeed = <FeedItem>[
     repostCount: '10',
     shareCount: '8',
     zapCount: '3',
+    authorDisplay: 'Dev Demo',
+    authorNpub: 'npub1devdemo12345',
   ),
 ];
 
