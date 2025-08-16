@@ -23,12 +23,7 @@ class FeedPager extends StatefulWidget {
 class _FeedPagerState extends State<FeedPager> {
   late final PageController _controller = PageController();
   int _index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _warmUp(_index);
-  }
+  bool _didInitialWarmUp = false;
 
   void _warmUp(int i) {
     final adapter = VideoScope.of(context);
@@ -36,6 +31,15 @@ class _FeedPagerState extends State<FeedPager> {
     if (i + 1 < widget.items.length) urls.add(widget.items[i + 1].url);
     if (i - 1 >= 0) urls.add(widget.items[i - 1].url);
     adapter.warmUp(urls);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitialWarmUp) {
+      _didInitialWarmUp = true;
+      _warmUp(_index);
+    }
   }
 
   @override
