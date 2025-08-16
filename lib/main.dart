@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'app.dart';
+import 'video/video_adapter.dart';
+import 'video/video_adapter_real.dart';
 
 // Conditional import: on web use the real implementation, elsewhere the stub.
 import 'util/sw_debug_stub.dart'
@@ -24,7 +26,7 @@ Future<void> main() async {
       return true;
     }());
 
-    runApp(const App());
+    runApp(VideoScope(adapter: RealVideoAdapter(), child: const App()));
   }, (Object error, StackTrace stack) {
     // Surface uncaught errors in the console for web debug.
     // ignore: avoid_print

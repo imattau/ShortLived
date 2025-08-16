@@ -13,6 +13,11 @@ flutter pub get
 flutter run
 ```
 
+### Deterministic widget tests for video
+Widget tests run with a `FakeVideoAdapter` via `TestVideoApp`, so no plugin timers are created.
+The app itself uses `RealVideoAdapter` (video_player) at runtime via `VideoScope`.
+Avoid importing `video_player` in tests — use UI entry points that rely on the adapter.
+
 ## Configuration
 
 * Default relays: see `lib/core/config/network.dart`
