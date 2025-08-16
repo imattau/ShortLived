@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'widgets/video_player_view.dart';
+import 'widgets/feed_video_player_view.dart';
 import 'widgets/overlay_cluster.dart';
 import '../sheets/create_sheet.dart';
 import '../sheets/comments_sheet.dart';
