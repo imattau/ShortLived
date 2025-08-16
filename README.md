@@ -64,6 +64,11 @@ All overlay elements still hide/show with long-press. Feed is not rebuilt when t
 the controller; `FeedPager` listens and rebuilds only the visible page when mute changes.
 Double-tap on a video likes the current item (demo increments count).
 
+### Deep links and share
+- Current item is reflected in the URL as `?v=<index>&id=<slug>`.
+- Opening the app with `?v=` or `?id=` starts at that item.
+- Copy Link action copies a canonical URL that includes both `v` and `id`.
+
 Commands
 - flutter clean
 - flutter pub get
@@ -71,7 +76,6 @@ Commands
 - flutter test
 
 Acceptance
-- See search pill and author header in the top-left; npub pill above caption.
-- Tapping npub pill copies to clipboard (toast).
-- Long-press still hides/shows all overlays.
-- Console warning about mobile-web-app-capable is resolved.
+- Navigate to `/?v=1` or `/?id=butterfly` and the second item is initial.
+- Scrolling updates the URL without reload.
+- Using Copy Link copies a URL that re-opens to the same item.
