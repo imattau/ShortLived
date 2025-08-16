@@ -21,6 +21,11 @@ class RealVideoAdapter extends VideoAdapter {
       onReady: onReady,
     );
   }
+
+  @override
+  Future<void> warmUp(List<String> urls) async {
+    // No-op placeholder; some platforms can preconnect here if desired.
+  }
 }
 
 class _RealVideo extends StatefulWidget {
