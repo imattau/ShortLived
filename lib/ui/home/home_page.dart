@@ -12,6 +12,7 @@ import '../../config/app_config.dart';
 import '../../web/url_shim.dart'
     if (dart.library.html) '../../web/url_shim_web.dart';
 import '../../utils/count_format.dart';
+import '../../utils/caption_format.dart';
 import '../../platform/share_shim.dart'
     if (dart.library.html) '../../platform/share_shim_web.dart';
 
@@ -39,13 +40,14 @@ class _HomePageState extends State<HomePage> {
     muted: _controller.muted,
     model: ValueNotifier<HudModel>(
       kNostrEnabled
-          ? const HudModel(caption: 'Loading Nostr…')
+          ? const HudModel(caption: 'Loading Nostr…', fullCaption: 'Loading Nostr…')
           : _modelFromItem(_items[0]),
     ),
   );
 
   HudModel _modelFromItem(FeedItem f) => HudModel(
-        caption: f.caption,
+        caption: CaptionFormat.display(f.caption),
+        fullCaption: f.caption,
         likeCount: f.likeCount,
         commentCount: f.commentCount,
         repostCount: f.repostCount,
@@ -102,6 +104,8 @@ class _HomePageState extends State<HomePage> {
           // keep HUD model text but do not flip back to demo
           _hud.model.value = _hud.model.value.copyWith(
             caption:
+                'No Nostr videos found yet. Pull to refresh or try another relay.',
+            fullCaption:
                 'No Nostr videos found yet. Pull to refresh or try another relay.',
           );
           _initialIndex = 0;
