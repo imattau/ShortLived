@@ -20,8 +20,8 @@ class DrawerHost extends StatelessWidget {
         };
 
         return Shortcuts(
-          shortcuts: const <LogicalKeySet, Intent>{
-            LogicalKeySet(LogicalKeyboardKey.escape): DismissIntent(),
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
           },
           child: Actions(
             actions: <Type, Action<Intent>>{
