@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../design/tokens.dart';
 import '../../widgets/app_icon.dart';
 
@@ -55,7 +56,7 @@ class ActionButton extends StatelessWidget {
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 11,
                     height: 1.0,
-                    color: color.withOpacity(0.9),
+                    color: color.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.1,
                   ),
