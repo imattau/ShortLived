@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:web/web.dart' as html;
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:html' as html;
 
 class Capabilities {
   static bool get shareSupported {
