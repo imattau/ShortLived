@@ -12,6 +12,7 @@ import '../../services/upload/upload_service.dart';
 import '../../services/upload/upload_models.dart';
 import '../../crypto/nostr_event.dart';
 import '../../services/keys/key_service.dart';
+import '../design/tokens.dart';
 
 class CreateSheet extends StatefulWidget {
   const CreateSheet({super.key});
@@ -118,58 +119,63 @@ class _CreateSheetState extends State<CreateSheet> {
   Widget build(BuildContext context) {
     final file = _file;
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 4,
-              width: 36,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
-            ),
-            Row(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: T.maxCaptionW),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _caption,
-                    decoration: const InputDecoration(hintText: 'Add a caption (optional)'),
+                Container(
+                  height: 4,
+                  width: 36,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _caption,
+                        decoration: const InputDecoration(hintText: 'Add a caption (optional)'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _sending ? null : _pick,
+                      icon: const Icon(Icons.video_library),
+                      label: const Text('Choose video'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: (file == null || _sending) ? null : _uploadAndPublish,
+                      icon: const Icon(Icons.cloud_upload),
+                      label: const Text('Upload'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (_sending)
+                  LinearProgressIndicator(
+                    value: _progress == 0 ? null : _progress,
+                    minHeight: 3,
                   ),
-                ),
+                if (file != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      file.path.split('/').last,
+                      style: const TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _sending ? null : _pick,
-                  icon: const Icon(Icons.video_library),
-                  label: const Text('Choose video'),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  onPressed: (file == null || _sending) ? null : _uploadAndPublish,
-                  icon: const Icon(Icons.cloud_upload),
-                  label: const Text('Upload'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (_sending)
-              LinearProgressIndicator(
-                value: _progress == 0 ? null : _progress,
-                minHeight: 3,
-              ),
-            if (file != null)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  file.path.split('/').last,
-                  style: const TextStyle(fontSize: 12, color: Colors.white70),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );

@@ -19,10 +19,44 @@ A privacy-first short-video client:
 flutter pub get
 flutter run
 ```
+ 
+## Icon assets (Web)
 
-Vector icons are loaded from `assets/icons/*.svg.vec`. In dev, if the `.vec` isn't
-present yet, `AppIcon` falls back to a Material icon so the UI never shows
-empty slots.
+The UI references icons under `assets/icons/` and (optionally) precompiled vector files `*.svg.vec`.
+
+### Options
+1. **Just use SVGs (quickest):**
+   - Drop your icons into `assets/icons/*.svg`.
+   - Ensure `pubspec.yaml` includes:
+     ```
+     flutter:
+       assets:
+         - assets/icons/
+     ```
+   - Runtime will fall back to `.svg` if `.svg.vec` is missing.
+   - **Note:** You may still see 404 logs for `.svg.vec` checks during existence probing.
+
+2. **Precompile to `.svg.vec` (no 404s, fastest render):**
+   - Install the vector graphics compiler:
+     ```
+     flutter pub add --dev vector_graphics
+     flutter pub add vector_graphics_codec
+     flutter pub add vector_graphics_compiler
+     ```
+   - Put your SVGs in `assets/icons/`.
+   - Run:
+     ```
+     bash tool/gen_icons.sh
+     ```
+   - This produces `assets/icons/*.svg.vec`. Commit both `.svg` and `.svg.vec`.
+   - Make sure `pubspec.yaml` includes:
+     ```
+     flutter:
+       assets:
+         - assets/icons/
+     ```
+
+Either approach will work; (2) removes the 404 noise and may improve web perf.
 
 ### Caption behaviour
 - Overlay caption is clamped to 3 lines with a subtle backdrop and max width (≤ 78% of viewport, capped at 520 px).
