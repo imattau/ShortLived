@@ -18,6 +18,8 @@ import '../../utils/count_format.dart';
 import '../../utils/caption_format.dart';
 import '../../platform/share/share.dart';
 import '../../utils/prefs.dart';
+import '../drawers/drawers.dart';
+import '../drawers/drawer_host.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +32,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
   late final FeedDataSource _ds = SourceSelector.instance;
 
   OverlayEntry? _entry;
+  OverlayEntry? _drawerEntry;
+  final Drawers _drawers = Drawers();
   StreamSubscription<List<FeedItem>>? _sub;
 
   // Start with demo only if flag is OFF
@@ -92,10 +96,17 @@ class _HomePageState extends State<HomePage> with RouteAware {
             controller: _controller,
             onLikeLogical: _likeCurrent,
             onShareLogical: _shareCurrent,
+            onSearch: () => _drawers.open(DrawerType.search),
           ),
         ),
       );
       overlay.insert(_entry!);
+      _drawerEntry = OverlayEntry(
+        builder: (ctx) => Positioned.fill(
+          child: DrawerHost(controller: _drawers),
+        ),
+      );
+      overlay.insert(_drawerEntry!);
     });
 
     // Subscribe to data source
@@ -202,6 +213,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
   @override
   void dispose() {
     _entry?.remove();
+    _drawerEntry?.remove();
+    _drawers.dispose();
     _controller.dispose();
     _hud.visible.dispose();
     _hud.model.dispose();
