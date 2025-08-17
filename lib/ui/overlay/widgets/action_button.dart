@@ -45,14 +45,14 @@ class ActionButton extends StatelessWidget {
         ),
         if (label != null) ...[
           const SizedBox(width: T.rowGap),
-          ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 24),
+          SizedBox(
+            width: 28,
             child: Text(
               label!,
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.right,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 11,
                     height: 1.0,

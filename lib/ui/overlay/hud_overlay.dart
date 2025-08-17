@@ -121,19 +121,20 @@ class HudOverlay extends StatelessWidget {
                     duration: const Duration(milliseconds: 150),
                     child: Material(
                       type: MaterialType.transparency,
-                      child: SafeArea(
-                        child: Stack(
+                      child: Builder(builder: (context) {
+                        final padding = MediaQuery.of(context).padding;
+                        return Stack(
                           children: [
                             Positioned(
-                              left: T.s24,
-                              top: T.s24,
+                              left: T.s24 + padding.left,
+                              top: T.s24 + padding.top,
                               child: SearchPill(
                                 onTap: () => _openSearch(context),
                               ),
                             ),
                             Positioned(
-                              right: T.s24,
-                              top: T.s24,
+                              right: T.s24 + padding.right,
+                              top: T.s24 + padding.top,
                               child: const SizedBox(
                                 width: 48,
                                 height: 48,
@@ -142,8 +143,8 @@ class HudOverlay extends StatelessWidget {
                             ),
                             if (kIsWeb)
                               Positioned(
-                                left: T.s24,
-                                top: T.s24 + 56,
+                                left: T.s24 + padding.left,
+                                top: T.s24 + padding.top + 56,
                                 child: ValueListenableBuilder<bool>(
                                   valueListenable: controller.muted,
                                   builder: (_, muted, __) => ElevatedButton(
@@ -158,7 +159,7 @@ class HudOverlay extends StatelessWidget {
                                       MediaQuery.of(ctx).padding.bottom)
                                   .clamp(80.0, T.stackBottomReserve);
                               return Positioned(
-                                right: T.stackSidePad,
+                                right: T.stackSidePad + padding.right,
                                 bottom: bottom,
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(
@@ -184,22 +185,22 @@ class HudOverlay extends StatelessWidget {
                               );
                             }),
                             Positioned(
-                              left: T.s24,
-                              bottom: MediaQuery.of(context).size.height * 0.22,
+                              left: T.s24 + padding.left,
+                              bottom: MediaQuery.of(context).size.height * 0.22 +
+                                  padding.bottom,
                               child: ValueListenableBuilder<HudModel>(
                                 valueListenable: state.model,
                                 builder: (_, m, __) => BottomInfoBar(model: m),
                               ),
                             ),
                             Positioned(
-                              right: 16,
-                              bottom:
-                                  16 + MediaQuery.of(context).padding.bottom,
+                              right: 16 + padding.right,
+                              bottom: 16 + padding.bottom,
                               child: const ViewerAvatar(),
                             ),
                           ],
-                        ),
-                      ),
+                        );
+                      }),
                     ),
                   ),
                 );

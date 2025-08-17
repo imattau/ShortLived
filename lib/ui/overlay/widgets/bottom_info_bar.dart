@@ -15,7 +15,8 @@ class BottomInfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final maxW = min(size.width * 0.78, 520.0);
+    // Clamp width so captions can't push the overlay layout.
+    final maxW = min(size.width * 0.66, 520.0);
     final showMore = model.fullCaption.trim() != model.caption.trim();
 
     return ConstrainedBox(

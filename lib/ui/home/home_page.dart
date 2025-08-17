@@ -255,7 +255,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
           child: const CreateButton(),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // Center the create button so drawers and rails don't shift it.
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

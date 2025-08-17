@@ -45,23 +45,42 @@ class OverlayCluster extends StatelessWidget {
       Widget row(String icon, String? count, VoidCallback onTap, String tip) =>
           Padding(
             padding: EdgeInsets.only(bottom: gap),
-            child: ActionButton(icon: icon, label: count, onTap: onTap, tooltip: tip),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: ActionButton(
+                icon: icon,
+                label: count,
+                onTap: onTap,
+                tooltip: tip,
+              ),
+            ),
           );
 
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          row('heart_24',    likeCount,    onLike,    'Like'),
-          row('comment_24',  commentCount, onComment, 'Comments'),
-          row('repost_24',   repostCount,  onRepost,  'Repost'),
-          row('bookmark_24', null,         onCopyLink,'Save'),
-          row('share_24',    shareCount,   onShare,   'Share'),
-          Padding(
-            padding: EdgeInsets.only(bottom: 0), // last item no extra gap
-            child: ActionButton(icon: 'zap_24', label: zapCount, onTap: onZap, tooltip: 'Zap'),
-          ),
-        ],
+      return SizedBox(
+        width: 56,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            row('heart_24',    likeCount,    onLike,    'Like'),
+            row('comment_24',  commentCount, onComment, 'Comments'),
+            row('repost_24',   repostCount,  onRepost,  'Repost'),
+            row('bookmark_24', null,         onCopyLink,'Save'),
+            row('share_24',    shareCount,   onShare,   'Share'),
+            Padding(
+              padding: EdgeInsets.only(bottom: 0), // last item no extra gap
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ActionButton(
+                  icon: 'zap_24',
+                  label: zapCount,
+                  onTap: onZap,
+                  tooltip: 'Zap',
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     });
   }

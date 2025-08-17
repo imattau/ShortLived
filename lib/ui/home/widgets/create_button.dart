@@ -6,26 +6,28 @@ class CreateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.85),
-              width: 2,
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.85),
+                width: 2,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Create',
-          style: TextStyle(color: Colors.white),
-        ),
-      ],
+          const SizedBox(height: 8),
+          const Text(
+            'Create',
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 }
