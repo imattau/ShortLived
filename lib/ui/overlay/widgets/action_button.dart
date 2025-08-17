@@ -21,7 +21,7 @@ class ActionButton extends StatelessWidget {
   });
 
   double _btnSize(BuildContext context) {
-    // On the web with a mouse, allow 40px; otherwise 44px for touch.
+    // On the web with a mouse, allow 40px; otherwise 48px for touch.
     final kind = RendererBinding.instance.mouseTracker.mouseIsConnected;
     return kind ? T.btnSizeMouse : T.btnSizeTouch;
   }
@@ -45,8 +45,8 @@ class ActionButton extends StatelessWidget {
         ),
         if (label != null) ...[
           const SizedBox(width: T.rowGap),
-          SizedBox(
-            width: 28,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 24),
             child: Text(
               label!,
               maxLines: 1,

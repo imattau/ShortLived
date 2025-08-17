@@ -10,8 +10,8 @@ class T {
   static const Color bg = Colors.black;
   static const Color blue = Colors.blueAccent;
 
-  // Tap target sizes (we keep ≥44 on touch)
-  static const double btnSizeTouch = 44;
+  // Tap target sizes (we keep ≥48 on touch)
+  static const double btnSizeTouch = 48;
   static const double btnSizeMouse = 40;
 
   // Vertical gap between rows (min..max)
