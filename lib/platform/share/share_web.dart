@@ -1,15 +1,7 @@
-// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
-
-import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js_util' as jsu;
+import 'dart:html' as html;
 
-import 'share_shim.dart' hide shareShim;
-export 'share_shim.dart' hide shareShim;
-
-final ShareShim _shareShim = _WebShareShim();
-
-ShareShim get shareShim => _shareShim;
+import 'share_interface.dart';
 
 class _WebShareShim implements ShareShim {
   @override
@@ -23,7 +15,7 @@ class _WebShareShim implements ShareShim {
         html.window.navigator,
         'share',
         [
-          <String, dynamic>{
+          {
             if (title != null) 'title': title,
             if (text != null) 'text': text,
             'url': url,
@@ -36,3 +28,5 @@ class _WebShareShim implements ShareShim {
     }
   }
 }
+
+final ShareShim shareShim = _WebShareShim();

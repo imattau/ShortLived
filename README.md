@@ -30,7 +30,8 @@ empty slots.
 - Tap **More** to read the full caption in a bottom sheet.
 
 ### Sharing
-- Share button uses the Web Share API when available; otherwise it copies a deep link to the clipboard.
+- Share uses conditional export at `platform/share/share.dart`. On web, we call the native Web Share API when available; otherwise we copy to clipboard.
+- This avoids runtime "undefined isSupported".
 - Counts are formatted consistently via `utils/count_format.dart`.
 - No permissions required; works in PWA too.
 
