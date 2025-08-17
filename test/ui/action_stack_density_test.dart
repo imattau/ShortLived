@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:nostr_video/ui/home/home_page.dart';
 import 'package:nostr_video/ui/home/widgets/overlay_cluster.dart';
 import 'package:nostr_video/ui/overlay/widgets/action_button.dart';
+import 'package:nostr_video/utils/capabilities.dart';
 import '../test_helpers/test_video_scope.dart';
 
 void main() {
@@ -14,8 +15,9 @@ void main() {
     );
     await t.pumpAndSettle();
 
-    // Ensure the six actions exist
-    expect(find.byType(ActionButton), findsNWidgets(6));
+    // Ensure the expected number of actions exist
+    final expected = Capabilities.shareSupported ? 6 : 5;
+    expect(find.byType(ActionButton), findsNWidgets(expected));
 
     final clusterBox =
         find.byType(OverlayCluster).evaluate().first.renderObject as RenderBox;
