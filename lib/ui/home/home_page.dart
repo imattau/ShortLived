@@ -13,8 +13,7 @@ import '../../web/url_shim.dart'
     if (dart.library.html) '../../web/url_shim_web.dart';
 import '../../utils/count_format.dart';
 import '../../utils/caption_format.dart';
-import '../../platform/share_shim.dart'
-    if (dart.library.html) '../../platform/share_shim_web.dart';
+import '../../platform/share/share.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,7 +39,8 @@ class _HomePageState extends State<HomePage> {
     muted: _controller.muted,
     model: ValueNotifier<HudModel>(
       kNostrEnabled
-          ? const HudModel(caption: 'Loading Nostr…', fullCaption: 'Loading Nostr…')
+          ? const HudModel(
+              caption: 'Loading Nostr…', fullCaption: 'Loading Nostr…')
           : _modelFromItem(_items[0]),
     ),
   );
@@ -146,6 +146,20 @@ class _HomePageState extends State<HomePage> {
     _hud.model.value = _modelFromItem(item);
   }
 
+  void _snack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  void _bumpShareCount(int i) {
+    final item = _items[i];
+    var v = parseCount(item.shareCount) + 1;
+    item.shareCount = formatCount(v);
+    _hud.model.value = _modelFromItem(item);
+  }
+
   Future<void> _shareCurrent() async {
     final i = _controller.index.value;
     if (i < 0 || i >= _items.length) return;
@@ -154,22 +168,23 @@ class _HomePageState extends State<HomePage> {
     final url = urlShim.buildUrl({'v': '$i', 'id': f.id});
     final text = f.caption.isEmpty ? 'Watch on ShortLived' : f.caption;
 
-    bool ok = await shareShim.share(url: url, text: text, title: 'ShortLived');
-    if (!ok) {
+    if (!shareShim.isSupported) {
       await Clipboard.setData(ClipboardData(text: url));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Link copied')),
-        );
-      }
-      ok = true; // still count as a "share" when copied
+      _snack('Link copied');
+      _bumpShareCount(i);
+      return;
     }
 
-    if (ok) {
-      var v = parseCount(f.shareCount) + 1;
-      f.shareCount = formatCount(v);
-      _hud.model.value = _modelFromItem(f);
+    final ok = await shareShim.share(
+      url: url,
+      text: text,
+      title: 'ShortLived',
+    );
+    if (!ok) {
+      await Clipboard.setData(ClipboardData(text: url));
+      _snack('Link copied');
     }
+    _bumpShareCount(i);
   }
 
   @override
