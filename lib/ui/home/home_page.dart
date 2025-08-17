@@ -17,6 +17,7 @@ import '../../web/url_shim.dart'
 import '../../utils/count_format.dart';
 import '../../utils/caption_format.dart';
 import '../../platform/share/share.dart';
+import '../../utils/prefs.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -64,6 +65,12 @@ class _HomePageState extends State<HomePage> with RouteAware {
   @override
   void initState() {
     super.initState();
+    VideoPrefs.getMuted().then((m) {
+      _controller.muted.value = m;
+    });
+    _controller.muted.addListener(() {
+      VideoPrefs.setMuted(_controller.muted.value);
+    });
     // Deep link (v/id) against current list (will re-map after data arrives)
     final uri = urlShim.current();
     final id = uri.queryParameters['id'];
