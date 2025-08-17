@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
@@ -63,6 +64,16 @@ class _RealVideoState extends State<_RealVideo> {
   bool _readyCalled = false;
   bool _error = false;
 
+  void _safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
+  }
+
+  void _onCtrlUpdate() {
+    if (!mounted) return;
+    _safeSetState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,35 +84,61 @@ class _RealVideoState extends State<_RealVideo> {
     final url = widget.url;
     if (!WebVideoCompat.browserCanLikelyPlay(url)) {
       widget.onUnsupported?.call('Codec not supported by this browser');
-      setState(() => _error = true);
+      _safeSetState(() => _error = true);
       return;
     }
 
-    final c = VideoPlayerController.networkUrl(
+    final local = VideoPlayerController.networkUrl(
       Uri.parse(url),
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
       httpHeaders: const {'accept': '*/*'},
     );
-    _c = c;
 
     try {
-      await c.initialize();
-      await c.setLooping(true);
-      await c.setVolume(widget.muted ? 0.0 : 1.0);
+      await local.initialize();
+      if (!mounted) {
+        await local.dispose();
+        return;
+      }
+      await local.setLooping(true);
+      if (!mounted) {
+        await local.dispose();
+        return;
+      }
+      await local.setVolume(widget.muted ? 0.0 : 1.0);
+      if (!mounted) {
+        await local.dispose();
+        return;
+      }
       if (kIsWeb) {
         WebVideoCompat.createWithCors();
       }
+
       if (widget.autoplay) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => c.play());
+        try {
+          await local.play();
+        } catch (_) {}
       }
+
+      _c?.removeListener(_onCtrlUpdate);
+      await _c?.dispose();
+
+      _c = local;
+      _c!.addListener(_onCtrlUpdate);
+
       if (!_readyCalled) {
         _readyCalled = true;
         widget.onReady();
       }
-      setState(() {});
+      _safeSetState(() {});
     } catch (e) {
+      if (!mounted) {
+        await local.dispose();
+        return;
+      }
+      await local.dispose();
       widget.onUnsupported?.call(e.toString());
-      setState(() => _error = true);
+      _safeSetState(() => _error = true);
     }
   }
 
@@ -115,7 +152,9 @@ class _RealVideoState extends State<_RealVideo> {
 
   @override
   void dispose() {
+    _c?.removeListener(_onCtrlUpdate);
     _c?.dispose();
+    _c = null;
     super.dispose();
   }
 
@@ -147,4 +186,5 @@ class _RealVideoState extends State<_RealVideo> {
     }
     return player;
   }
+
 }
