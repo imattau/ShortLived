@@ -10,9 +10,10 @@ Future<void> showAccountMenu(BuildContext context) {
 Widget accountMenuContent(BuildContext context) {
   final p = userSession.current.value;
   void navigateAfterClose(String route) {
-    Navigator.of(context, rootNavigator: true).maybePop();
+    final navigator = Navigator.of(context, rootNavigator: true);
+    navigator.maybePop();
     Future.microtask(() {
-      Navigator.of(context, rootNavigator: true).pushNamed(route);
+      navigator.pushNamed(route);
     });
   }
 
