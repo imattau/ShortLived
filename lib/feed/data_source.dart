@@ -37,7 +37,10 @@ class NostrFeedDataSource implements FeedDataSource {
         .streamRecent(limit: kNostrInitialLimit)
         .listen(
           (e) {
-            final m = mapEventToFeedItem(e);
+            final m = mapEventToFeedItem(
+              e,
+              preferredExts: const ['mp4', 'webm', 'm3u8'],
+            );
             if (m != null) {
               items.add(m);
               if (items.length == 1) {

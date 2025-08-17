@@ -10,6 +10,8 @@ abstract class VideoAdapter {
     required bool muted,
     required BoxFit fit,
     required VideoReady onReady,
+    VoidCallback? onSkip,
+    void Function(String message)? onUnsupported,
     Key? key,
   });
 
