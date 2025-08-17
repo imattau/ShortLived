@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html show Navigator, window;
+import 'package:web/web.dart' as html;
 
 class Capabilities {
   static bool get shareSupported {
