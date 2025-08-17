@@ -153,29 +153,39 @@ class HudOverlay extends StatelessWidget {
                             Builder(
                               builder: (ctx) {
                                 final s = MediaQuery.of(ctx).size;
-                                final bottomSafe = MediaQuery.of(
+                                final safeBottom = MediaQuery.of(
                                   ctx,
                                 ).padding.bottom;
-                                // Keep centre bias; reserve ~120px for the Create button footprint.
-                                final baseBottom =
-                                    (s.height * 0.22) + bottomSafe;
+                                final bottom = (s.height * 0.22 + safeBottom)
+                                    .clamp(
+                                      100.0,
+                                      T.stackSafeBottom,
+                                    ); // keep it tighter
                                 return Positioned(
-                                  right: 20,
-                                  bottom: baseBottom.clamp(100.0, 260.0),
-                                  child: ValueListenableBuilder<HudModel>(
-                                    valueListenable: state.model,
-                                    builder: (_, m, __) => OverlayCluster(
+                                  right: T.stackSidePad,
+                                  bottom: bottom,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      // give the LayoutBuilder a clean vertical budget
+                                      maxHeight:
+                                          s.height -
+                                          bottom -
+                                          20, // reserve a sliver of top headroom
+                                    ),
+                                    child: OverlayCluster(
                                       onLike: onLikeLogical,
                                       onComment: () {},
                                       onRepost: () {},
                                       onShare: onShareLogical ?? () {},
                                       onCopyLink: () {},
                                       onZap: () {},
-                                      likeCount: m.likeCount,
-                                      commentCount: m.commentCount,
-                                      repostCount: m.repostCount,
-                                      shareCount: m.shareCount,
-                                      zapCount: m.zapCount,
+                                      likeCount: state.model.value.likeCount,
+                                      commentCount:
+                                          state.model.value.commentCount,
+                                      repostCount:
+                                          state.model.value.repostCount,
+                                      shareCount: state.model.value.shareCount,
+                                      zapCount: state.model.value.zapCount,
                                     ),
                                   ),
                                 );
@@ -191,7 +201,8 @@ class HudOverlay extends StatelessWidget {
                             ),
                             Positioned(
                               right: 16,
-                              bottom: 16 + MediaQuery.of(context).padding.bottom,
+                              bottom:
+                                  16 + MediaQuery.of(context).padding.bottom,
                               child: ViewerAvatar(
                                 onTap: () => showAccountMenu(context),
                               ),

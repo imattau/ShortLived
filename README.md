@@ -35,9 +35,9 @@ empty slots.
 - No permissions required; works in PWA too.
 
 ### Action stack
-- Buttons use 48 px tap targets with compact spacing and baseline-aligned counts.
+- **Action stack is viewport-aware**: on short windows the gaps shrink automatically (min gap 6px), labels use a compact size, and the stack sits closer to centre without overlapping the Create button.
+- Buttons use 44 px tap targets with compact spacing and baseline-aligned counts.
 - Tooltips appear on web/desktop.
-- The stack anchors responsively so it doesn’t drift too close to the screen edge or collide with the Create button.
 
 ### Deterministic widget tests for video
 Widget tests run with a `FakeVideoAdapter` via `TestVideoApp`, so no plugin timers are created.

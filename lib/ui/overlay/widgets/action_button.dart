@@ -39,10 +39,15 @@ class ActionButton extends StatelessWidget {
           const SizedBox(height: T.btnGap),
           Text(
             label!,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 11,
+                  height: 1.0,
                   color: color.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
+                  letterSpacing: 0.15,
                 ),
           ),
         ],
