@@ -10,7 +10,8 @@ import 'feed_controller.dart';
 import 'widgets/create_button.dart';
 import '../../navigation/route_observer.dart';
 import 'package:flutter/services.dart';
-import '../../config/app_config.dart';
+import '../../core/config/app_config.dart';
+import '../../data/source_selector.dart';
 import '../../web/url_shim.dart'
     if (dart.library.html) '../../web/url_shim_web.dart';
 import '../../utils/count_format.dart';
@@ -25,16 +26,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with RouteAware {
   late final FeedController _controller = FeedController();
-  late final FeedDataSource _ds =
-      kNostrEnabled ? NostrFeedDataSource() : DemoFeedDataSource();
+  late final FeedDataSource _ds = SourceSelector.instance;
 
   OverlayEntry? _entry;
   StreamSubscription<List<FeedItem>>? _sub;
 
   // Start with demo only if flag is OFF
-  List<FeedItem> _items = kNostrEnabled ? <FeedItem>[] : demoFeed;
+  List<FeedItem> _items = AppConfig.nostrEnabled ? <FeedItem>[] : demoFeed;
   int _initialIndex = 0;
-  final bool _nostrActive = kNostrEnabled; // for UI banner
+  final bool _nostrActive = AppConfig.nostrEnabled; // for UI banner
 
   bool _showFab = true;
 
@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
     visible: ValueNotifier<bool>(true),
     muted: _controller.muted,
     model: ValueNotifier<HudModel>(
-      kNostrEnabled
+      AppConfig.nostrEnabled
           ? const HudModel(
               caption: 'Loading Nostr…', fullCaption: 'Loading Nostr…')
           : _modelFromItem(_items[0]),
@@ -64,14 +64,6 @@ class _HomePageState extends State<HomePage> with RouteAware {
   @override
   void initState() {
     super.initState();
-    if (kNostrEnabled) {
-      debugPrint(
-        '[ShortLived] Data source: NOSTR (relays=${kDefaultRelays.length})',
-      );
-    } else {
-      debugPrint('[ShortLived] Data source: DEMO');
-    }
-
     // Deep link (v/id) against current list (will re-map after data arrives)
     final uri = urlShim.current();
     final id = uri.queryParameters['id'];
@@ -101,10 +93,10 @@ class _HomePageState extends State<HomePage> with RouteAware {
 
     // Subscribe to data source
     _sub = _ds.streamInitial().listen((list) {
-      debugPrint('[ShortLived] Nostr delivered ${list.length} items');
+      debugPrint('[ShortLived] Feed delivered ${list.length} items');
       setState(() {
         _items = list;
-        if (_items.isEmpty) {
+        if (_items.isEmpty && AppConfig.nostrEnabled) {
           // keep HUD model text but do not flip back to demo
           _hud.model.value = _hud.model.value.copyWith(
             caption:
