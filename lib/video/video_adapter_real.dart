@@ -63,7 +63,6 @@ class _RealVideoState extends State<_RealVideo> {
   VideoPlayerController? _c;
   bool _readyCalled = false;
   bool _error = false;
-  Timer? _hudTimer;
 
   void _safeSetState(VoidCallback fn) {
     if (!mounted) return;
@@ -153,8 +152,6 @@ class _RealVideoState extends State<_RealVideo> {
 
   @override
   void dispose() {
-    _hudTimer?.cancel();
-    _hudTimer = null;
     _c?.removeListener(_onCtrlUpdate);
     _c?.dispose();
     _c = null;
@@ -190,13 +187,4 @@ class _RealVideoState extends State<_RealVideo> {
     return player;
   }
 
-  void _scheduleHudAutoHide(Duration d) {
-    _hudTimer?.cancel();
-    _hudTimer = Timer(d, () {
-      if (!mounted) return;
-      _safeSetState(() {
-        // hide HUD state change here
-      });
-    });
-  }
 }
