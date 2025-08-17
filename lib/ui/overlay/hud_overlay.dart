@@ -22,6 +22,22 @@ class HudOverlay extends StatelessWidget {
     required this.onLikeLogical,
     this.onShareLogical,
   });
+  void _toggleHud(BuildContext context) {
+    final next = !state.visible.value;
+    state.visible.value = next;
+    if (!next) {
+      final m = ScaffoldMessenger.maybeOf(context);
+      m?.hideCurrentSnackBar();
+      m?.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'HUD hidden. Long-press anywhere (or press H) to show.',
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   void _openSearch(BuildContext context) async {
     state.visible.value = false;
@@ -78,125 +94,136 @@ class HudOverlay extends StatelessWidget {
         const SingleActivator(LogicalKeyboardKey.arrowUp): controller.prev,
         const SingleActivator(LogicalKeyboardKey.keyM): controller.toggleMute,
         const SingleActivator(LogicalKeyboardKey.keyL): onLikeLogical,
+        const SingleActivator(LogicalKeyboardKey.keyH): () =>
+            _toggleHud(context),
       },
       child: Focus(
         autofocus: true,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: state.visible,
-          builder: (_, visible, __) {
-            final overlay = IgnorePointer(
-              ignoring: !visible,
-              child: Material(
-                type: MaterialType.transparency,
-                child: SafeArea(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        left: T.s24,
-                        top: T.s24,
-                        child: SearchPill(onTap: () => _openSearch(context)),
-                      ),
-                      Positioned(
-                        right: T.s24,
-                        top: T.s24,
-                        child: const SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: Center(child: AppIcon('bell_24')),
-                        ),
-                      ),
-                      if (kIsWeb)
-                        Positioned(
-                          left: T.s24,
-                          top: T.s24 + 56,
-                          child: ValueListenableBuilder<bool>(
-                            valueListenable: controller.muted,
-                            builder: (_, muted, __) => ElevatedButton(
-                              onPressed: controller.toggleMute,
-                              child: Text(muted ? 'Unmute' : 'Mute'),
-                            ),
-                          ),
-                        ),
-                      Builder(
-                        builder: (ctx) {
-                          final s = MediaQuery.of(ctx).size;
-                          final bottomSafe = MediaQuery.of(ctx).padding.bottom;
-                          // Keep centre bias; reserve ~120px for the Create button footprint.
-                          final baseBottom = (s.height * 0.22) + bottomSafe;
-                          return Positioned(
-                            right: 20,
-                            bottom: baseBottom.clamp(100.0, 260.0),
-                            child: ValueListenableBuilder<HudModel>(
-                              valueListenable: state.model,
-                              builder: (_, m, __) => OverlayCluster(
-                                onLike: onLikeLogical,
-                                onComment: () {},
-                                onRepost: () {},
-                                onShare: onShareLogical ?? () {},
-                                onCopyLink: () {},
-                                onZap: () {},
-                                likeCount: m.likeCount,
-                                commentCount: m.commentCount,
-                                repostCount: m.repostCount,
-                                shareCount: m.shareCount,
-                                zapCount: m.zapCount,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onLongPress: () => _toggleHud(context),
+              child: const SizedBox.expand(),
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: state.visible,
+              builder: (context, visible, _) {
+                return IgnorePointer(
+                  ignoring: !visible,
+                  child: AnimatedOpacity(
+                    opacity: visible ? 1 : 0,
+                    duration: const Duration(milliseconds: 150),
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: SafeArea(
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: T.s24,
+                              top: T.s24,
+                              child: SearchPill(
+                                onTap: () => _openSearch(context),
                               ),
                             ),
-                          );
-                        },
-                      ),
-                      Positioned(
-                        left: T.s24,
-                        bottom: MediaQuery.of(context).size.height * 0.22,
-                        child: ValueListenableBuilder<HudModel>(
-                          valueListenable: state.model,
-                          builder: (_, m, __) => BottomInfoBar(model: m),
-                        ),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: T.s24,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(28),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                  width: 2,
+                            Positioned(
+                              right: T.s24,
+                              top: T.s24,
+                              child: const SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: Center(child: AppIcon('bell_24')),
+                              ),
+                            ),
+                            if (kIsWeb)
+                              Positioned(
+                                left: T.s24,
+                                top: T.s24 + 56,
+                                child: ValueListenableBuilder<bool>(
+                                  valueListenable: controller.muted,
+                                  builder: (_, muted, __) => ElevatedButton(
+                                    onPressed: controller.toggleMute,
+                                    child: Text(muted ? 'Unmute' : 'Mute'),
+                                  ),
                                 ),
                               ),
+                            Builder(
+                              builder: (ctx) {
+                                final s = MediaQuery.of(ctx).size;
+                                final bottomSafe = MediaQuery.of(
+                                  ctx,
+                                ).padding.bottom;
+                                // Keep centre bias; reserve ~120px for the Create button footprint.
+                                final baseBottom =
+                                    (s.height * 0.22) + bottomSafe;
+                                return Positioned(
+                                  right: 20,
+                                  bottom: baseBottom.clamp(100.0, 260.0),
+                                  child: ValueListenableBuilder<HudModel>(
+                                    valueListenable: state.model,
+                                    builder: (_, m, __) => OverlayCluster(
+                                      onLike: onLikeLogical,
+                                      onComment: () {},
+                                      onRepost: () {},
+                                      onShare: onShareLogical ?? () {},
+                                      onCopyLink: () {},
+                                      onZap: () {},
+                                      likeCount: m.likeCount,
+                                      commentCount: m.commentCount,
+                                      repostCount: m.repostCount,
+                                      shareCount: m.shareCount,
+                                      zapCount: m.zapCount,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Create',
-                              style: TextStyle(color: Colors.white),
+                            Positioned(
+                              left: T.s24,
+                              bottom: MediaQuery.of(context).size.height * 0.22,
+                              child: ValueListenableBuilder<HudModel>(
+                                valueListenable: state.model,
+                                builder: (_, m, __) => BottomInfoBar(model: m),
+                              ),
+                            ),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: T.s24,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(28),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.85,
+                                        ),
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Create',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      Positioned.fill(
-                        child: GestureDetector(
-                          onLongPress: () =>
-                              state.visible.value = !state.visible.value,
-                          behavior: HitTestBehavior.translucent,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
-              child: visible ? overlay : const SizedBox.shrink(),
-            );
-          },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
