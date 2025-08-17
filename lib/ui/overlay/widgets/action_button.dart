@@ -21,7 +21,7 @@ class ActionButton extends StatelessWidget {
   });
 
   double _btnSize(BuildContext context) {
-    // On the web with a mouse, allow 40px; otherwise 44px for touch.
+    // On the web with a mouse, allow 40px; otherwise 48px for touch.
     final kind = RendererBinding.instance.mouseTracker.mouseIsConnected;
     return kind ? T.btnSizeMouse : T.btnSizeTouch;
   }
@@ -52,7 +52,7 @@ class ActionButton extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.right,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 11,
                     height: 1.0,
