@@ -11,6 +11,8 @@ A privacy-first short-video client:
 - NIP-96 upload → NIP-94 tags on posts
 - Likes (kind 7), comments (kind 1 replies), zaps (9734/9735)
 - Offline queue + relay backoff
+- **Viewer avatar:** bottom-right, always shown when HUD is visible. Tap to open the account menu. Falls back to coloured initials if there’s no picture.
+- Hides when HUD is hidden (long-press anywhere to toggle).
 
 ## Quickstart
 ```bash
