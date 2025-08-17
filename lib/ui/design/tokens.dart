@@ -26,5 +26,6 @@ class T {
   static const double stackTopHeadroom = 80;
   static const double stackBottomReserve =
       120; // Create button footprint
-  static const double maxCaptionW = 520; // used elsewhere
+  /// Max width for narrow content sheets and overlays on large screens.
+  static const double maxCaptionW = 600.0;
 }
