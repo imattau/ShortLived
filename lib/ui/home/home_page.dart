@@ -54,6 +54,9 @@ class _HomePageState extends State<HomePage> with RouteAware {
     ),
   );
 
+  bool _hudWasVisible = true;
+  late final VoidCallback _drawerListener;
+
   HudModel _modelFromItem(FeedItem f) => HudModel(
         caption: CaptionFormat.display(f.caption),
         fullCaption: f.caption,
@@ -86,6 +89,16 @@ class _HomePageState extends State<HomePage> with RouteAware {
         if (idx >= 0) _initialIndex = idx;
       }
     }
+
+    _drawerListener = () {
+      if (_drawers.isOpen) {
+        _hudWasVisible = _hud.visible.value;
+        _hud.visible.value = false;
+      } else {
+        _hud.visible.value = _hudWasVisible;
+      }
+    };
+    _drawers.addListener(_drawerListener);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final overlay = Overlay.of(context);
@@ -214,6 +227,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
   void dispose() {
     _entry?.remove();
     _drawerEntry?.remove();
+    _drawers.removeListener(_drawerListener);
     _drawers.dispose();
     _controller.dispose();
     _hud.visible.dispose();
