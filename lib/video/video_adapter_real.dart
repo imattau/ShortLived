@@ -63,9 +63,10 @@ class _RealVideoState extends State<_RealVideo> {
   VideoPlayerController? _c;
   bool _readyCalled = false;
   bool _error = false;
+  bool _disposed = false;
 
   void _safeSetState(VoidCallback fn) {
-    if (!mounted) return;
+    if (!mounted || _disposed) return;
     setState(fn);
   }
 
@@ -152,6 +153,7 @@ class _RealVideoState extends State<_RealVideo> {
 
   @override
   void dispose() {
+    _disposed = true;
     _c?.removeListener(_onCtrlUpdate);
     _c?.dispose();
     _c = null;

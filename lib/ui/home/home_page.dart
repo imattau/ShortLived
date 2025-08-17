@@ -7,6 +7,8 @@ import '../../feed/data_source.dart';
 import '../overlay/hud_overlay.dart';
 import '../overlay/hud_model.dart';
 import 'feed_controller.dart';
+import 'widgets/create_button.dart';
+import '../../navigation/route_observer.dart';
 import 'package:flutter/services.dart';
 import '../../config/app_config.dart';
 import '../../web/url_shim.dart'
@@ -21,7 +23,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with RouteAware {
   late final FeedController _controller = FeedController();
   late final FeedDataSource _ds =
       kNostrEnabled ? NostrFeedDataSource() : DemoFeedDataSource();
@@ -33,6 +35,8 @@ class _HomePageState extends State<HomePage> {
   List<FeedItem> _items = kNostrEnabled ? <FeedItem>[] : demoFeed;
   int _initialIndex = 0;
   final bool _nostrActive = kNostrEnabled; // for UI banner
+
+  bool _showFab = true;
 
   late final HudState _hud = HudState(
     visible: ValueNotifier<bool>(true),
@@ -125,6 +129,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
   void _updateUrlForIndex(int i) {
     final f = _items[i];
     urlShim.replaceQuery({'v': '$i', 'id': f.id});
@@ -195,7 +208,18 @@ class _HomePageState extends State<HomePage> {
     _hud.model.dispose();
     _sub?.cancel();
     _ds.dispose();
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didPushNext() {
+    setState(() => _showFab = false);
+  }
+
+  @override
+  void didPopNext() {
+    setState(() => _showFab = true);
   }
 
   @override
@@ -227,6 +251,19 @@ class _HomePageState extends State<HomePage> {
             onSkip: _controller.next,
           );
 
-    return Scaffold(backgroundColor: T.bg, body: body);
+    return Scaffold(
+      backgroundColor: T.bg,
+      body: body,
+      floatingActionButton: AnimatedSlide(
+        duration: const Duration(milliseconds: 180),
+        offset: _showFab ? Offset.zero : const Offset(0, 1.5),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: _showFab ? 1 : 0,
+          child: const CreateButton(),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
   }
 }

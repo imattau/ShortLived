@@ -18,6 +18,10 @@ Future<void> main() async {
     FlutterError.onError =
         (details) => FlutterError.dumpErrorToConsole(details);
 
+    const nostr = bool.fromEnvironment('NOSTR_ENABLED', defaultValue: false);
+    // ignore: avoid_print
+    print('[ShortLived] NOSTR_ENABLED=$nostr');
+
     // In debug on web, unregister stale service workers and caches.
     assert(() {
       if (kIsWeb) {
