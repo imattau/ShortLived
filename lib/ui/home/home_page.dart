@@ -250,20 +250,30 @@ class _HomePageState extends State<HomePage> with RouteAware {
             onSkip: _controller.next,
           );
 
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return Scaffold(
       backgroundColor: T.bg,
-      body: body,
-      floatingActionButton: AnimatedSlide(
-        duration: const Duration(milliseconds: 180),
-        offset: _showFab ? Offset.zero : const Offset(0, 1.5),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 180),
-          opacity: _showFab ? 1 : 0,
-          child: const CreateButton(),
-        ),
+      body: Stack(
+        children: [
+          body,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 12 + bottomInset,
+            child: AnimatedSlide(
+              duration: const Duration(milliseconds: 180),
+              offset: _showFab ? Offset.zero : const Offset(0, 1.5),
+              child: Center(
+                child: CreateButton(
+                  onPressed: () {},
+                  hidden: !_showFab,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      // Center the create button so drawers and rails don't shift it.
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

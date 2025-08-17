@@ -1,32 +1,31 @@
 import 'package:flutter/material.dart';
 
-/// Simple placeholder "Create" button used as floating action button.
+/// Floating "Create" button used on the home page.
 class CreateButton extends StatelessWidget {
-  const CreateButton({super.key});
+  const CreateButton({
+    super.key,
+    required this.onPressed,
+    this.hidden = false,
+  });
+
+  final VoidCallback onPressed;
+  final bool hidden;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.85),
-                width: 2,
-              ),
-            ),
+    return IgnorePointer(
+      ignoring: hidden,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: hidden ? 0.0 : 1.0,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(22),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Create',
-            style: TextStyle(color: Colors.white),
-          ),
-        ],
+          onPressed: onPressed,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
