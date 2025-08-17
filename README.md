@@ -36,8 +36,7 @@ empty slots.
 - No permissions required; works in PWA too.
 
 ### Action stack
-- **Action stack is viewport-aware**: on short windows the gaps shrink automatically (min gap 6px), labels use a compact size, and the stack sits closer to centre without overlapping the Create button.
-- Buttons use 44 px tap targets with compact spacing and baseline-aligned counts.
+- **Action bar**: counts now sit to the right of icons. Vertical gaps adapt to the viewport (4–10 px). Tap-targets are 44 px on touch, 40 px on mouse.
 - Tooltips appear on web/desktop.
 
 ### Deterministic widget tests for video

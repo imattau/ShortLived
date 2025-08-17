@@ -10,12 +10,21 @@ class T {
   static const Color bg = Colors.black;
   static const Color blue = Colors.blueAccent;
 
-  static const double btnSize = 44; // min tap target (kept ≥44px)
-  static const double btnGap = 10; // gap between icon and count
-  static const double stackGapMin = 6; // ↓ new: tighter floor
-  static const double stackGapMax = 14; // cap for tall screens
-  static const double stackSidePad = 20; // right margin
-  static const double stackSafeBottom =
-      140; // space reserved for Create btn footprint
+  // Tap target sizes (we keep ≥44 on touch)
+  static const double btnSizeTouch = 44;
+  static const double btnSizeMouse = 40;
+
+  // Vertical gap between rows (min..max)
+  static const double stackGapMin = 4;
+  static const double stackGapMed = 6;
+  static const double stackGapMax = 10;
+
+  // Spacing inside a row (icon ↔ count)
+  static const double rowGap = 6;
+
+  static const double stackSidePad = 18;
+  static const double stackTopHeadroom = 80;
+  static const double stackBottomReserve =
+      120; // Create button footprint
   static const double maxCaptionW = 520; // used elsewhere
 }
