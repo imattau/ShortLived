@@ -8,6 +8,8 @@ class AppIcon extends StatelessWidget {
   final Color? color;
   const AppIcon(this.name, {super.key, this.size = 24, this.color});
 
+  static const _base = 'assets/icons';
+
   static final Map<String, IconData> _fallback = {
     'heart_24': Icons.favorite_border,
     'comment_24': Icons.mode_comment_outlined,
@@ -31,7 +33,7 @@ class AppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = 'assets/icons/$name.svg.vec';
+    final p = '$_base/$name.svg.vec';
     return FutureBuilder<bool>(
       future: _vecExists(p),
       builder: (context, snap) {
