@@ -256,8 +256,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
         children: [
           body,
           ValueListenableBuilder<bool>(
-            valueListenable: _hud.overlayOpen,
-            builder: (context, open, __) {
+            valueListenable: _hud.visible,
+            builder: (context, visible, __) {
               final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
               return Positioned(
                 left: 0,
@@ -269,7 +269,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
                   child: Center(
                     child: CreateButton(
                       onPressed: () {},
-                      hidden: open || !_showFab,
+                      hidden: !visible || !_showFab,
                     ),
                   ),
                 ),
