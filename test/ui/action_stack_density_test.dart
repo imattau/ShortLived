@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nostr_video/ui/home/home_page.dart';
+import 'package:nostr_video/ui/home/widgets/overlay_cluster.dart';
 
 void main() {
   testWidgets('action stack compacts on short viewports', (t) async {
@@ -12,9 +14,11 @@ void main() {
     expect(find.byTooltip('Like'), findsOneWidget);
     expect(find.byTooltip('Zap'), findsOneWidget);
 
-    // Measure overall stack height is under 75% of viewport (i.e., dense)
-    final stack = find.byTooltip('Like').evaluate().first.renderObject!;
-    // Smoke check: not a golden test, but ensures it didn't overflow
-    expect(t.binding.renderView.size.height, 520);
+    final clusterBox =
+        find.byType(OverlayCluster).evaluate().first.renderObject as RenderBox;
+    final viewportHeight =
+        RendererBinding.instance.renderViews.first.size.height;
+    expect(clusterBox.size.height, lessThan(viewportHeight * 0.75));
+    expect(viewportHeight, 520);
   });
 }
