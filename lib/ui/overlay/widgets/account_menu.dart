@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../sheet_gate.dart';
 import '../../../session/user_session.dart';
+import '../../../app/routes.dart';
 
 Future<void> showAccountMenu(BuildContext context) {
   return SheetGate.openAccountMenu(context, accountMenuContent);
@@ -8,6 +9,14 @@ Future<void> showAccountMenu(BuildContext context) {
 
 Widget accountMenuContent(BuildContext context) {
   final p = userSession.current.value;
+  void navigateAfterClose(String route) {
+    final navigator = Navigator.of(context, rootNavigator: true);
+    navigator.maybePop();
+    Future.microtask(() {
+      navigator.pushNamed(route);
+    });
+  }
+
   return SafeArea(
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -39,18 +48,12 @@ Widget accountMenuContent(BuildContext context) {
             leading: const Icon(Icons.notifications, color: Colors.white70),
             title:
                 const Text('Notifications', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: open notifications
-            },
+            onTap: () => navigateAfterClose(AppRoutes.notifications),
           ),
           ListTile(
             leading: const Icon(Icons.settings, color: Colors.white70),
             title: const Text('Settings', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context);
-              // TODO: open settings
-            },
+            onTap: () => navigateAfterClose(AppRoutes.settings),
           ),
         ],
       ),
