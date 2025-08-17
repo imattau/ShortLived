@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../session/user_session.dart';
+import '../sheet_gate.dart';
+import 'account_menu.dart';
 
 class ViewerAvatar extends StatelessWidget {
   final double size;
-  final VoidCallback? onTap;
-  const ViewerAvatar({super.key, this.size = 44, this.onTap});
+  const ViewerAvatar({super.key, this.size = 44});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,8 @@ class ViewerAvatar extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap: onTap,
+            onTap: () =>
+                SheetGate.toggleAccountMenu(context, accountMenuContent),
             child: avatar,
           ),
         );

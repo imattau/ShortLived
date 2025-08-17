@@ -9,7 +9,6 @@ import '../home/feed_controller.dart';
 import 'widgets/search_pill.dart';
 import 'widgets/bottom_info_bar.dart';
 import 'widgets/viewer_avatar.dart';
-import 'widgets/account_menu.dart';
 
 class HudOverlay extends StatelessWidget {
   final HudState state;
@@ -203,10 +202,8 @@ class HudOverlay extends StatelessWidget {
                               right: 16,
                               bottom:
                                   16 + MediaQuery.of(context).padding.bottom,
-                              child: ViewerAvatar(
-                                onTap: () => showAccountMenu(context),
+                              child: const ViewerAvatar(),
                               ),
-                            ),
                             Positioned(
                               left: 0,
                               right: 0,
