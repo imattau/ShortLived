@@ -170,7 +170,7 @@ class HudOverlay extends StatelessWidget {
                                       maxHeight:
                                           s.height -
                                           bottom -
-                                          80, // 80≈top headroom
+                                          20, // reserve a sliver of top headroom
                                     ),
                                     child: OverlayCluster(
                                       onLike: onLikeLogical,
