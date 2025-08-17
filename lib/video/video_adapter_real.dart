@@ -2,10 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
+import 'package:http/http.dart' as http;
 import '../ui/home/widgets/unsupported_overlay.dart';
 import 'web_video_compat.dart';
 import 'video_adapter.dart';
 import '../core/config/app_config.dart';
+import 'source_filter.dart';
 
 class RealVideoAdapter extends VideoAdapter {
   @override
@@ -84,8 +86,23 @@ class _RealVideoState extends State<_RealVideo> {
 
   Future<void> _init() async {
     final url = widget.url;
-    if (kIsWeb && url.endsWith('.m3u8') && !AppConfig.webHlsPreferred) {
+    final uri = Uri.parse(url);
+    String? contentType;
+    try {
+      final resp = await http.head(uri);
+      contentType = resp.headers['content-type'];
+    } catch (_) {}
+
+    final isHls = WebVideoCompat.isHls(url) ||
+        (contentType?.toLowerCase().contains('mpegurl') ?? false);
+
+    if (kIsWeb && isHls && !AppConfig.webHlsPreferred) {
       widget.onUnsupported?.call('HLS disabled by flag');
+      _safeSetState(() => _error = true);
+      return;
+    }
+    if (!SourceFilter.allow(contentType: contentType, uri: uri)) {
+      widget.onUnsupported?.call('Blocked by type gate: ct=$contentType');
       _safeSetState(() => _error = true);
       return;
     }
@@ -96,9 +113,10 @@ class _RealVideoState extends State<_RealVideo> {
     }
 
     final local = VideoPlayerController.networkUrl(
-      Uri.parse(url),
+      uri,
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
       httpHeaders: const {'accept': '*/*'},
+      formatHint: isHls ? VideoFormat.hls : null,
     );
 
     try {
@@ -112,19 +130,29 @@ class _RealVideoState extends State<_RealVideo> {
         await local.dispose();
         return;
       }
-      await local.setVolume(widget.muted ? 0.0 : 1.0);
+
+      if (widget.autoplay) {
+        await local.setVolume(0.0);
+        if (!mounted) {
+          await local.dispose();
+          return;
+        }
+        try {
+          await local.play();
+        } catch (_) {}
+        if (!widget.muted) {
+          await local.setVolume(1.0);
+        }
+      } else {
+        await local.setVolume(widget.muted ? 0.0 : 1.0);
+      }
       if (!mounted) {
         await local.dispose();
         return;
       }
+
       if (kIsWeb) {
         WebVideoCompat.createWithCors();
-      }
-
-      if (widget.autoplay) {
-        try {
-          await local.play();
-        } catch (_) {}
       }
 
       _c?.removeListener(_onCtrlUpdate);
@@ -171,7 +199,7 @@ class _RealVideoState extends State<_RealVideo> {
     if (_c == null || !_c!.value.isInitialized) {
       return const SizedBox.expand();
     }
-    final player = FittedBox(
+    Widget player = FittedBox(
       fit: widget.fit,
       clipBehavior: Clip.hardEdge,
       child: SizedBox(
@@ -181,7 +209,7 @@ class _RealVideoState extends State<_RealVideo> {
       ),
     );
     if (_error || _c!.value.hasError) {
-      return Stack(
+      player = Stack(
         fit: StackFit.expand,
         children: [
           player,
@@ -190,6 +218,23 @@ class _RealVideoState extends State<_RealVideo> {
             onSkip: widget.onSkip,
           ),
         ],
+      );
+    }
+    if (kIsWeb) {
+      player = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () async {
+          if (_c == null) return;
+          if (!_c!.value.isPlaying) {
+            try {
+              await _c!.play();
+              if (!widget.muted) {
+                await _c!.setVolume(1.0);
+              }
+            } catch (_) {}
+          }
+        },
+        child: player,
       );
     }
     return player;
