@@ -8,7 +8,7 @@ import '../test_helpers/test_video_scope.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
 void main() {
-  testWidgets('action buttons have 48x48 min hit targets and compact gaps', (t) async {
+  testWidgets('action buttons have 44x44 hit targets and compact gaps', (t) async {
     await mockNetworkImagesFor(() async {
       await t.pumpWidget(
           const TestVideoApp(child: MaterialApp(home: HomePage())));
@@ -20,7 +20,7 @@ void main() {
         expect(find.byType(ActionButton), findsNWidgets(expected));
       }
       final boxes =
-          find.byWidgetPredicate((w) => w is SizedBox && w.width == 48 && w.height == 48);
+          find.byWidgetPredicate((w) => w is SizedBox && w.width == 44 && w.height == 44);
       expect(boxes, findsWidgets);
     });
   });
