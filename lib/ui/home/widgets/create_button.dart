@@ -18,13 +18,17 @@ class CreateButton extends StatelessWidget {
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 180),
         opacity: hidden ? 0.0 : 1.0,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(22),
+        child: Semantics(
+          label: 'Create',
+          button: true,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: const CircleBorder(),
+              padding: const EdgeInsets.all(22),
+            ),
+            onPressed: onPressed,
+            child: const Icon(Icons.add),
           ),
-          onPressed: onPressed,
-          child: const Icon(Icons.add),
         ),
       ),
     );

@@ -28,8 +28,8 @@ void main() {
     // Open search
     await t.tap(find.textContaining('Search'));
     await t.pumpAndSettle();
-    // Create label should still be present but invisible while sheet is open
-    final createFinder = find.text('Create');
+    // Create button semantics should still be present but invisible while sheet is open
+    final createFinder = find.bySemanticsLabel('Create');
     expect(createFinder, findsOneWidget);
     final opacityFinder = find
         .ancestor(of: createFinder, matching: find.byType(AnimatedOpacity))
