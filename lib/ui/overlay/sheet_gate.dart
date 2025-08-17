@@ -33,7 +33,12 @@ class SheetGate {
     WidgetBuilder builder,
   ) async {
     if (_accountMenuFuture != null) {
-      Navigator.of(context, rootNavigator: true).maybePop();
+      // Schedule the pop after the current frame so a rapid second tap closes
+      // a sheet that's still being built.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context, rootNavigator: true).maybePop();
+      });
+      await _accountMenuFuture; // wait until the sheet closes
       return;
     }
     await openAccountMenu(context, builder);
