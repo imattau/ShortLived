@@ -12,6 +12,8 @@ class FeedPager extends StatefulWidget {
   final FeedController controller;
   final void Function(int index)? onDoubleTapLike;
   final int initialIndex;
+  final void Function(String reason)? onUnsupported;
+  final VoidCallback? onSkip;
 
   const FeedPager({
     super.key,
@@ -20,6 +22,8 @@ class FeedPager extends StatefulWidget {
     required this.controller,
     this.onDoubleTapLike,
     this.initialIndex = 0,
+    this.onUnsupported,
+    this.onSkip,
   });
 
   @override
@@ -93,6 +97,8 @@ class _FeedPagerState extends State<FeedPager> {
             item: item,
             autoplay: isCurrent,
             muted: widget.controller.muted.value,
+            onUnsupported: widget.onUnsupported,
+            onSkip: widget.onSkip,
           ),
         );
       },
@@ -104,11 +110,15 @@ class _FeedPage extends StatefulWidget {
   final FeedItem item;
   final bool autoplay;
   final bool muted;
+  final void Function(String reason)? onUnsupported;
+  final VoidCallback? onSkip;
   const _FeedPage({
     super.key,
     required this.item,
     required this.autoplay,
     required this.muted,
+    this.onUnsupported,
+    this.onSkip,
   });
 
   @override
@@ -130,6 +140,8 @@ class _FeedPageState extends State<_FeedPage>
         muted: widget.muted,
         fit: BoxFit.cover,
         onReady: () {},
+        onUnsupported: widget.onUnsupported,
+        onSkip: widget.onSkip,
       ),
     );
   }

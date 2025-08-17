@@ -10,7 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: any
-  video_player: ^2.8.6
+  video_player: ^2.9.1
+  # Use hls.js behind the scenes on web; this registers itself instead of default web impl
+  video_player_web_hls: ^1.2.0
   chewie: any
   dio: ^5.4.0
   image_picker: ^1.0.7

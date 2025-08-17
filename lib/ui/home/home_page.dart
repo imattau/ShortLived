@@ -204,6 +204,12 @@ class _HomePageState extends State<HomePage> {
             onIndexChanged: _onIndexChanged,
             onDoubleTapLike: (_) => _likeCurrent(),
             initialIndex: _initialIndex,
+            onUnsupported: (reason) {
+              debugPrint('[ShortLived] Unsupported: '
+                  '$reason → skipping');
+              _controller.next();
+            },
+            onSkip: _controller.next,
           );
 
     return Scaffold(backgroundColor: T.bg, body: body);

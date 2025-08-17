@@ -10,6 +10,8 @@ class VideoPlayerView extends StatelessWidget {
     required this.muted,
     required this.fit,
     required this.onReady,
+    this.onSkip,
+    this.onUnsupported,
   });
 
   final String url;
@@ -17,6 +19,8 @@ class VideoPlayerView extends StatelessWidget {
   final bool muted;
   final BoxFit fit;
   final VideoReady onReady;
+  final VoidCallback? onSkip;
+  final void Function(String message)? onUnsupported;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +31,8 @@ class VideoPlayerView extends StatelessWidget {
       muted: muted,
       fit: fit,
       onReady: onReady,
+      onSkip: onSkip,
+      onUnsupported: onUnsupported,
     );
   }
 }

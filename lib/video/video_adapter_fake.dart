@@ -11,6 +11,8 @@ class FakeVideoAdapter extends VideoAdapter {
     required bool muted,
     required BoxFit fit,
     required VideoReady onReady,
+    VoidCallback? onSkip,
+    void Function(String message)? onUnsupported,
     Key? key,
   }) {
     return _FakeVideo(key: key, onReady: onReady);

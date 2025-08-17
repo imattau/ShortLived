@@ -112,3 +112,8 @@ Acceptance
 - With flag OFF, the demo feed behaves as before.
 - With flag ON and reachable relays, the app loads a list of notes that include video links and displays them as a vertical feed.
 - Deep links (`?v=&id=`) still work with the Nostr list.
+
+### Troubleshooting
+- **HLS**: Chrome requires hls.js. We include `video_player_web_hls`; make sure it's installed.
+- **CORS**: Remote servers must send `Access-Control-Allow-Origin: *` (or your domain). If missing, the player will show “Unsupported or blocked”.
+- **Codecs**: Chrome can’t play HEVC/H.265 MP4s. Those will be skipped.
