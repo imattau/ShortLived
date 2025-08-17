@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import 'video/video_adapter.dart';
 import 'video/video_adapter_real.dart';
+import 'session/user_session.dart';
 
 // Conditional import: on web use the real implementation, elsewhere the stub.
 import 'util/sw_debug_stub.dart'
@@ -25,6 +26,13 @@ Future<void> main() async {
       }
       return true;
     }());
+
+    // Set a placeholder viewer profile until auth is wired.
+    userSession.current.value = const UserProfile(
+      npub: 'npub1guest',
+      displayName: 'You',
+      pictureUrl: null,
+    );
 
     runApp(VideoScope(adapter: RealVideoAdapter(), child: const App()));
   }, (Object error, StackTrace stack) {

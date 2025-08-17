@@ -8,6 +8,8 @@ import 'hud_model.dart';
 import '../home/feed_controller.dart';
 import 'widgets/search_pill.dart';
 import 'widgets/bottom_info_bar.dart';
+import 'widgets/viewer_avatar.dart';
+import 'widgets/account_menu.dart';
 
 class HudOverlay extends StatelessWidget {
   final HudState state;
@@ -185,6 +187,13 @@ class HudOverlay extends StatelessWidget {
                               child: ValueListenableBuilder<HudModel>(
                                 valueListenable: state.model,
                                 builder: (_, m, __) => BottomInfoBar(model: m),
+                              ),
+                            ),
+                            Positioned(
+                              right: 16,
+                              bottom: 16 + MediaQuery.of(context).padding.bottom,
+                              child: ViewerAvatar(
+                                onTap: () => showAccountMenu(context),
                               ),
                             ),
                             Positioned(
