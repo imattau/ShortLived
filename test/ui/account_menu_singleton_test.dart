@@ -20,7 +20,8 @@ void main() {
     await t.pumpAndSettle();
 
     // Second toggle closes the sheet instead of stacking.
-    await SheetGate.toggleAccountMenu(ctx, accountMenuContent);
+    // SheetGate closes via a post-frame callback; don't await here.
+    SheetGate.toggleAccountMenu(ctx, accountMenuContent);
     await t.pumpAndSettle();
     expect(find.byType(BottomSheet), findsNothing);
 
