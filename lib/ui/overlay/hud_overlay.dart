@@ -149,47 +149,37 @@ class HudOverlay extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            Builder(
-                              builder: (ctx) {
-                                final s = MediaQuery.of(ctx).size;
-                                final safeBottom = MediaQuery.of(
-                                  ctx,
-                                ).padding.bottom;
-                                final bottom = (s.height * 0.22 + safeBottom)
-                                    .clamp(
-                                      100.0,
-                                      T.stackSafeBottom,
-                                    ); // keep it tighter
-                                return Positioned(
-                                  right: T.stackSidePad,
-                                  bottom: bottom,
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      // give the LayoutBuilder a clean vertical budget
-                                      maxHeight:
-                                          s.height -
-                                          bottom -
-                                          20, // reserve a sliver of top headroom
-                                    ),
-                                    child: OverlayCluster(
-                                      onLike: onLikeLogical,
-                                      onComment: () {},
-                                      onRepost: () {},
-                                      onShare: onShareLogical ?? () {},
-                                      onCopyLink: () {},
-                                      onZap: () {},
-                                      likeCount: state.model.value.likeCount,
-                                      commentCount:
-                                          state.model.value.commentCount,
-                                      repostCount:
-                                          state.model.value.repostCount,
-                                      shareCount: state.model.value.shareCount,
-                                      zapCount: state.model.value.zapCount,
-                                    ),
+                            Builder(builder: (ctx) {
+                              final s = MediaQuery.of(ctx).size;
+                              final bottom = (s.height * 0.18 +
+                                      MediaQuery.of(ctx).padding.bottom)
+                                  .clamp(80.0, T.stackBottomReserve);
+                              return Positioned(
+                                right: T.stackSidePad,
+                                bottom: bottom,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight:
+                                        s.height - bottom - T.stackTopHeadroom,
                                   ),
-                                );
-                              },
-                            ),
+                                  child: OverlayCluster(
+                                    onLike: onLikeLogical,
+                                    onComment: () {},
+                                    onRepost: () {},
+                                    onShare: onShareLogical ?? () {},
+                                    onCopyLink: () {},
+                                    onZap: () {},
+                                    likeCount: state.model.value.likeCount,
+                                    commentCount:
+                                        state.model.value.commentCount,
+                                    repostCount:
+                                        state.model.value.repostCount,
+                                    shareCount: state.model.value.shareCount,
+                                    zapCount: state.model.value.zapCount,
+                                  ),
+                                ),
+                              );
+                            }),
                             Positioned(
                               left: T.s24,
                               bottom: MediaQuery.of(context).size.height * 0.22,

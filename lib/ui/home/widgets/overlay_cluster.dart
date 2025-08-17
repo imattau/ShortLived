@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../design/tokens.dart';
 import '../../overlay/widgets/action_button.dart';
 
@@ -32,83 +31,39 @@ class OverlayCluster extends StatelessWidget {
     required this.zapCount,
   });
 
+  double _gapForHeight(double h) {
+    if (h < 560) return T.stackGapMin; // very tight
+    if (h < 720) return T.stackGapMed; // tight
+    return T.stackGapMax; // comfy
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (ctx, constraints) {
-        // Available vertical space for the column. We reserve a little
-        // headroom so it never kisses top/bottom chrome.
-        final avail = constraints.maxHeight.clamp(200.0, 1200.0);
+    return LayoutBuilder(builder: (_, c) {
+      final gap = _gapForHeight(c.maxHeight);
 
-        // Estimate height of rows that show a numeric label vs. icon only.
-        const labelLine = 11.0; // labelSmall font size with height 1.0
-        const rowWithLabel = T.btnSize + T.btnGap + labelLine; // icon+gap+label
-        const rowNoLabel = T.btnSize;
+      Widget row(String icon, String? count, VoidCallback onTap, String tip) =>
+          Padding(
+            padding: EdgeInsets.only(bottom: gap),
+            child: ActionButton(icon: icon, label: count, onTap: onTap, tooltip: tip),
+          );
 
-        // Six actions, one of which (bookmark) has no label.
-        const labelledRows = 5;
-        const noLabelRows = 1;
-        const spacers = 6 - 1;
-        final rowsHeight =
-            labelledRows * rowWithLabel + noLabelRows * rowNoLabel;
-
-        // Ideal free space to distribute as gaps.
-        final free = avail - rowsHeight;
-        double gap;
-        if (free <= 0) {
-          gap = T.stackGapMin;
-        } else {
-          final ideal = free / spacers;
-          gap = ideal.clamp(T.stackGapMin, T.stackGapMax);
-        }
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ActionButton(
-              icon: 'heart_24',
-              label: likeCount,
-              onTap: onLike,
-              tooltip: 'Like',
-            ),
-            SizedBox(height: gap),
-            ActionButton(
-              icon: 'comment_24',
-              label: commentCount,
-              onTap: onComment,
-              tooltip: 'Comments',
-            ),
-            SizedBox(height: gap),
-            ActionButton(
-              icon: 'repost_24',
-              label: repostCount,
-              onTap: onRepost,
-              tooltip: 'Repost',
-            ),
-            SizedBox(height: gap),
-            ActionButton(
-              icon: 'bookmark_24',
-              label: null,
-              onTap: onCopyLink,
-              tooltip: 'Save',
-            ),
-            SizedBox(height: gap),
-            ActionButton(
-              icon: 'share_24',
-              label: shareCount,
-              onTap: onShare,
-              tooltip: 'Share',
-            ),
-            SizedBox(height: gap),
-            ActionButton(
-              icon: 'zap_24',
-              label: zapCount,
-              onTap: onZap,
-              tooltip: 'Zap',
-            ),
-          ],
-        );
-      },
-    );
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          row('heart_24',    likeCount,    onLike,    'Like'),
+          row('comment_24',  commentCount, onComment, 'Comments'),
+          row('repost_24',   repostCount,  onRepost,  'Repost'),
+          row('bookmark_24', null,         onCopyLink,'Save'),
+          row('share_24',    shareCount,   onShare,   'Share'),
+          Padding(
+            padding: EdgeInsets.only(bottom: 0), // last item no extra gap
+            child: ActionButton(icon: 'zap_24', label: zapCount, onTap: onZap, tooltip: 'Zap'),
+          ),
+        ],
+      );
+    });
   }
 }
+

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import '../../design/tokens.dart';
 import '../../widgets/app_icon.dart';
 
@@ -20,47 +19,55 @@ class ActionButton extends StatelessWidget {
     this.color = Colors.white,
   });
 
+  double _btnSize(BuildContext context) {
+    // On the web with a mouse, allow 40px; otherwise 44px for touch.
+    final kind = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    return kind ? T.btnSizeMouse : T.btnSizeTouch;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final core = Column(
+    final size = _btnSize(context);
+
+    final core = Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         InkResponse(
           onTap: onTap,
-          radius: T.btnSize / 2,
+          radius: size / 2,
           child: SizedBox(
-            width: T.btnSize,
-            height: T.btnSize,
+            width: size,
+            height: size,
             child: Center(child: AppIcon(icon, size: 24, color: color)),
           ),
         ),
         if (label != null) ...[
-          const SizedBox(height: T.btnGap),
-          Text(
-            label!,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontSize: 11,
-                  height: 1.0,
-                  color: color.withValues(alpha: 0.85),
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.15,
-                ),
+          const SizedBox(width: T.rowGap),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 24),
+            child: Text(
+              label!,
+              maxLines: 1,
+              overflow: TextOverflow.fade,
+              softWrap: false,
+              textAlign: TextAlign.left,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 11,
+                    height: 1.0,
+                    color: color.withOpacity(0.9),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.1,
+                  ),
+            ),
           ),
         ],
       ],
     );
 
-    // Tooltips are most useful on web/desktop.
-    return kIsWeb && tooltip != null
-        ? Tooltip(
-            message: tooltip!,
-            waitDuration: const Duration(milliseconds: 300),
-            child: core,
-          )
+    return (kIsWeb && tooltip != null)
+        ? Tooltip(message: tooltip!, child: core)
         : core;
   }
 }
+
