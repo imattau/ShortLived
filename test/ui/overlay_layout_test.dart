@@ -19,7 +19,13 @@ void main() {
     // Open search
     await t.tap(find.textContaining('Search'));
     await t.pumpAndSettle();
-    // Create label should be hidden while sheet is open
-    expect(find.text('Create'), findsNothing);
+    // Create label should still be present but invisible while sheet is open
+    final createFinder = find.text('Create');
+    expect(createFinder, findsOneWidget);
+    final opacityFinder = find
+        .ancestor(of: createFinder, matching: find.byType(AnimatedOpacity))
+        .first;
+    final animatedOpacity = t.widget<AnimatedOpacity>(opacityFinder);
+    expect(animatedOpacity.opacity, equals(0));
   });
 }
