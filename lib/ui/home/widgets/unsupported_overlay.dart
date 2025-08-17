@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class UnsupportedOverlay extends StatelessWidget {
   final String message;
   final VoidCallback? onSkip;
-  const UnsupportedOverlay({required this.message, this.onSkip});
+  const UnsupportedOverlay({super.key, required this.message, this.onSkip});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class UnsupportedOverlay extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.55),
+                color: Colors.black.withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(message, style: const TextStyle(color: Colors.white)),

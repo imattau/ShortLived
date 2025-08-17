@@ -79,7 +79,7 @@ class _RealVideoState extends State<_RealVideo> {
 
     final c = VideoPlayerController.networkUrl(
       Uri.parse(url),
-      videoPlayerOptions: const VideoPlayerOptions(mixWithOthers: true),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
       httpHeaders: const {'accept': '*/*'},
     );
     _c = c;

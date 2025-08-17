@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:video_player/video_player.dart';
-import '../../video/web_video_compat.dart';
+import '../../../video/web_video_compat.dart';
 import 'unsupported_overlay.dart';
 
 class RealVideoView extends StatefulWidget {
