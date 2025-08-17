@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
-    if (route is PageRoute) {
+    if (route != null) {
       routeObserver.subscribe(this, route);
     }
   }
