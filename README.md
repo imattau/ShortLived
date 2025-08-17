@@ -2,7 +2,9 @@
 
 A privacy-first short-video client:
 - One screen (full-bleed video) with overlays
-- Long-press toggles overlays (cinema mode)
+- Long-press anywhere to hide/show the HUD.
+- Desktop/Web: press **H** to toggle.
+- A brief hint appears when the HUD is hidden.
 - Vertical feed uses PageView.builder with off-window pages disposed
 - Only the current page autoplays; neighbours initialise paused
 - At most three video widgets exist at any time
