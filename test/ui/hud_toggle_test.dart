@@ -23,6 +23,7 @@ void main() {
             state: state,
             controller: controller,
             onLikeLogical: () {},
+            onSearch: () {},
           ),
         ),
       ),

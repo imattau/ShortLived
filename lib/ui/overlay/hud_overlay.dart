@@ -15,6 +15,7 @@ class HudOverlay extends StatelessWidget {
   final FeedController controller;
   final VoidCallback onLikeLogical;
   final VoidCallback? onShareLogical;
+  final VoidCallback onSearch;
 
   const HudOverlay({
     super.key,
@@ -22,6 +23,7 @@ class HudOverlay extends StatelessWidget {
     required this.controller,
     required this.onLikeLogical,
     this.onShareLogical,
+    required this.onSearch,
   });
   void _toggleHud(BuildContext context) {
     final next = !state.visible.value;
@@ -38,53 +40,6 @@ class HudOverlay extends StatelessWidget {
         ),
       );
     }
-  }
-
-  void _openSearch(BuildContext context) async {
-    state.visible.value = false;
-    await showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF0E0E11),
-      builder: (ctx) => Padding(
-        padding: MediaQuery.of(ctx).viewInsets.add(const EdgeInsets.all(16)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Search',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: 'Type to search…',
-                hintStyle: TextStyle(color: Colors.white54),
-                filled: true,
-                fillColor: Color(0x22FFFFFF),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                ),
-              ),
-              style: TextStyle(color: Colors.white),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Close'),
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    );
-    state.visible.value = true;
   }
 
   @override
@@ -129,7 +84,7 @@ class HudOverlay extends StatelessWidget {
                               left: T.s24 + padding.left,
                               top: T.s24 + padding.top,
                               child: SearchPill(
-                                onTap: () => _openSearch(context),
+                                onTap: onSearch,
                               ),
                             ),
                             Positioned(
