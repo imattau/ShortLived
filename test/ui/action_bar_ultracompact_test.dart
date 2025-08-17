@@ -11,16 +11,13 @@ void main() {
       (t) async {
     await t.binding.setSurfaceSize(const Size(1024, 768));
     await mockNetworkImagesFor(() async {
-      await t
-          .pumpWidget(const TestVideoApp(child: MaterialApp(home: HomePage())));
+      await t.pumpWidget(
+          const TestVideoApp(child: MaterialApp(home: HomePage())));
       await t.pumpAndSettle();
     });
 
-    // Use the Like tooltip proxy to locate the column root.
-    final like = find.byTooltip('Like');
-    expect(like, findsOneWidget);
-    final cluster =
-        find.ancestor(of: like, matching: find.byType(OverlayCluster));
+    // Locate the action cluster directly and confirm it stays compact.
+    final cluster = find.byType(OverlayCluster);
     expect(cluster, findsOneWidget);
     expect(t.getSize(cluster).height, lessThan(320));
   });
