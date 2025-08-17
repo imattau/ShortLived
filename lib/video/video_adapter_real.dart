@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '../ui/home/widgets/unsupported_overlay.dart';
 import 'web_video_compat.dart';
 import 'video_adapter.dart';
+import '../core/config/app_config.dart';
 
 class RealVideoAdapter extends VideoAdapter {
   @override
@@ -83,6 +84,11 @@ class _RealVideoState extends State<_RealVideo> {
 
   Future<void> _init() async {
     final url = widget.url;
+    if (kIsWeb && url.endsWith('.m3u8') && !AppConfig.webHlsPreferred) {
+      widget.onUnsupported?.call('HLS disabled by flag');
+      _safeSetState(() => _error = true);
+      return;
+    }
     if (!WebVideoCompat.browserCanLikelyPlay(url)) {
       widget.onUnsupported?.call('Codec not supported by this browser');
       _safeSetState(() => _error = true);
@@ -138,7 +144,7 @@ class _RealVideoState extends State<_RealVideo> {
         return;
       }
       await local.dispose();
-      widget.onUnsupported?.call(e.toString());
+      widget.onUnsupported?.call('Video init error: $e');
       _safeSetState(() => _error = true);
     }
   }

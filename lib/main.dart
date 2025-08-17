@@ -5,6 +5,7 @@ import 'app.dart';
 import 'video/video_adapter.dart';
 import 'video/video_adapter_real.dart';
 import 'session/user_session.dart';
+import 'data/source_selector.dart';
 
 // Conditional import: on web use the real implementation, elsewhere the stub.
 import 'util/sw_debug_stub.dart'
@@ -17,10 +18,6 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
     FlutterError.onError =
         (details) => FlutterError.dumpErrorToConsole(details);
-
-    const nostr = bool.fromEnvironment('NOSTR_ENABLED', defaultValue: false);
-    // ignore: avoid_print
-    print('[ShortLived] NOSTR_ENABLED=$nostr');
 
     // In debug on web, unregister stale service workers and caches.
     assert(() {
@@ -37,6 +34,9 @@ Future<void> main() async {
       displayName: 'You',
       pictureUrl: null,
     );
+
+    // Select primary data source before app builds.
+    SourceSelector.bootstrap();
 
     runApp(VideoScope(adapter: RealVideoAdapter(), child: const App()));
   }, (Object error, StackTrace stack) {

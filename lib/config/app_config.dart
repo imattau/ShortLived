@@ -1,10 +1,4 @@
-import 'package:flutter/foundation.dart'; // ignore: unused_import
-
-/// Build flag: flutter run -d chrome --dart-define=NOSTR_ENABLED=true
-const bool kNostrEnabled = bool.fromEnvironment(
-  'NOSTR_ENABLED',
-  defaultValue: false,
-);
+// Configuration values for Nostr networking.
 
 // Add more relays (websocket friendly)
 const List<String> kDefaultRelays = <String>[

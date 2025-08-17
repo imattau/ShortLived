@@ -134,8 +134,10 @@ Acceptance
 - Using Copy Link copies a URL that re-opens to the same item.
 
 ### Nostr (read-only) adapter
-- Enable via build flag:  
+- Enable via build flag:
   `flutter run -d chrome --dart-define=NOSTR_ENABLED=true`
+- Prefer web HLS (default true):
+  `flutter run -d chrome --dart-define=WEB_HLS_PREFERRED=true`
 - Edit default relays in `lib/config/app_config.dart`.
 - We subscribe to recent kind-1 notes and try to extract a playable video URL
   from tags `["video" | "media", "<url>"]` or the first `mp4/webm/m3u8` link in content.
@@ -145,6 +147,7 @@ Commands
 - flutter clean && flutter pub get
 - flutter test
 - flutter run -d chrome --dart-define=NOSTR_ENABLED=true
+- flutter run -d chrome --dart-define=WEB_HLS_PREFERRED=true
 
 Acceptance
 - With flag OFF, the demo feed behaves as before.
