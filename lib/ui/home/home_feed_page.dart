@@ -414,7 +414,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     );
   }
 
-  void _shareOrCopy() {
+  void _shareOrCopy() async {
     final p = Locator.I.get<FeedController>().currentOrNull;
     if (p == null) return;
     final link = neventEncode(
@@ -430,13 +430,15 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       }
       return;
     }
-    Share.share(shareText).catchError((_) async {
+    try {
+      await Share.share(shareText);
+    } catch (_) {
       await Clipboard.setData(ClipboardData(text: shareText));
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Link copied')));
       }
-    });
+    }
   }
 
   void _copyLink() {
