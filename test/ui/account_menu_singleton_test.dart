@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nostr_video/ui/home/home_page.dart';
-import 'package:nostr_video/ui/overlay/widgets/viewer_avatar.dart';
+import 'package:nostr_video/ui/widgets/current_user_badge.dart';
 import '../test_helpers/test_video_scope.dart';
 
 void main() {
@@ -10,7 +10,7 @@ void main() {
         .pumpWidget(const TestVideoApp(child: MaterialApp(home: HomePage())));
     await t.pumpAndSettle();
 
-    final avatar = find.byType(ViewerAvatar);
+    final avatar = find.byType(CurrentUserBadge);
 
     // Tap to open.
     await t.tap(avatar);

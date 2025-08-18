@@ -21,6 +21,9 @@ import '../../utils/prefs.dart';
 import '../drawers/drawers.dart';
 import '../drawers/drawer_host.dart';
 import '../sheets/zap_sheet.dart';
+import '../widgets/current_user_badge.dart';
+import '../sheets/account_menu_sheet.dart';
+import '../overlay/sheet_gate.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -209,6 +212,13 @@ class _HomePageState extends State<HomePage> with RouteAware {
     ).whenComplete(() => _zapping = false);
   }
 
+  void _openAccountMenu() {
+    SheetGate.toggleAccountMenu(
+      context,
+      (_) => const AccountMenuSheet(),
+    );
+  }
+
   Future<void> _shareCurrent() async {
     final i = _controller.index.value;
     if (i < 0 || i >= _items.length) return;
@@ -315,6 +325,12 @@ class _HomePageState extends State<HomePage> with RouteAware {
                 ),
               );
             },
+          ),
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: CurrentUserBadge(onTap: _openAccountMenu),
+            ),
           ),
         ],
       ),

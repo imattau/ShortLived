@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nostr_video/app/routes.dart';
 import 'package:nostr_video/ui/pages/notifications_page.dart';
 import 'package:nostr_video/ui/pages/settings_page.dart';
-import 'package:nostr_video/ui/overlay/widgets/account_menu.dart';
+import 'package:nostr_video/ui/sheets/account_menu_sheet.dart';
 
 void main() {
   testWidgets('Account menu items navigate to pages', (tester) async {
@@ -21,7 +21,7 @@ void main() {
                 showModalBottomSheet(
                   context: context,
                   useRootNavigator: true,
-                  builder: accountMenuContent,
+                  builder: (_) => const AccountMenuSheet(),
                 );
               },
               child: const Text('Open'),
