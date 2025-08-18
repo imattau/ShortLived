@@ -61,7 +61,7 @@ class FakePrefs implements SharedPreferences {
   @override
   Stream<Map<String, dynamic>> get events => const Stream.empty();
   @override
-  Future<void> like({required String eventId}) async {}
+  Future<void> like({required String eventId, required String authorPubkey}) async {}
   @override
   Future<void> reply(
       {required String parentId,

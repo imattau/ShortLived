@@ -18,7 +18,11 @@ abstract class RelayService {
   });
 
   /// High-level helpers now require signing context; implementations can call KeyService.
-  Future<void> like({required String eventId});
+  Future<void> like({
+    required String eventId,
+    required String authorPubkey,
+    String emojiOrPlus = '+',
+  });
   Future<void> reply({
     required String parentId,
     required String content,

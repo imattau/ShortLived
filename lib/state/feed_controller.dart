@@ -16,6 +16,7 @@ class FeedController extends ChangeNotifier {
   bool _online = true;
   ActionQueue? _queue;
   RelayService? _relayForReplay;
+  final Set<String> _sessionLiked = {};
   void insertOptimistic(Post p) {
     _posts.insert(0, p);
     _index = 0;
@@ -74,21 +75,39 @@ class FeedController extends ChangeNotifier {
   Future<void> likeCurrent(RelayService relay) async {
     if (_posts.isEmpty) return;
     final p = _posts[_index];
+    if (_sessionLiked.contains(p.id)) return;
+
+    _sessionLiked.add(p.id);
+    final before = p.likeCount;
     _posts[_index] = p.copyWith(likeCount: p.likeCount + 1);
     notifyListeners();
 
-    final action = QueuedAction(ActionType.like, {'eventId': p.id});
+    Future<void> doPublish() =>
+        relay.like(eventId: p.id, authorPubkey: p.author.pubkey);
+    final action = QueuedAction(
+        ActionType.like, {'eventId': p.id, 'authorPubkey': p.author.pubkey});
+
     if (!_online || _queue == null) {
       try {
-        await relay.like(eventId: p.id);
-      } catch (_) {}
+        await doPublish();
+      } catch (_) {
+        _posts[_index] = p.copyWith(likeCount: before);
+        _sessionLiked.remove(p.id);
+        notifyListeners();
+      }
       return;
     }
 
     try {
-      await relay.like(eventId: p.id);
+      await doPublish();
     } catch (_) {
-      await _queue!.enqueue(action);
+      try {
+        await _queue!.enqueue(action);
+      } catch (_) {
+        _posts[_index] = p.copyWith(likeCount: before);
+        _sessionLiked.remove(p.id);
+        notifyListeners();
+      }
     }
   }
 
@@ -147,7 +166,9 @@ class FeedController extends ChangeNotifier {
               await relay.signAndPublish(kind: kind, content: content, tags: tags);
               break;
           case ActionType.like:
-            await relay.like(eventId: a.payload['eventId'] as String);
+            await relay.like(
+                eventId: a.payload['eventId'] as String,
+                authorPubkey: a.payload['authorPubkey'] as String);
             break;
           case ActionType.reply:
             await relay.reply(
