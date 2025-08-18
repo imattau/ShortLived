@@ -1,12 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../core/di/locator.dart';
-import '../../services/nostr/relay_service.dart';
-import '../../services/lightning/lightning_service.dart';
-import '../../services/nostr/metadata_service.dart';
 import '../../state/feed_controller.dart';
-import '../../services/keys/key_service.dart';
+import '../../services/lightning/zap_service.dart';
+import '../../services/nostr/metadata_service.dart';
 
 class ZapSheet extends StatefulWidget {
   const ZapSheet({super.key});
@@ -32,42 +28,15 @@ class _ZapSheetState extends State<ZapSheet> {
 
     setState(() => _loading = true);
     try {
-      final meta = Locator.I.tryGet<MetadataService>()?.get(p.author.pubkey);
-      final addr = meta?.lud16?.isNotEmpty == true ? meta!.lud16! : null;
-      final lnurl = meta?.lud06?.isNotEmpty == true ? meta!.lud06! : null;
-      if (addr == null && lnurl == null) {
-        throw Exception('No lightning address');
-      }
-
-      final relay = Locator.I.get<RelayService>();
-      final zapReq = await relay.buildZapRequest(
-        recipientPubkey: p.author.pubkey,
-        eventId: p.id,
-        content: _note.text.trim(),
-        amountMsat: _sats * 1000,
-      );
-
-      final l = Locator.I.tryGet<LightningService>() ??
-          LnurlLightningService(Dio(), Locator.I.get<KeyService>());
-      final params = addr != null
-          ? await l.fetchParamsFromAddress(addr)
-          : await l.fetchParamsFromLnurl(lnurl!);
-      final inv = await l.requestInvoice(
-        params: params,
+      await ZapService.instance.zap(
+        post: p,
         amountSats: _sats,
-        zapRequest9734: zapReq,
         comment: _note.text.trim().isEmpty ? null : _note.text.trim(),
       );
-
-      final uri = Uri.parse('lightning:${inv.bolt11}');
-      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-        throw Exception('No wallet found to handle invoice');
-      }
-
       if (mounted) Navigator.of(context).maybePop();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Opened wallet for $_sats sats')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Zap sent')));
       }
     } catch (e) {
       if (mounted) {

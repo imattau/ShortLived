@@ -9,6 +9,9 @@ import '../keys/signer.dart';
 import '../../core/di/locator.dart';
 import 'events/reaction_event.dart';
 import 'events/zap_request_event.dart';
+import '../lightning/zap_service.dart';
+import '../../state/feed_controller.dart';
+import '../../data/models/post.dart';
 
 typedef WebSocketFactory = WebSocketChannel Function(Uri uri);
 
@@ -196,7 +199,20 @@ class RelayServiceWs implements RelayService {
   @override
   Future<void> zapRequest(
       {required String eventId, required int millisats}) async {
-    // Not implemented yet
+    final fc = Locator.I.tryGet<FeedController>();
+    Post? post;
+    if (fc != null) {
+      try {
+        post = fc.posts.firstWhere((p) => p.id == eventId);
+      } catch (_) {
+        post = null;
+      }
+    }
+    if (post == null) {
+      throw Exception('Post not found for zap');
+    }
+    await ZapService.instance
+        .zap(post: post, amountSats: millisats ~/ 1000);
   }
 
   @override
