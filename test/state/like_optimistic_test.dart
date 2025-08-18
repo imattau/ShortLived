@@ -64,7 +64,8 @@ void main() {
     final c = FeedController(MockFeedRepository(count: 1));
     await c.connect();
     final before = c.posts.first.likeCount;
-    await c.likeCurrent(_NoopRelay());
+    final ok = await c.likeCurrent(_NoopRelay());
+    expect(ok, isTrue);
     expect(c.posts.first.likeCount, before + 1);
   });
 
@@ -73,7 +74,8 @@ void main() {
     await c.connect();
     c.setOnline(false);
     final before = c.posts.first.likeCount;
-    await c.likeCurrent(_FailRelay());
+    final ok = await c.likeCurrent(_FailRelay());
+    expect(ok, isFalse);
     expect(c.posts.first.likeCount, before);
   });
 }
