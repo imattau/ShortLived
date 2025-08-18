@@ -72,10 +72,10 @@ class FeedController extends ChangeNotifier {
     _relayForReplay = relay ?? _relayForReplay;
   }
 
-  Future<void> likeCurrent(RelayService relay) async {
-    if (_posts.isEmpty) return;
+  Future<bool> likeCurrent(RelayService relay) async {
+    if (_posts.isEmpty) return false;
     final p = _posts[_index];
-    if (_sessionLiked.contains(p.id)) return;
+    if (_sessionLiked.contains(p.id)) return true;
 
     _sessionLiked.add(p.id);
     final before = p.likeCount;
@@ -90,23 +90,27 @@ class FeedController extends ChangeNotifier {
     if (!_online || _queue == null) {
       try {
         await doPublish();
+        return true;
       } catch (_) {
         _posts[_index] = p.copyWith(likeCount: before);
         _sessionLiked.remove(p.id);
         notifyListeners();
+        return false;
       }
-      return;
     }
 
     try {
       await doPublish();
+      return true;
     } catch (_) {
       try {
         await _queue!.enqueue(action);
+        return true;
       } catch (_) {
         _posts[_index] = p.copyWith(likeCount: before);
         _sessionLiked.remove(p.id);
         notifyListeners();
+        return false;
       }
     }
   }

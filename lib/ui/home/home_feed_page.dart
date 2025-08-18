@@ -40,7 +40,9 @@ import '../../core/testing/test_switches.dart';
 import '../../services/nostr/relay_directory.dart';
 import '../../web/pwa/pwa_service.dart';
 import '../../crypto/nip19.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../utils/capabilities.dart';
 import '../../utils/count_format.dart';
 
 class _RelayServiceStub implements RelayService {
@@ -267,7 +269,12 @@ class _HomeFeedPageState extends State<HomeFeedPage>
 
   void _like() {
     final controller = Locator.I.get<FeedController>();
-    controller.likeCurrent(relay);
+    controller.likeCurrent(relay).then((ok) {
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Failed to like')));
+      }
+    });
   }
 
   Future<void> _repost() async {
@@ -407,14 +414,44 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     );
   }
 
-  void _shareCurrent() {
+  void _shareOrCopy() {
     final p = Locator.I.get<FeedController>().currentOrNull;
     if (p == null) return;
     final link = neventEncode(
       eventIdHex: p.id,
       authorPubkeyHex: p.author.pubkey,
     );
-    Share.share('nostr:$link');
+    final shareText = 'nostr:$link';
+    if (!Capabilities.shareSupported) {
+      Clipboard.setData(ClipboardData(text: shareText));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Link copied')));
+      }
+      return;
+    }
+    Share.share(shareText).catchError((_) async {
+      await Clipboard.setData(ClipboardData(text: shareText));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Link copied')));
+      }
+    });
+  }
+
+  void _copyLink() {
+    final p = Locator.I.get<FeedController>().currentOrNull;
+    if (p == null) return;
+    final link = neventEncode(
+      eventIdHex: p.id,
+      authorPubkeyHex: p.author.pubkey,
+    );
+    final shareText = 'nostr:$link';
+    Clipboard.setData(ClipboardData(text: shareText));
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Link copied')));
+    }
   }
 
   Future<void> _promptInstall() async {
@@ -456,8 +493,8 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                     onLike: _like,
                     onComment: _openComments,
                     onRepost: _repost,
-                    onShare: _shareCurrent,
-                    onCopyLink: _shareCurrent,
+                    onShare: _shareOrCopy,
+                    onCopyLink: _copyLink,
                     onZap: _openZap,
                     likeCount:
                         formatCount(_currentPost?.likeCount ?? 0),
