@@ -50,41 +50,55 @@ class _RelayServiceStub implements RelayService {
   Future<void> init(List<String> relays) async {}
 
   @override
-  Future<String> subscribe(List<Map<String, dynamic>> filters,
-          {String? subId}) async =>
-      'sub';
+  Future<String> subscribe(
+    List<Map<String, dynamic>> filters, {
+    String? subId,
+  }) async => 'sub';
 
   @override
   Future<void> close(String subId) async {}
 
   @override
-  Stream<List<dynamic>> subscribeFeed(
-          {required List<String> authors, String? hashtag}) =>
-      const Stream.empty();
+  Stream<List<dynamic>> subscribeFeed({
+    required List<String> authors,
+    String? hashtag,
+  }) => const Stream.empty();
 
   @override
   Future<String> publishEvent(Map<String, dynamic> signedEventJson) async =>
       'id';
 
   @override
-  Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
+  Future<String?> signAndPublish({
+    required int kind,
+    required String content,
+    required List<List<String>> tags,
+  }) async => 'id';
 
   @override
-  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
+  Future<void> like({
+    required String eventId,
+    required String authorPubkey,
+    String emojiOrPlus = '+',
+  }) async {}
 
   @override
-  Future<void> reply(
-      {required String parentId,
-      required String content,
-      String? parentPubkey,
-      String? rootId,
-      String? rootPubkey}) async {}
+  Future<void> reply({
+    required String parentId,
+    required String content,
+    String? parentPubkey,
+    String? rootId,
+    String? rootPubkey,
+  }) async {}
 
   @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
 
   @override
-  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+  Future<void> zapRequest({
+    required String eventId,
+    required int millisats,
+  }) async {}
 
   @override
   Stream<Map<String, dynamic>> get events => const Stream.empty();
@@ -93,13 +107,13 @@ class _RelayServiceStub implements RelayService {
   Future<void> resetConnections(List<String> urls) async {}
 
   @override
-  Future<Map<String, dynamic>> buildZapRequest(
-          {required String recipientPubkey,
-          required String eventId,
-          String content = '',
-          List<String>? relays,
-          int amountMsat = 0}) async =>
-      {};
+  Future<Map<String, dynamic>> buildZapRequest({
+    required String recipientPubkey,
+    required String eventId,
+    String content = '',
+    List<String>? relays,
+    int amountMsat = 0,
+  }) async => {};
 }
 
 class HomeFeedPage extends StatefulWidget {
@@ -160,10 +174,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void _registerMuteService() {
     if (Locator.I.tryGet<MuteService>() == null) {
       Locator.I.put<MuteService>(
-        MuteService(
-          settings,
-          Locator.I.get<RelayService>(),
-        ),
+        MuteService(settings, Locator.I.get<RelayService>()),
       );
     }
   }
@@ -172,24 +183,37 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _init();
+  }
+
+  Future<void> _init() async {
     // Use a stub if no PwaService has been registered. Tests typically do not
     // bootstrap the service locator, so falling back keeps them isolated.
     _pwa = Locator.I.tryGet<PwaService>() ?? PwaServiceStub();
     if (Locator.I.tryGet<KeyService>() == null) {
       Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
     }
+    settings =
+        Locator.I.tryGet<SettingsService>() ??
+        SettingsService(await SharedPreferences.getInstance());
+    safety = ContentSafetyService(settings);
+    if (!Locator.I.contains<SettingsService>()) {
+      Locator.I.put<SettingsService>(settings);
+    }
+    overlaysVisible = !settings.overlaysDefaultHidden();
     if (AppConfig.nostrEnabled) {
-      relay = Locator.I.tryGet<RelayService>() ??
+      relay =
+          Locator.I.tryGet<RelayService>() ??
           RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
       if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
-        relay.init(NetworkConfig.relays);
+        await relay.init(NetworkConfig.relays);
         Locator.I.put<RelayService>(relay);
       }
-      relayDir = Locator.I.tryGet<RelayDirectory>() ??
-          RelayDirectory(Locator.I.get(), Locator.I.get(), Locator.I.get());
+      relayDir =
+          Locator.I.tryGet<RelayDirectory>() ??
+          RelayDirectory(settings, relay, Locator.I.get<KeyService>());
       Locator.I.put<RelayDirectory>(relayDir!);
-      // On production runs, apply NIP-65; tests have disableRelays = true.
-      relayDir!.init();
+      await relayDir!.init();
       _zapSub = relay.events.listen((evt) {
         if (evt['kind'] == 9735) {
           final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
@@ -203,7 +227,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       });
       queue = Locator.I.tryGet<ActionQueue>() ?? ActionQueueHive();
       if (!Locator.I.contains<ActionQueue>()) {
-        queue!.init();
+        await queue!.init();
         Locator.I.put<ActionQueue>(queue!);
       }
       if (!TestSwitches.disableRelays) {
@@ -221,28 +245,11 @@ class _HomeFeedPageState extends State<HomeFeedPage>
         Locator.I.put<RelayService>(relay);
       }
     }
-    final existing = Locator.I.tryGet<SettingsService>();
-    if (existing != null) {
-      settings = existing;
-      safety = ContentSafetyService(settings);
-      overlaysVisible = !settings.overlaysDefaultHidden();
-      Locator.I.ensureSigner();
-      _setupNotifications();
-      _registerMuteService();
-    } else {
-      SharedPreferences.getInstance().then((sp) {
-        settings = SettingsService(sp);
-        safety = ContentSafetyService(settings);
-        Locator.I.put<SettingsService>(settings);
-        Locator.I.ensureSigner();
-        _setupNotifications();
-        _registerMuteService();
-        if (mounted) {
-          setState(() {
-            overlaysVisible = !settings.overlaysDefaultHidden();
-          });
-        }
-      });
+    Locator.I.ensureSigner();
+    _setupNotifications();
+    _registerMuteService();
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -271,8 +278,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     final controller = Locator.I.get<FeedController>();
     controller.likeCurrent(relay).then((ok) {
       if (!ok && mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Failed to like')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to like')));
       }
     });
   }
@@ -425,8 +433,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     if (!Capabilities.shareSupported) {
       Clipboard.setData(ClipboardData(text: shareText));
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Link copied')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Link copied')));
       }
       return;
     }
@@ -435,8 +444,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: shareText));
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Link copied')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Link copied')));
       }
     }
   }
@@ -451,8 +461,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     final shareText = 'nostr:$link';
     Clipboard.setData(ClipboardData(text: shareText));
     if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Link copied')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Link copied')));
     }
   }
 
@@ -498,12 +509,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                     onShare: _shareOrCopy,
                     onCopyLink: _copyLink,
                     onZap: _openZap,
-                    likeCount:
-                        formatCount(_currentPost?.likeCount ?? 0),
-                    commentCount:
-                        formatCount(_currentPost?.commentCount ?? 0),
-                    repostCount:
-                        formatCount(_currentPost?.repostCount ?? 0),
+                    likeCount: formatCount(_currentPost?.likeCount ?? 0),
+                    commentCount: formatCount(_currentPost?.commentCount ?? 0),
+                    repostCount: formatCount(_currentPost?.repostCount ?? 0),
                     shareCount: '0',
                     zapCount: '0',
                   ),
