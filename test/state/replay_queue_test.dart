@@ -79,7 +79,10 @@ void main() async {
 
     await c.enqueuePublish({'kind': 1, 'content': 'hi', 'tags': []});
     await c.enqueueReply('evt1', 'yo', parentPubkey: 'pk');
-    await q.enqueue(QueuedAction(ActionType.like, {'eventId': 'evt1'}));
+    await q.enqueue(QueuedAction(ActionType.like, {
+      'eventId': 'evt1',
+      'authorPubkey': 'pk',
+    }));
 
     final spy = _RelaySpy();
     await c.replayQueue(spy);
