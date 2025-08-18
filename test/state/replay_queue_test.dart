@@ -12,7 +12,7 @@ import 'package:nostr_video/services/queue/action_queue.dart';
   @override
   Future<void> init(List<String> relays) async {}
   @override
-  Future<void> like({required String eventId, required String authorPubkey}) async {
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {
     likes++;
   }
 

@@ -7,7 +7,7 @@ class _NoopRelay implements RelayService {
   @override
   Future<void> init(List<String> relays) async {}
   @override
-  Future<void> like({required String eventId, required String authorPubkey}) async {}
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
     @override
     Future<String> publishEvent(Map<String, dynamic> e) async => 'id';
     @override
@@ -53,7 +53,7 @@ class _NoopRelay implements RelayService {
 
 class _FailRelay extends _NoopRelay {
   @override
-  Future<void> like({required String eventId, required String authorPubkey}) async {
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {
     throw Exception('fail');
   }
 }
