@@ -233,9 +233,11 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       if (!TestSwitches.disableRelays) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            final c = Locator.I.get<FeedController>();
-            c.bindQueue(queue!);
-            c.setOnline(true, relay: Locator.I.get<RelayService>());
+            final c = Locator.I.tryGet<FeedController>();
+            if (c != null) {
+              c.bindQueue(queue!);
+              c.setOnline(true, relay: Locator.I.get<RelayService>());
+            }
           }
         });
       }
@@ -264,19 +266,20 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      Locator.I.get<FeedController>().replayQueue(relay);
+      final c = Locator.I.tryGet<FeedController>();
+      c?.replayQueue(relay);
     }
   }
 
   Post? get _currentPost {
-    final c = Locator.I.get<FeedController>();
-    if (c.posts.isEmpty) return null;
+    final c = Locator.I.tryGet<FeedController>();
+    if (c == null || c.posts.isEmpty) return null;
     return c.posts[c.index];
   }
 
   void _like() {
-    final controller = Locator.I.get<FeedController>();
-    controller.likeCurrent(relay).then((ok) {
+    final controller = Locator.I.tryGet<FeedController>();
+    controller?.likeCurrent(relay).then((ok) {
       if (!ok && mounted) {
         ScaffoldMessenger.of(
           context,
@@ -286,9 +289,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   Future<void> _repost() async {
-    final c = Locator.I.get<FeedController>();
-    final p = c.currentOrNull;
-    if (p == null) return;
+    final c = Locator.I.tryGet<FeedController>();
+    final p = c?.currentOrNull;
+    if (c == null || p == null) return;
     final confirm = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.black,
@@ -303,9 +306,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   Future<void> _openQuote() async {
-    final c = Locator.I.get<FeedController>();
-    final p = c.currentOrNull;
-    if (p == null) return;
+    final c = Locator.I.tryGet<FeedController>();
+    final p = c?.currentOrNull;
+    if (c == null || p == null) return;
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
@@ -316,9 +319,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   Future<void> _openComments() async {
-    final c = Locator.I.get<FeedController>();
-    final p = c.currentOrNull;
-    if (p == null) return;
+    final c = Locator.I.tryGet<FeedController>();
+    final p = c?.currentOrNull;
+    if (c == null || p == null) return;
     _pausedBySheet.value = true;
     await showModalBottomSheet(
       context: context,
@@ -369,13 +372,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
 
   Future<void> _openProfile() async {
     final p = _currentPost;
-    if (p == null) return;
+    final fc = Locator.I.tryGet<FeedController>();
+    if (p == null || fc == null) return;
     _pausedBySheet.value = true;
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
       builder: (_) => ProfileSheet(
-        controller: Locator.I.get<FeedController>(),
+        controller: fc,
         pubkey: p.author.pubkey,
         displayName: p.author.name,
       ),
@@ -423,7 +427,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   void _shareOrCopy() async {
-    final p = Locator.I.get<FeedController>().currentOrNull;
+    final p = Locator.I.tryGet<FeedController>()?.currentOrNull;
     if (p == null) return;
     final link = neventEncode(
       eventIdHex: p.id,
@@ -452,7 +456,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   void _copyLink() {
-    final p = Locator.I.get<FeedController>().currentOrNull;
+    final p = Locator.I.tryGet<FeedController>()?.currentOrNull;
     if (p == null) return;
     final link = neventEncode(
       eventIdHex: p.id,
