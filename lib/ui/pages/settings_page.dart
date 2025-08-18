@@ -9,9 +9,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppLabels.settingsTitle),
-      ),
+      appBar: AppBar(title: const Text(AppLabels.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: const [
@@ -38,10 +36,7 @@ class SettingsPage extends StatelessWidget {
           ),
           _SettingsGroup(
             title: 'About',
-            children: [
-              _SettingsTile('App Version'),
-              _SettingsTile('Licenses'),
-            ],
+            children: [_SettingsTile('App Version'), _SettingsTile('Licenses')],
           ),
         ],
       ),

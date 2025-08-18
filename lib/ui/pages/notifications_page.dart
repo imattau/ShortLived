@@ -9,9 +9,7 @@ class NotificationsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppLabels.notificationsTitle),
-      ),
+      appBar: AppBar(title: const Text(AppLabels.notificationsTitle)),
       body: const _EmptyNotifications(),
     );
   }

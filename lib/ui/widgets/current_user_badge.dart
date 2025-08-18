@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Bottom-right floating user avatar that opens the account menu.
 class CurrentUserBadge extends StatelessWidget {
-  const CurrentUserBadge({
-    super.key,
-    required this.onTap,
-  });
+  const CurrentUserBadge({super.key, required this.onTap});
 
   final VoidCallback onTap;
 
@@ -46,4 +43,3 @@ class CurrentUserBadge extends StatelessWidget {
     );
   }
 }
-

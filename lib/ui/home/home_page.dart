@@ -54,7 +54,9 @@ class _HomePageState extends State<HomePage> with RouteAware {
     model: ValueNotifier<HudModel>(
       AppConfig.nostrEnabled
           ? const HudModel(
-              caption: 'Loading Nostr…', fullCaption: 'Loading Nostr…')
+              caption: 'Loading Nostr…',
+              fullCaption: 'Loading Nostr…',
+            )
           : _modelFromItem(_items[0]),
     ),
   );
@@ -63,16 +65,16 @@ class _HomePageState extends State<HomePage> with RouteAware {
   late final VoidCallback _drawerListener;
 
   HudModel _modelFromItem(FeedItem f) => HudModel(
-        caption: CaptionFormat.display(f.caption),
-        fullCaption: f.caption,
-        likeCount: f.likeCount,
-        commentCount: f.commentCount,
-        repostCount: f.repostCount,
-        shareCount: f.shareCount,
-        zapCount: f.zapCount,
-        authorDisplay: f.authorDisplay,
-        authorNpub: f.authorNpub,
-      );
+    caption: CaptionFormat.display(f.caption),
+    fullCaption: f.caption,
+    likeCount: f.likeCount,
+    commentCount: f.commentCount,
+    repostCount: f.repostCount,
+    shareCount: f.shareCount,
+    zapCount: f.zapCount,
+    authorDisplay: f.authorDisplay,
+    authorNpub: f.authorNpub,
+  );
 
   @override
   void initState() {
@@ -112,7 +114,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
           child: HudOverlay(
             state: _hud,
             controller: _controller,
-          onLikeLogical: _likeCurrent,
+            onLikeLogical: _likeCurrent,
             onShareLogical: _shareCurrent,
             onSearch: () => _drawers.open(DrawerType.search),
             onZap: _handleZap,
@@ -121,9 +123,8 @@ class _HomePageState extends State<HomePage> with RouteAware {
       );
       overlay.insert(_entry!);
       _drawerEntry = OverlayEntry(
-        builder: (ctx) => Positioned.fill(
-          child: DrawerHost(controller: _drawers),
-        ),
+        builder: (ctx) =>
+            Positioned.fill(child: DrawerHost(controller: _drawers)),
       );
       overlay.insert(_drawerEntry!);
     });
@@ -190,9 +191,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
 
   void _snack(String msg) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   void _bumpShareCount(int i) {
@@ -213,10 +212,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
   }
 
   void _openAccountMenu() {
-    SheetGate.toggleAccountMenu(
-      context,
-      (_) => const AccountMenuSheet(),
-    );
+    SheetGate.toggleAccountMenu(context, (_) => const AccountMenuSheet());
   }
 
   Future<void> _shareCurrent() async {
@@ -234,11 +230,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
       return;
     }
 
-    final ok = await shareShim.share(
-      url: url,
-      text: text,
-      title: 'ShortLived',
-    );
+    final ok = await shareShim.share(url: url, text: text, title: 'ShortLived');
     if (!ok) {
       await Clipboard.setData(ClipboardData(text: url));
       _snack('Link copied');
@@ -293,8 +285,10 @@ class _HomePageState extends State<HomePage> with RouteAware {
             onDoubleTapLike: (_) => _likeCurrent(),
             initialIndex: _initialIndex,
             onUnsupported: (reason) {
-              debugPrint('[ShortLived] Unsupported: '
-                  '$reason → skipping');
+              debugPrint(
+                '[ShortLived] Unsupported: '
+                '$reason → skipping',
+              );
               _controller.next();
             },
             onSkip: _controller.next,

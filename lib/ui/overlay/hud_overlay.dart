@@ -59,13 +59,16 @@ class HudOverlay extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            GestureDetector(
+            Listener(
               behavior: HitTestBehavior.translucent,
-              onTap: () {
+              onPointerDown: (_) {
                 if (!state.visible.value) state.visible.value = true;
               },
-              onLongPress: () => _toggleHud(context),
-              child: const SizedBox.expand(),
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onLongPress: () => _toggleHud(context),
+                child: const SizedBox.expand(),
+              ),
             ),
             ValueListenableBuilder<bool>(
               valueListenable: state.visible,
@@ -77,81 +80,89 @@ class HudOverlay extends StatelessWidget {
                     duration: const Duration(milliseconds: 150),
                     child: Material(
                       type: MaterialType.transparency,
-                      child: Builder(builder: (context) {
-                        final padding = MediaQuery.of(context).padding;
-                        return Stack(
-                          children: [
-                            Positioned(
-                              left: T.s24 + padding.left,
-                              top: T.s24 + padding.top,
-                              child: SearchPill(
-                                onTap: onSearch,
-                              ),
-                            ),
-                            Positioned(
-                              right: T.s24 + padding.right,
-                              top: T.s24 + padding.top,
-                              child: const SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: Center(child: AppIcon('bell_24')),
-                              ),
-                            ),
-                            if (kIsWeb)
+                      child: Builder(
+                        builder: (context) {
+                          final padding = MediaQuery.of(context).padding;
+                          return Stack(
+                            children: [
                               Positioned(
                                 left: T.s24 + padding.left,
-                                top: T.s24 + padding.top + 56,
-                                child: ValueListenableBuilder<bool>(
-                                  valueListenable: controller.muted,
-                                  builder: (_, muted, __) => ElevatedButton(
-                                    onPressed: controller.toggleMute,
-                                    child: Text(muted ? 'Unmute' : 'Mute'),
-                                  ),
+                                top: T.s24 + padding.top,
+                                child: SearchPill(onTap: onSearch),
+                              ),
+                              Positioned(
+                                right: T.s24 + padding.right,
+                                top: T.s24 + padding.top,
+                                child: const SizedBox(
+                                  width: 48,
+                                  height: 48,
+                                  child: Center(child: AppIcon('bell_24')),
                                 ),
                               ),
-                            Builder(builder: (ctx) {
-                              final s = MediaQuery.of(ctx).size;
-                              final bottom = (s.height * 0.18 +
-                                      MediaQuery.of(ctx).padding.bottom)
-                                  .clamp(80.0, T.stackBottomReserve);
-                              return Positioned(
-                                right: T.stackSidePad + padding.right,
-                                bottom: bottom,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxHeight:
-                                        s.height - bottom - T.stackTopHeadroom,
-                                  ),
-                                  child: OverlayCluster(
-                                    onLike: onLikeLogical,
-                                    onComment: () {},
-                                    onRepost: () {},
-                                    onShare: onShareLogical ?? () {},
-                                    onCopyLink: () {},
-                                    onZap: onZap ?? () {},
-                                    likeCount: state.model.value.likeCount,
-                                    commentCount:
-                                        state.model.value.commentCount,
-                                    repostCount:
-                                        state.model.value.repostCount,
-                                    shareCount: state.model.value.shareCount,
-                                    zapCount: state.model.value.zapCount,
+                              if (kIsWeb)
+                                Positioned(
+                                  left: T.s24 + padding.left,
+                                  top: T.s24 + padding.top + 56,
+                                  child: ValueListenableBuilder<bool>(
+                                    valueListenable: controller.muted,
+                                    builder: (_, muted, __) => ElevatedButton(
+                                      onPressed: controller.toggleMute,
+                                      child: Text(muted ? 'Unmute' : 'Mute'),
+                                    ),
                                   ),
                                 ),
-                              );
-                            }),
-                            Positioned(
-                              left: T.s24 + padding.left,
-                              bottom: MediaQuery.of(context).size.height * 0.22 +
-                                  padding.bottom,
-                              child: ValueListenableBuilder<HudModel>(
-                                valueListenable: state.model,
-                                builder: (_, m, __) => BottomInfoBar(model: m),
+                              Builder(
+                                builder: (ctx) {
+                                  final s = MediaQuery.of(ctx).size;
+                                  final bottom =
+                                      (s.height * 0.18 +
+                                              MediaQuery.of(ctx).padding.bottom)
+                                          .clamp(80.0, T.stackBottomReserve);
+                                  return Positioned(
+                                    right: T.stackSidePad + padding.right,
+                                    bottom: bottom,
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxHeight:
+                                            s.height -
+                                            bottom -
+                                            T.stackTopHeadroom,
+                                      ),
+                                      child: OverlayCluster(
+                                        onLike: onLikeLogical,
+                                        onComment: () {},
+                                        onRepost: () {},
+                                        onShare: onShareLogical ?? () {},
+                                        onCopyLink: () {},
+                                        onZap: onZap ?? () {},
+                                        likeCount: state.model.value.likeCount,
+                                        commentCount:
+                                            state.model.value.commentCount,
+                                        repostCount:
+                                            state.model.value.repostCount,
+                                        shareCount:
+                                            state.model.value.shareCount,
+                                        zapCount: state.model.value.zapCount,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ),
-                          ],
-                        );
-                      }),
+                              Positioned(
+                                left: T.s24 + padding.left,
+                                bottom:
+                                    MediaQuery.of(context).size.height * 0.22 +
+                                    padding.bottom,
+                                child: ValueListenableBuilder<HudModel>(
+                                  valueListenable: state.model,
+                                  builder: (_, m, __) =>
+                                      BottomInfoBar(model: m),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 );

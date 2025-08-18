@@ -14,8 +14,9 @@ class AccountMenuSheet extends StatelessWidget {
         label: 'Notifications',
         onTap: () {
           Navigator.of(context).pop();
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
         },
       ),
       _Item(
@@ -23,8 +24,9 @@ class AccountMenuSheet extends StatelessWidget {
         label: 'Settings',
         onTap: () {
           Navigator.of(context).pop();
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => const SettingsPage()));
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
         },
       ),
     ];
@@ -60,4 +62,3 @@ class _Item {
   final VoidCallback onTap;
   _Item({required this.icon, required this.label, required this.onTap});
 }
-
