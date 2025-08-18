@@ -4,6 +4,7 @@ import '../nostr/nostr_repo.dart';
 import '../nostr/nostr_repo_ws.dart';
 import '../nostr/mapper.dart';
 import '../config/app_config.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 abstract class FeedDataSource {
   Stream<List<FeedItem>> streamInitial();
@@ -39,7 +40,9 @@ class NostrFeedDataSource implements FeedDataSource {
           (e) {
             final m = mapEventToFeedItem(
               e,
-              preferredExts: const ['mp4', 'webm', 'm3u8'],
+              preferredExts: kIsWeb
+                  ? const ['mp4', 'm3u8', 'webm']
+                  : const ['m3u8', 'mp4', 'webm'],
             );
             if (m != null) {
               items.add(m);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'core/app_router.dart';
 import 'ui/design/theme.dart';
-import 'ui/home/home_page.dart';
+import 'ui/home/home_feed_page.dart';
 import 'navigation/route_observer.dart';
 
 class App extends StatelessWidget {
@@ -15,7 +15,7 @@ class App extends StatelessWidget {
       navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
       theme: appThemeDark,
-      home: const HomePage(),
+      home: const HomeFeedPage(),
     );
   }
 }
