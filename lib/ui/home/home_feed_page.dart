@@ -11,6 +11,7 @@ import '../sheets/profile_sheet.dart';
 import '../sheets/details_sheet.dart';
 import '../sheets/relays_sheet.dart';
 import '../sheets/quote_sheet.dart';
+import '../sheets/repost_sheet.dart';
 import '../sheets/search_sheet.dart';
 import '../sheets/settings_sheet.dart';
 import '../sheets/notifications_sheet.dart';
@@ -199,10 +200,21 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     controller.likeCurrent(relay);
   }
 
-  void _repost() {
+  Future<void> _repost() async {
     final c = Locator.I.get<FeedController>();
-    final r = Locator.I.get<RelayService>();
-    c.repostCurrent(r);
+    final p = c.currentOrNull;
+    if (p == null) return;
+    final confirm = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.black,
+      isDismissible: true,
+      enableDrag: true,
+      builder: (_) => RepostSheet(eventId: p.id),
+    );
+    if (confirm == true) {
+      final r = Locator.I.get<RelayService>();
+      c.repostCurrent(r);
+    }
   }
 
   Future<void> _openQuote() async {
@@ -303,6 +315,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       context: context,
       backgroundColor: Colors.black,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      barrierColor: Colors.black54,
       builder: (_) => const SearchSheet(),
     );
   }
