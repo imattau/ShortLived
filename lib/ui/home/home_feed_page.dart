@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'widgets/feed_video_player_view.dart';
 import 'widgets/overlay_cluster.dart';
+import 'widgets/create_button.dart';
 import '../sheets/create_sheet.dart';
 import '../sheets/comments_sheet.dart';
 import '../sheets/zap_sheet.dart';
@@ -540,11 +541,14 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 16,
+                  bottom: 24 + MediaQuery.of(context).padding.bottom,
                   child: Center(
-                    child: FloatingActionButton.large(
-                      onPressed: _openCreate,
-                      child: const Icon(Icons.add),
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: _pausedBySheet,
+                      builder: (_, paused, __) => CreateButton(
+                        onPressed: _openCreate,
+                        hidden: !overlaysVisible || paused,
+                      ),
                     ),
                   ),
                 ),

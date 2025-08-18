@@ -9,6 +9,8 @@ import '../home/feed_controller.dart';
 import 'widgets/search_pill.dart';
 import 'widgets/bottom_info_bar.dart';
 
+// Ensure no FloatingActionButton usage remains here.
+
 class HudOverlay extends StatelessWidget {
   final HudState state;
   final FeedController controller;
