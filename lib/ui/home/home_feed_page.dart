@@ -212,7 +212,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       }
       relayDir =
           Locator.I.tryGet<RelayDirectory>() ??
-          RelayDirectory(settings, relay, Locator.I.get<KeyService>());
+          RelayDirectory(settings!, relay, Locator.I.get<KeyService>());
       Locator.I.put<RelayDirectory>(relayDir!);
       await relayDir!.init();
       _zapSub = relay.events.listen((evt) {
