@@ -76,7 +76,8 @@ class FakePrefs implements SharedPreferences {
           {required String recipientPubkey,
           required String eventId,
           String content = '',
-          List<String>? relays}) async =>
+          List<String>? relays,
+          int amountMsat = 0}) async =>
       {};
   @override
   Future<void> resetConnections(List<String> urls) async {}

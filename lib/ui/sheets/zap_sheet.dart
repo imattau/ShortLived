@@ -44,6 +44,7 @@ class _ZapSheetState extends State<ZapSheet> {
         recipientPubkey: p.author.pubkey,
         eventId: p.id,
         content: _note.text.trim(),
+        amountMsat: _sats * 1000,
       );
 
       final l = Locator.I.tryGet<LightningService>() ??

@@ -20,6 +20,7 @@ import '../../platform/share/share.dart';
 import '../../utils/prefs.dart';
 import '../drawers/drawers.dart';
 import '../drawers/drawer_host.dart';
+import '../sheets/zap_sheet.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -42,6 +43,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
   final bool _nostrActive = AppConfig.nostrEnabled; // for UI banner
 
   bool _showFab = true;
+  bool _zapping = false;
 
   late final HudState _hud = HudState(
     visible: ValueNotifier<bool>(true),
@@ -107,9 +109,10 @@ class _HomePageState extends State<HomePage> with RouteAware {
           child: HudOverlay(
             state: _hud,
             controller: _controller,
-            onLikeLogical: _likeCurrent,
+          onLikeLogical: _likeCurrent,
             onShareLogical: _shareCurrent,
             onSearch: () => _drawers.open(DrawerType.search),
+            onZap: _handleZap,
           ),
         ),
       );
@@ -194,6 +197,16 @@ class _HomePageState extends State<HomePage> with RouteAware {
     var v = parseCount(item.shareCount) + 1;
     item.shareCount = formatCount(v);
     _hud.model.value = _modelFromItem(item);
+  }
+
+  void _handleZap() {
+    if (_zapping) return;
+    _zapping = true;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const ZapSheet(),
+    ).whenComplete(() => _zapping = false);
   }
 
   Future<void> _shareCurrent() async {

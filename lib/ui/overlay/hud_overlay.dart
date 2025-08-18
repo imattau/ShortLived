@@ -16,6 +16,7 @@ class HudOverlay extends StatelessWidget {
   final VoidCallback onLikeLogical;
   final VoidCallback? onShareLogical;
   final VoidCallback onSearch;
+  final VoidCallback? onZap;
 
   const HudOverlay({
     super.key,
@@ -24,6 +25,7 @@ class HudOverlay extends StatelessWidget {
     required this.onLikeLogical,
     this.onShareLogical,
     required this.onSearch,
+    this.onZap,
   });
   void _toggleHud(BuildContext context) {
     final next = !state.visible.value;
@@ -127,7 +129,7 @@ class HudOverlay extends StatelessWidget {
                                     onRepost: () {},
                                     onShare: onShareLogical ?? () {},
                                     onCopyLink: () {},
-                                    onZap: () {},
+                                    onZap: onZap ?? () {},
                                     likeCount: state.model.value.likeCount,
                                     commentCount:
                                         state.model.value.commentCount,

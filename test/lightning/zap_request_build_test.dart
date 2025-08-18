@@ -65,9 +65,11 @@ void main() {
       Locator.I.put<Signer>(LocalSigner(ks));
       final rs = RelayServiceWs(factory: (u) => _WSFake());
       await rs.init(const ['wss://example']);
-    final evt =
-        await rs.buildZapRequest(recipientPubkey: 'pk', eventId: 'evt1');
+    final evt = await rs.buildZapRequest(
+        recipientPubkey: 'pk', eventId: 'evt1', amountMsat: 21000);
     expect(evt['kind'], 9734);
     expect((evt['sig'] as String).length >= 128, true);
+    final tags = (evt['tags'] as List).cast<List>();
+    expect(tags.any((t) => t[0] == 'amount' && t[1] == '21000'), true);
   });
 }

@@ -42,6 +42,7 @@ abstract class RelayService {
     required String eventId,
     String content,
     List<String>? relays,
+    int amountMsat,
   });
 
   /// NEW: reset the active connections to the provided relay URLs

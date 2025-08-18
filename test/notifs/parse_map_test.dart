@@ -27,7 +27,7 @@ class _RelayFake implements RelayService {
   @override
   Future<void> zapRequest({required String eventId, required int millisats}) async {}
   @override
-  Future<Map<String, dynamic>> buildZapRequest({required String recipientPubkey, required String eventId, String content = '', List<String>? relays}) async => {};
+  Future<Map<String, dynamic>> buildZapRequest({required String recipientPubkey, required String eventId, String content = '', List<String>? relays, int amountMsat = 0}) async => {};
   @override
   Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
   @override
