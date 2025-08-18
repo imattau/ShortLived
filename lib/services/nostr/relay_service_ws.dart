@@ -205,7 +205,7 @@ class RelayServiceWs implements RelayService {
     required String eventId,
     String content = '',
     List<String>? relays,
-    required int amountMsat,
+    int amountMsat = 0,
   }) async {
     final builder = ZapRequestBuilder(
       recipientPubkey: recipientPubkey,
