@@ -23,7 +23,7 @@ class CurrentUserBadge extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: theme.colorScheme.surface.withOpacity(0.85),
+                color: theme.colorScheme.surface.withValues(alpha: 0.85),
                 boxShadow: const [
                   BoxShadow(
                     blurRadius: 10,
