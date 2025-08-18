@@ -1,8 +1,10 @@
+import 'dart:convert';
 import '../models/post.dart';
 import '../models/author.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/cache/cache_service.dart';
 import '../../services/moderation/mute_service.dart';
+import '../../services/nostr/metadata_service.dart';
 import '../../core/di/locator.dart';
 
 abstract class FeedRepository {
@@ -142,38 +144,111 @@ class RealFeedRepository implements FeedRepository {
     final initial = await fetchInitial();
     yield initial;
 
+    final since =
+        (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) - 7 * 24 * 3600;
     final filters = [
       {
         "kinds": [1],
         "limit": 100,
         "#t": ["video/mp4", "video/quicktime", "video/webm"],
-        "since": (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) -
-            7 * 24 * 3600
+        "since": since,
+      },
+      {
+        "kinds": [6, 7],
+        "since": since,
+      },
+      {
+        "kinds": [0],
+        "since": since,
       }
     ];
     final subId = await _relay.subscribe(filters);
     final mute = Locator.I.tryGet<MuteService>();
+    final meta = Locator.I.tryGet<MetadataService>();
     try {
       await for (final evt in _relay.events) {
-        final p = _postFromEvent(evt);
-        if (p == null) continue;
-        if (mute != null &&
-            mute.isPostMuted(
-                author: p.author.pubkey,
-                eventId: p.id,
-                caption: p.caption)) {
-          continue;
+        final kind = evt['kind'] as int? ?? 0;
+        switch (kind) {
+          case 1:
+            final p = _postFromEvent(evt);
+            if (p == null) break;
+            if (mute != null &&
+                mute.isPostMuted(
+                    author: p.author.pubkey,
+                    eventId: p.id,
+                    caption: p.caption)) {
+              break;
+            }
+            _byId[p.id] = p;
+            final list = _sorted();
+            yield list;
+            try {
+              final latest = list.take(50).toList();
+              await _cache.savePosts(latest);
+            } catch (_) {}
+            break;
+          case 7: // like reaction
+            final id = _firstTagValue(evt, 'e');
+            if (id != null && _byId.containsKey(id)) {
+              final p = _byId[id]!;
+              _byId[id] = p.copyWith(likeCount: p.likeCount + 1);
+              yield _sorted();
+            }
+            break;
+          case 6: // repost
+            final id = _firstTagValue(evt, 'e');
+            if (id != null && _byId.containsKey(id)) {
+              final p = _byId[id]!;
+              _byId[id] = p.copyWith(repostCount: p.repostCount + 1);
+              yield _sorted();
+            }
+            break;
+          case 0: // metadata
+            meta?.handleEvent(evt);
+            final pk = (evt['pubkey'] ?? '') as String;
+            if (pk.isEmpty) break;
+            String? name;
+            String? picture;
+            try {
+              final content = (evt['content'] ?? '{}') as String;
+              final c = jsonDecode(content) as Map<String, dynamic>;
+              name = c['name'] as String? ?? c['display_name'] as String?;
+              picture = c['picture'] as String?;
+            } catch (_) {}
+            bool changed = false;
+            for (final entry in _byId.entries.toList()) {
+              if (entry.value.author.pubkey == pk) {
+                final a = entry.value.author;
+                final updated = entry.value.copyWith(
+                  author: Author(
+                    pubkey: a.pubkey,
+                    name: name ?? a.name,
+                    avatarUrl: picture ?? a.avatarUrl,
+                    following: a.following,
+                  ),
+                );
+                _byId[entry.key] = updated;
+                changed = true;
+              }
+            }
+            if (changed) {
+              yield _sorted();
+            }
+            break;
         }
-        _byId[p.id] = p;
-        final list = _sorted();
-        yield list;
-        try {
-          final latest = list.take(50).toList();
-          await _cache.savePosts(latest);
-        } catch (_) {}
       }
     } finally {
       await _relay.close(subId);
     }
+  }
+
+  String? _firstTagValue(Map<String, dynamic> e, String tag) {
+    final tags = (e['tags'] as List?)?.whereType<List>().toList() ?? const [];
+    for (final t in tags) {
+      if (t.isNotEmpty && t.first == tag && t.length > 1) {
+        return t[1] as String;
+      }
+    }
+    return null;
   }
 }
