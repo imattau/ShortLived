@@ -116,11 +116,24 @@ class _SearchSheetState extends State<SearchSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(height: 4, width: 36, margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
+            Container(
+                height: 4,
+                width: 36,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2))),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
                       controller: _ctrl,
                       decoration: const InputDecoration(
                           hintText: 'Search #tag, npub… or text'),
