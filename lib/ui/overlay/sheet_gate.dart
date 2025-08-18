@@ -14,7 +14,6 @@ class SheetGate {
     if (_accountMenuFuture != null) return _accountMenuFuture!;
     _accountMenuFuture = showModalBottomSheet<void>(
       context: context,
-      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: const Color(0xFF0E0E11),
       shape: const RoundedRectangleBorder(
@@ -36,7 +35,7 @@ class SheetGate {
       // Schedule the pop after the current frame so a rapid second tap closes
       // a sheet that's still being built.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context, rootNavigator: true).maybePop();
+        Navigator.of(context).maybePop();
       });
       await _accountMenuFuture; // wait until the sheet closes
       return;
