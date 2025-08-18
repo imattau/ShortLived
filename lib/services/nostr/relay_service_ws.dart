@@ -8,6 +8,7 @@ import '../../crypto/nip19.dart';
 import '../keys/signer.dart';
 import '../../core/di/locator.dart';
 import 'events/reaction_event.dart';
+import 'events/zap_request_event.dart';
 
 typedef WebSocketFactory = WebSocketChannel Function(Uri uri);
 
@@ -204,14 +205,22 @@ class RelayServiceWs implements RelayService {
     required String eventId,
     String content = '',
     List<String>? relays,
+    int amountMsat = 0,
   }) async {
-    final tags = <List<String>>[
-      ['p', recipientPubkey],
-      ['e', eventId],
-      if (relays != null && relays.isNotEmpty)
-        ...relays.map((r) => ['relays', r]),
-    ];
-    final evt = await _sign(9734, content, tags);
+    final builder = ZapRequestBuilder(
+      recipientPubkey: recipientPubkey,
+      targetEventId: eventId,
+      amountMsat: amountMsat,
+      relays: relays ?? const [],
+      content: content,
+    );
+    final pub = await _signer.getPubkey();
+    if (pub == null) return <String, dynamic>{};
+    final unsigned = builder.toUnsigned(pubkey: pub);
+    final tags = (unsigned['tags'] as List)
+        .map((e) => (e as List).cast<String>())
+        .toList();
+    final evt = await _sign(9734, unsigned['content'] as String, tags);
     return evt ?? <String, dynamic>{};
   }
 

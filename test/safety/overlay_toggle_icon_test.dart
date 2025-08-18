@@ -68,7 +68,8 @@ class _RelayServiceStub implements RelayService {
           {required String recipientPubkey,
           required String eventId,
           String content = '',
-          List<String>? relays}) async =>
+          List<String>? relays,
+          int amountMsat = 0}) async =>
       {};
 }
 

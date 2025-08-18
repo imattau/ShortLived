@@ -63,6 +63,7 @@ class _RelayNoop implements RelayService {
     required String eventId,
     String content = '',
     List<String>? relays,
+    int amountMsat = 0,
   }) async =>
       {};
 }
