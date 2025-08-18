@@ -97,6 +97,17 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     });
   }
 
+  void _registerMuteService() {
+    if (Locator.I.tryGet<MuteService>() == null) {
+      Locator.I.put<MuteService>(
+        MuteService(
+          settings,
+          Locator.I.get<RelayService>(),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -150,6 +161,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
       overlaysVisible = !settings.overlaysDefaultHidden();
       Locator.I.ensureSigner();
       _setupNotifications();
+      _registerMuteService();
     } else {
       SharedPreferences.getInstance().then((sp) {
         settings = SettingsService(sp);
@@ -157,20 +169,13 @@ class _HomeFeedPageState extends State<HomeFeedPage>
         Locator.I.put<SettingsService>(settings);
         Locator.I.ensureSigner();
         _setupNotifications();
+        _registerMuteService();
         if (mounted) {
           setState(() {
             overlaysVisible = !settings.overlaysDefaultHidden();
           });
         }
       });
-    }
-    if (Locator.I.tryGet<MuteService>() == null) {
-      Locator.I.put<MuteService>(
-        MuteService(
-          Locator.I.get<SettingsService>(),
-          Locator.I.get<RelayService>(),
-        ),
-      );
     }
   }
 
