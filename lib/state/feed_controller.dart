@@ -47,10 +47,19 @@ class FeedController extends ChangeNotifier {
   }
 
   void setPosts(List<Post> data) {
+    String? currentId;
+    if (_posts.isNotEmpty && _index < _posts.length) {
+      currentId = _posts[_index].id;
+    }
     _posts
       ..clear()
       ..addAll(data);
-    _index = 0;
+    if (currentId != null) {
+      final i = _posts.indexWhere((p) => p.id == currentId);
+      _index = i >= 0 ? i : 0;
+    } else {
+      _index = 0;
+    }
     _filterMuted();
   }
 

@@ -34,12 +34,13 @@ class Post {
   });
 
   Post copyWith({
+    Author? author,
     int? likeCount,
     int? commentCount,
     int? repostCount,
   }) => Post(
         id: id,
-        author: author,
+        author: author ?? this.author,
         caption: caption,
         tags: tags,
         url: url,
