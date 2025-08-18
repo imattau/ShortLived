@@ -27,7 +27,7 @@ class _RelayStub implements RelayService {
     @override
     Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
   @override
-  Future<void> like({required String eventId}) async {}
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
   @override
   Future<void> reply(
       {required String parentId,

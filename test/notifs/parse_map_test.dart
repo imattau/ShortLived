@@ -19,7 +19,7 @@ class _RelayFake implements RelayService {
   @override
   Future<String> publishEvent(Map<String, dynamic> e) async => 'id';
   @override
-  Future<void> like({required String eventId}) async {}
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
   @override
   Future<void> reply({required String parentId, required String content, String? parentPubkey, String? rootId, String? rootPubkey}) async {}
   @override

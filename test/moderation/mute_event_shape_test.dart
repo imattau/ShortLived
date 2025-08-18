@@ -33,7 +33,7 @@ class _RelayNoop implements RelayService {
   }
 
   @override
-  Future<void> like({required String eventId}) async {}
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
 
   @override
   Future<void> reply({

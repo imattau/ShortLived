@@ -7,6 +7,7 @@ import 'relay_service.dart';
 import '../../crypto/nip19.dart';
 import '../keys/signer.dart';
 import '../../core/di/locator.dart';
+import 'events/reaction_event.dart';
 
 typedef WebSocketFactory = WebSocketChannel Function(Uri uri);
 
@@ -159,10 +160,17 @@ class RelayServiceWs implements RelayService {
   }
 
   @override
-  Future<void> like({required String eventId}) async {
-    await signAndPublish(kind: 7, content: "+", tags: [
-      ["e", eventId],
-    ]);
+  Future<void> like({
+    required String eventId,
+    required String authorPubkey,
+    String emojiOrPlus = '+',
+  }) async {
+    final builder = ReactionEventBuilder(
+      content: emojiOrPlus,
+      targetEventId: eventId,
+      targetAuthorPubkey: authorPubkey,
+    );
+    await signAndPublish(kind: 7, content: builder.content, tags: builder.toTags());
   }
 
   @override

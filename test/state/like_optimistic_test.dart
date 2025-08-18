@@ -7,7 +7,7 @@ class _NoopRelay implements RelayService {
   @override
   Future<void> init(List<String> relays) async {}
   @override
-  Future<void> like({required String eventId}) async {}
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
     @override
     Future<String> publishEvent(Map<String, dynamic> e) async => 'id';
     @override
@@ -51,6 +51,13 @@ class _NoopRelay implements RelayService {
       {};
 }
 
+class _FailRelay extends _NoopRelay {
+  @override
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {
+    throw Exception('fail');
+  }
+}
+
 void main() {
   test('optimistic like increments count', () async {
     final c = FeedController(MockFeedRepository(count: 1));
@@ -58,5 +65,14 @@ void main() {
     final before = c.posts.first.likeCount;
     await c.likeCurrent(_NoopRelay());
     expect(c.posts.first.likeCount, before + 1);
+  });
+
+  test('like rolls back on failure without queue', () async {
+    final c = FeedController(MockFeedRepository(count: 1));
+    await c.connect();
+    c.setOnline(false);
+    final before = c.posts.first.likeCount;
+    await c.likeCurrent(_FailRelay());
+    expect(c.posts.first.likeCount, before);
   });
 }

@@ -85,7 +85,7 @@ void main() {
       Locator.I.put<Signer>(LocalSigner(ks));
       final rs = RelayServiceWs(factory: (u) => _WSFake());
     await rs.init(const ['wss://example']);
-    await rs.like(eventId: 'evt1');
+    await rs.like(eventId: 'evt1', authorPubkey: 'pkabc');
     await rs.reply(parentId: 'evt1', content: 'hello', rootId: 'evt1');
 
     // we can’t easily intercept frames per relay here; rely on no-throw and smoke test.
