@@ -22,8 +22,11 @@ class CreateButton extends StatelessWidget {
         minimumSize: Size.square(size),
         padding: EdgeInsets.zero,
         shape: const CircleBorder(),
-        side: BorderSide(color: Colors.white.withOpacity(.85), width: 1.6),
-        backgroundColor: Colors.black.withOpacity(.25),
+        side: BorderSide(
+          color: Colors.white.withValues(alpha: 0.85),
+          width: 1.6,
+        ),
+        backgroundColor: Colors.black.withValues(alpha: 0.25),
         foregroundColor: Colors.white,
       ),
       child: Icon(Icons.add, size: isWide ? 28 : 26),
