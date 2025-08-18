@@ -128,7 +128,7 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   final ValueNotifier<bool> _pausedBySheet = ValueNotifier(false);
   late final RelayService relay;
   StreamSubscription<Map<String, dynamic>>? _zapSub;
-  late SettingsService settings;
+  SettingsService? settings;
   late ContentSafetyService safety;
   ActionQueue? queue;
   RelayDirectory? relayDir;
@@ -172,9 +172,10 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   void _registerMuteService() {
+    if (settings == null) return;
     if (Locator.I.tryGet<MuteService>() == null) {
       Locator.I.put<MuteService>(
-        MuteService(settings, Locator.I.get<RelayService>()),
+        MuteService(settings!, Locator.I.get<RelayService>()),
       );
     }
   }
@@ -196,11 +197,11 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     settings =
         Locator.I.tryGet<SettingsService>() ??
         SettingsService(await SharedPreferences.getInstance());
-    safety = ContentSafetyService(settings);
+    safety = ContentSafetyService(settings!);
     if (!Locator.I.contains<SettingsService>()) {
-      Locator.I.put<SettingsService>(settings);
+      Locator.I.put<SettingsService>(settings!);
     }
-    overlaysVisible = !settings.overlaysDefaultHidden();
+    overlaysVisible = !settings!.overlaysDefaultHidden();
     if (AppConfig.nostrEnabled) {
       relay =
           Locator.I.tryGet<RelayService>() ??
@@ -389,12 +390,13 @@ class _HomeFeedPageState extends State<HomeFeedPage>
 
   Future<void> _openDetails() async {
     final p = _currentPost;
-    if (p == null) return;
+    final s = settings;
+    if (p == null || s == null) return;
     _pausedBySheet.value = true;
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
-      builder: (_) => DetailsSheet(post: p, settings: settings),
+      builder: (_) => DetailsSheet(post: p, settings: s),
     );
     _pausedBySheet.value = false;
   }
@@ -412,8 +414,10 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   }
 
   void _toggleSafety() {
-    final next = !settings.sensitiveBlurEnabled();
-    settings.setSensitiveBlurEnabled(next);
+    final s = settings;
+    if (s == null) return;
+    final next = !s.sensitiveBlurEnabled();
+    s.setSensitiveBlurEnabled(next);
     setState(() {});
   }
 
@@ -526,11 +530,11 @@ class _HomeFeedPageState extends State<HomeFeedPage>
                   child: IconButton(
                     tooltip: 'Safety mode',
                     icon: Icon(
-                      settings.sensitiveBlurEnabled()
+                      (settings?.sensitiveBlurEnabled() ?? false)
                           ? Icons.shield
                           : Icons.shield_outlined,
                     ),
-                    onPressed: _toggleSafety,
+                    onPressed: settings == null ? null : _toggleSafety,
                   ),
                 ),
                 Positioned(
