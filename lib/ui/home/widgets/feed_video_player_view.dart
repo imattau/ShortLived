@@ -13,6 +13,7 @@ import '../../../services/nostr/relay_service.dart';
 import '../../../services/cache/cache_service.dart';
 import '../../../services/settings/settings_service.dart';
 import '../../../services/safety/content_safety_service.dart';
+import '../../../core/config/app_config.dart';
 
 class VideoPlayerView extends StatefulWidget {
   const VideoPlayerView({super.key, required this.globalPaused});
@@ -34,9 +35,13 @@ class _VideoPlayerViewState extends State<VideoPlayerView> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    final relay = Locator.I.get<RelayService>();
-    final cache = Locator.I.get<CacheService>();
-    controller = FeedController(RealFeedRepository(relay, cache));
+    if (AppConfig.nostrEnabled) {
+      final relay = Locator.I.get<RelayService>();
+      final cache = Locator.I.get<CacheService>();
+      controller = FeedController(RealFeedRepository(relay, cache));
+    } else {
+      controller = FeedController(MockFeedRepository());
+    }
     Locator.I.put<FeedController>(controller);
     controller.addListener(_onController);
     controller.connect();

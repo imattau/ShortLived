@@ -17,6 +17,7 @@ import '../sheets/settings_sheet.dart';
 import '../sheets/notifications_sheet.dart';
 import 'package:nostr_video/core/di/locator.dart';
 import '../../core/config/network.dart';
+import '../../core/config/app_config.dart';
 import '../../services/nostr/relay_service_ws.dart';
 import '../../services/nostr/relay_service.dart';
 import '../../services/settings/settings_service.dart';
@@ -42,6 +43,63 @@ import '../../crypto/nip19.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../utils/count_format.dart';
 
+class _RelayServiceStub implements RelayService {
+  @override
+  Future<void> init(List<String> relays) async {}
+
+  @override
+  Future<String> subscribe(List<Map<String, dynamic>> filters,
+          {String? subId}) async =>
+      'sub';
+
+  @override
+  Future<void> close(String subId) async {}
+
+  @override
+  Stream<List<dynamic>> subscribeFeed(
+          {required List<String> authors, String? hashtag}) =>
+      const Stream.empty();
+
+  @override
+  Future<String> publishEvent(Map<String, dynamic> signedEventJson) async =>
+      'id';
+
+  @override
+  Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
+
+  @override
+  Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
+
+  @override
+  Future<void> reply(
+      {required String parentId,
+      required String content,
+      String? parentPubkey,
+      String? rootId,
+      String? rootPubkey}) async {}
+
+  @override
+  Future<void> repost({required String eventId, String? originalJson}) async {}
+
+  @override
+  Future<void> zapRequest({required String eventId, required int millisats}) async {}
+
+  @override
+  Stream<Map<String, dynamic>> get events => const Stream.empty();
+
+  @override
+  Future<void> resetConnections(List<String> urls) async {}
+
+  @override
+  Future<Map<String, dynamic>> buildZapRequest(
+          {required String recipientPubkey,
+          required String eventId,
+          String content = '',
+          List<String>? relays,
+          int amountMsat = 0}) async =>
+      {};
+}
+
 class HomeFeedPage extends StatefulWidget {
   const HomeFeedPage({super.key});
   @override
@@ -56,8 +114,8 @@ class _HomeFeedPageState extends State<HomeFeedPage>
   StreamSubscription<Map<String, dynamic>>? _zapSub;
   late SettingsService settings;
   late ContentSafetyService safety;
-  late ActionQueue queue;
-  late RelayDirectory relayDir;
+  ActionQueue? queue;
+  RelayDirectory? relayDir;
   late final PwaService _pwa;
   int _unread = 0;
   StreamSubscription<List<NotificationItem>>? _notifSub;
@@ -118,41 +176,48 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     if (Locator.I.tryGet<KeyService>() == null) {
       Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
     }
-    relay = Locator.I.tryGet<RelayService>() ??
-        RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
-    if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
-      relay.init(NetworkConfig.relays);
-      Locator.I.put<RelayService>(relay);
-    }
-    relayDir = Locator.I.tryGet<RelayDirectory>() ??
-        RelayDirectory(Locator.I.get(), Locator.I.get(), Locator.I.get());
-    Locator.I.put<RelayDirectory>(relayDir);
-    // On production runs, apply NIP-65; tests have disableRelays = true.
-    relayDir.init();
-    _zapSub = relay.events.listen((evt) {
-      if (evt['kind'] == 9735) {
-        final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
-        final sats = (msats / 1000).round();
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Received zap: $sats sats')));
-        }
+    if (AppConfig.nostrEnabled) {
+      relay = Locator.I.tryGet<RelayService>() ??
+          RelayServiceWs(factory: (uri) => WebSocketChannel.connect(uri));
+      if (!TestSwitches.disableRelays && !Locator.I.contains<RelayService>()) {
+        relay.init(NetworkConfig.relays);
+        Locator.I.put<RelayService>(relay);
       }
-    });
-    queue = Locator.I.tryGet<ActionQueue>() ?? ActionQueueHive();
-    if (!Locator.I.contains<ActionQueue>()) {
-      queue.init();
-      Locator.I.put<ActionQueue>(queue);
-    }
-    if (!TestSwitches.disableRelays) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          final c = Locator.I.get<FeedController>();
-          c.bindQueue(queue);
-          c.setOnline(true, relay: Locator.I.get<RelayService>());
+      relayDir = Locator.I.tryGet<RelayDirectory>() ??
+          RelayDirectory(Locator.I.get(), Locator.I.get(), Locator.I.get());
+      Locator.I.put<RelayDirectory>(relayDir!);
+      // On production runs, apply NIP-65; tests have disableRelays = true.
+      relayDir!.init();
+      _zapSub = relay.events.listen((evt) {
+        if (evt['kind'] == 9735) {
+          final msats = int.tryParse((evt['amount'] ?? '0').toString()) ?? 0;
+          final sats = (msats / 1000).round();
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Received zap: $sats sats')));
+          }
         }
       });
+      queue = Locator.I.tryGet<ActionQueue>() ?? ActionQueueHive();
+      if (!Locator.I.contains<ActionQueue>()) {
+        queue!.init();
+        Locator.I.put<ActionQueue>(queue!);
+      }
+      if (!TestSwitches.disableRelays) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final c = Locator.I.get<FeedController>();
+            c.bindQueue(queue!);
+            c.setOnline(true, relay: Locator.I.get<RelayService>());
+          }
+        });
+      }
+    } else {
+      relay = Locator.I.tryGet<RelayService>() ?? _RelayServiceStub();
+      if (!Locator.I.contains<RelayService>()) {
+        Locator.I.put<RelayService>(relay);
+      }
     }
     final existing = Locator.I.tryGet<SettingsService>();
     if (existing != null) {
