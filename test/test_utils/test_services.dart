@@ -34,10 +34,15 @@ class RelayServiceFake implements RelayService {
   Stream<List<dynamic>> subscribeFeed(
       {required List<String> authors, String? hashtag}) async* {}
 
-    @override
-    Future<String> publishEvent(Map<String, dynamic> eventJson) async => 'id';
-    @override
-    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => 'id';
+  @override
+  Future<String> publishEvent(Map<String, dynamic> eventJson) async => 'id';
+
+  @override
+  Future<String?> signAndPublish(
+          {required int kind,
+          required String content,
+          required List<List<String>> tags}) async =>
+      'id';
 
   @override
   Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
@@ -49,6 +54,10 @@ class RelayServiceFake implements RelayService {
       String? parentPubkey,
       String? rootId,
       String? rootPubkey}) async {}
+
+  @override
+  Future<void> quote(
+      {required String eventId, required String content}) async {}
 
   @override
   Future<void> zapRequest(

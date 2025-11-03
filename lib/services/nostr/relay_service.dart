@@ -30,6 +30,7 @@ abstract class RelayService {
     String? rootId,
     String? rootPubkey,
   });
+  Future<void> quote({required String eventId, required String content});
   Future<void> repost({required String eventId, String? originalJson});
   Future<void> zapRequest({required String eventId, required int millisats});
 

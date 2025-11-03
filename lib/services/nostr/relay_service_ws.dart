@@ -137,6 +137,7 @@ class RelayServiceWs implements RelayService {
     await signAndPublish(kind: 6, content: originalJson ?? "", tags: tags);
   }
 
+  @override
   Future<void> quote({required String eventId, required String content}) async {
     final noteRef = Nip19.encodeNote(eventId);
     final tags = <List<String>>[

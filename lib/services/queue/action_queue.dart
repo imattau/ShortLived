@@ -1,4 +1,4 @@
-enum ActionType { publish, like, reply }
+enum ActionType { publish, like, reply, quote }
 
 class QueuedAction {
   final ActionType type;
