@@ -10,6 +10,7 @@ import 'package:nostr_video/data/models/post.dart';
 import 'package:nostr_video/data/models/author.dart';
 import 'package:nostr_video/core/di/locator.dart';
 import 'package:nostr_video/services/keys/key_service.dart';
+import 'package:nostr_video/services/nostr/metadata_service.dart';
 
 class RelayServiceFake implements RelayService {
   final _ctrl = StreamController<Map<String, dynamic>>.broadcast();
@@ -89,6 +90,7 @@ Future<void> setupTestLocator({Map<String, Object> prefs = const {}}) async {
   Locator.I.put<ActionQueue>(ActionQueueMemory());
   Locator.I.put<RelayService>(RelayServiceFake());
   Locator.I.put<KeyService>(KeyServiceFake());
+  Locator.I.put<MetadataService>(MetadataService());
 
   // Seed cache with sample posts so UI has content
   final cache = Locator.I.get<CacheService>();

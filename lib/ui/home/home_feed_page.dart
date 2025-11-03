@@ -192,6 +192,9 @@ class _HomeFeedPageState extends State<HomeFeedPage>
     // Use a stub if no PwaService has been registered. Tests typically do not
     // bootstrap the service locator, so falling back keeps them isolated.
     _pwa = Locator.I.tryGet<PwaService>() ?? PwaServiceStub();
+    if (!Locator.I.contains<MetadataService>()) {
+      Locator.I.put<MetadataService>(MetadataService());
+    }
     if (Locator.I.tryGet<KeyService>() == null) {
       Locator.I.put<KeyService>(KeyServiceSecure(const FlutterSecureStorage()));
     }

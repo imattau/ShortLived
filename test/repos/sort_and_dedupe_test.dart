@@ -4,6 +4,7 @@ import 'package:nostr_video/data/repos/feed_repository.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 import 'package:nostr_video/services/cache/cache_service.dart';
 import 'package:nostr_video/data/models/post.dart';
+import 'package:nostr_video/services/nostr/metadata_service.dart';
 
 class _RelayFake implements RelayService {
   final _ctrl = StreamController<Map<String, dynamic>>.broadcast();
@@ -75,7 +76,7 @@ void main() {
   test('dedupes by id and sorts newest first', () async {
     final r = _RelayFake();
     final c = _CacheNoop();
-    final repo = RealFeedRepository(r, c);
+    final repo = RealFeedRepository(r, c, MetadataService());
 
     final stream = repo.watchFeed();
     Future(() {
