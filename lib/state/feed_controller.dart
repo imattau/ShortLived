@@ -17,10 +17,29 @@ class FeedController extends ChangeNotifier {
   ActionQueue? _queue;
   RelayService? _relayForReplay;
   final Set<String> _sessionLiked = {};
-  void insertOptimistic(Post p) {
+
+  void applyOptimisticPost(Post p) {
     _posts.insert(0, p);
     _index = 0;
     notifyListeners();
+  }
+
+  @Deprecated('Use applyOptimisticPost instead')
+  void insertOptimistic(Post p) => applyOptimisticPost(p);
+
+  bool incrementCommentCount(String postId) => _adjustCommentCount(postId, 1);
+
+  bool decrementCommentCount(String postId) => _adjustCommentCount(postId, -1);
+
+  bool _adjustCommentCount(String postId, int delta) {
+    final idx = _posts.indexWhere((p) => p.id == postId);
+    if (idx < 0) return false;
+    final original = _posts[idx];
+    final next = original.commentCount + delta;
+    final safeCount = next < 0 ? 0 : next;
+    _posts[idx] = original.copyWith(commentCount: safeCount);
+    notifyListeners();
+    return true;
   }
 
   List<Post> get posts => List.unmodifiable(_posts);

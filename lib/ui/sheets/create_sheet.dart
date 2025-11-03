@@ -68,10 +68,12 @@ class _CreateSheetState extends State<CreateSheet> {
         },
       );
 
+      final feed = Locator.I.get<FeedController>();
       final relay = Locator.I.get<RelayService>();
       final keySvc = Locator.I.get<KeyService>();
       final pub = await keySvc.getPubkey();
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final caption = _caption.text.trim();
 
       final tags = <List<String>>[
         ['t', up.mime],
@@ -80,16 +82,52 @@ class _CreateSheetState extends State<CreateSheet> {
         if (up.width > 0 && up.height > 0) ['dim', '${up.width}x${up.height}'],
         if (up.duration > 0) ['dur', up.duration.toStringAsFixed(1)],
       ];
-      final e = NostrEvent(kind: 1, createdAt: now, content: _caption.text.trim(), tags: tags);
-      final signed = NostrEvent.sign((await keySvc.getPrivkey())!, pub!, e);
+      final event = NostrEvent(kind: 1, createdAt: now, content: caption, tags: tags);
 
-      await relay.publishEvent(signed);
+      bool queued = false;
+      Map<String, dynamic>? signed;
+      try {
+        final priv = await keySvc.getPrivkey();
+        if (priv == null || pub == null) {
+          throw StateError('Missing signing key');
+        }
+        signed = NostrEvent.sign(priv, pub, event);
+        await relay.publishEvent(signed);
+      } catch (error) {
+        final payload = {
+          'kind': event.kind,
+          'content': event.content,
+          'tags': event.tags.map((t) => List<String>.from(t)).toList(),
+        };
+        try {
+          await feed.enqueuePublish(payload);
+          queued = true;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Publish queued - will retry when online')),
+            );
+          }
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('Failed to publish: $error')));
+          }
+          return;
+        }
+      }
 
-      final you = Author(pubkey: pub, name: pub.substring(0, 8), avatarUrl: '');
+      final authorKey = pub ?? 'pending';
+      final displayName = pub != null
+          ? (pub.length > 8 ? pub.substring(0, 8) : pub)
+          : 'You';
+      final optimisticId = signed?['id'] as String? ??
+          (pub != null
+              ? NostrEvent.idFor(pub, event)
+              : 'pending-${DateTime.now().microsecondsSinceEpoch}');
       final optimistic = Post(
-        id: signed['id'] as String,
-        author: you,
-        caption: _caption.text.trim(),
+        id: optimisticId,
+        author: Author(pubkey: authorKey, name: displayName, avatarUrl: ''),
+        caption: caption,
         tags: const [],
         url: up.url,
         thumb: up.thumb,
@@ -102,11 +140,13 @@ class _CreateSheetState extends State<CreateSheet> {
         repostCount: 0,
         createdAt: DateTime.now(),
       );
-      Locator.I.get<FeedController>().insertOptimistic(optimistic);
+      feed.applyOptimisticPost(optimistic);
 
       if (!mounted) return;
       Navigator.of(context).maybePop();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Published')));
+      if (!queued) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Published')));
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
