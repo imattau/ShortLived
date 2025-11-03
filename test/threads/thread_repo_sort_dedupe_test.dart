@@ -39,10 +39,51 @@ void main() {
     final list = out.last;
     expect(list.first.content, 'A');
     await sub.cancel();
+    await repo.dispose();
+  });
+
+  test('updates existing comments when metadata service emits data', () async {
+    final meta = MetadataService();
+    final r = _RelayEventsFake();
+    final repo = ThreadRepository(r, meta);
+    final events = <List<ThreadComment>>[];
+    final sub = repo.watchThread(rootEventId: 'root').listen(events.add);
+
+    r.emit({
+      'id': 'a',
+      'kind': 1,
+      'pubkey': 'abcdef123456',
+      'created_at': 1,
+      'content': 'hello',
+      'tags': [
+        ['e', 'root', '', 'root']
+      ]
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(events, isNotEmpty);
+    final initial = events.last.first;
+    expect(initial.authorName.startsWith('abcdef12'), isTrue);
+    expect(initial.authorAvatar, isEmpty);
+
+    meta.handleEvent({
+      'kind': 0,
+      'pubkey': 'abcdef123456',
+      'content': '{"name":"Alice","picture":"https://example.com/a.png"}',
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+
+    final updated = events.last.first;
+    expect(updated.authorName, 'Alice');
+    expect(updated.authorAvatar, 'https://example.com/a.png');
+
+    await sub.cancel();
+    await repo.dispose();
   });
 }
 
-  class _RelayEventsFake implements RelayService {
+class _RelayEventsFake implements RelayService {
   final _c = StreamController<Map<String, dynamic>>.broadcast();
   void emit(Map<String, dynamic> e) => _c.add(e);
   @override
@@ -59,10 +100,14 @@ void main() {
   @override
   Stream<List<dynamic>> subscribeFeed(
       {required List<String> authors, String? hashtag}) async* {}
-    @override
-    Future<String> publishEvent(Map<String, dynamic> signedEventJson) async => '';
-    @override
-    Future<String?> signAndPublish({required int kind, required String content, required List<List<String>> tags}) async => '';
+  @override
+  Future<String> publishEvent(Map<String, dynamic> signedEventJson) async => '';
+  @override
+  Future<String?> signAndPublish(
+          {required int kind,
+          required String content,
+          required List<List<String>> tags}) async =>
+      '';
   @override
   Future<void> like({required String eventId, required String authorPubkey, String emojiOrPlus = '+'}) async {}
   @override
