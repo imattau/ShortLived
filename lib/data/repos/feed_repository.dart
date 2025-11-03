@@ -50,9 +50,10 @@ class MockFeedRepository implements FeedRepository {
 }
 
 class RealFeedRepository implements FeedRepository {
-  RealFeedRepository(this._relay, this._cache);
+  RealFeedRepository(this._relay, this._cache, this._meta);
   final RelayService _relay;
   final CacheService _cache;
+  final MetadataService _meta;
 
   final Map<String, Post> _byId = {};
 
@@ -164,7 +165,6 @@ class RealFeedRepository implements FeedRepository {
     ];
     final subId = await _relay.subscribe(filters);
     final mute = Locator.I.tryGet<MuteService>();
-    final meta = Locator.I.tryGet<MetadataService>();
     try {
       await for (final evt in _relay.events) {
         final kind = evt['kind'] as int? ?? 0;
@@ -204,7 +204,7 @@ class RealFeedRepository implements FeedRepository {
             }
             break;
           case 0: // metadata
-            meta?.handleEvent(evt);
+            _meta.handleEvent(evt);
             final pk = (evt['pubkey'] ?? '') as String;
             if (pk.isEmpty) break;
             String? name;

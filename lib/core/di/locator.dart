@@ -21,6 +21,7 @@ class Locator {
   T get<T>() => _store[T] as T;
   T? tryGet<T>() => _store[T] as T?;
   bool contains<T>() => _store.containsKey(T);
+  void remove<T>() => _store.remove(T);
 }
 
 extension SignerRegistration on Locator {
