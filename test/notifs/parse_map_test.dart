@@ -23,6 +23,8 @@ class _RelayFake implements RelayService {
   @override
   Future<void> reply({required String parentId, required String content, String? parentPubkey, String? rootId, String? rootPubkey}) async {}
   @override
+  Future<void> quote({required String eventId, required String content}) async {}
+  @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
   @override
   Future<void> zapRequest({required String eventId, required int millisats}) async {}

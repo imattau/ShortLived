@@ -9,6 +9,7 @@ import 'package:nostr_video/services/queue/action_queue.dart';
   int likes = 0;
     int publishes = 0;
   int replies = 0;
+  int quotes = 0;
   @override
   Future<void> init(List<String> relays) async {}
   @override
@@ -35,6 +36,11 @@ import 'package:nostr_video/services/queue/action_queue.dart';
       String? rootId,
       String? rootPubkey}) async {
     replies++;
+  }
+
+  @override
+  Future<void> quote({required String eventId, required String content}) async {
+    quotes++;
   }
 
   @override
@@ -80,6 +86,7 @@ void main() async {
 
     await c.enqueuePublish({'kind': 1, 'content': 'hi', 'tags': []});
     await c.enqueueReply('evt1', 'yo', parentPubkey: 'pk');
+    await c.enqueueQuote('evt2', 'quoted');
     await q.enqueue(QueuedAction(ActionType.like, {
       'eventId': 'evt1',
       'authorPubkey': 'pk',
@@ -91,6 +98,7 @@ void main() async {
     expect(spy.publishes, 1);
     expect(spy.replies, 1);
     expect(spy.likes, 1);
+    expect(spy.quotes, 1);
     expect((await q.all()).isEmpty, true);
   });
 }

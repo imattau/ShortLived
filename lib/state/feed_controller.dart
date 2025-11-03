@@ -179,6 +179,14 @@ class FeedController extends ChangeNotifier {
     }));
   }
 
+  Future<void> enqueueQuote(String eventId, String content) async {
+    if (_queue == null) return;
+    await _queue!.enqueue(QueuedAction(ActionType.quote, {
+      'eventId': eventId,
+      'content': content,
+    }));
+  }
+
   Future<void> replayQueue(RelayService relay) async {
     if (_queue == null) return;
     final items = await _queue!.all();
@@ -186,21 +194,22 @@ class FeedController extends ChangeNotifier {
     for (final a in items) {
       try {
         switch (a.type) {
-            case ActionType.publish:
-              final e = Map<String, dynamic>.from(a.payload['event'] as Map);
-              final kind = e['kind'] as int;
-              final content = (e['content'] as String?) ?? '';
-              final tags = (e['tags'] as List?)
-                      ?.whereType<List>()
-                      .map((t) => t.map((v) => v.toString()).toList())
-                      .toList() ??
-                  <List<String>>[];
-              await relay.signAndPublish(kind: kind, content: content, tags: tags);
-              break;
+          case ActionType.publish:
+            final e = Map<String, dynamic>.from(a.payload['event'] as Map);
+            final kind = e['kind'] as int;
+            final content = (e['content'] as String?) ?? '';
+            final tags = (e['tags'] as List?)
+                    ?.whereType<List>()
+                    .map((t) => t.map((v) => v.toString()).toList())
+                    .toList() ??
+                <List<String>>[];
+            await relay.signAndPublish(kind: kind, content: content, tags: tags);
+            break;
           case ActionType.like:
             await relay.like(
-                eventId: a.payload['eventId'] as String,
-                authorPubkey: a.payload['authorPubkey'] as String);
+              eventId: a.payload['eventId'] as String,
+              authorPubkey: a.payload['authorPubkey'] as String,
+            );
             break;
           case ActionType.reply:
             await relay.reply(
@@ -211,6 +220,12 @@ class FeedController extends ChangeNotifier {
                   : a.payload['parentPubkey'] as String,
               rootId: a.payload['rootId'] as String?,
               rootPubkey: a.payload['rootPubkey'] as String?,
+            );
+            break;
+          case ActionType.quote:
+            await relay.quote(
+              eventId: a.payload['eventId'] as String,
+              content: a.payload['content'] as String,
             );
             break;
         }

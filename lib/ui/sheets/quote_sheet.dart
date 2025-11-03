@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/di/locator.dart';
 import '../../services/nostr/relay_service.dart';
+import '../../state/feed_controller.dart';
 
 class QuoteSheet extends StatefulWidget {
   const QuoteSheet({super.key, required this.eventId, required this.relay});
@@ -16,16 +18,38 @@ class _QuoteSheetState extends State<QuoteSheet> {
 
   Future<void> _send() async {
     if (_ctrl.text.trim().isEmpty || sending) return;
+    final text = _ctrl.text.trim();
     setState(() => sending = true);
+    Object? failure;
     try {
-      await (widget.relay as dynamic)
-          .quote(eventId: widget.eventId, content: _ctrl.text.trim());
-      if (mounted) Navigator.of(context).maybePop();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed: $e')));
+      try {
+        await widget.relay.quote(eventId: widget.eventId, content: text);
+      } catch (error) {
+        final controller = Locator.I.tryGet<FeedController>();
+        if (controller != null) {
+          try {
+            await controller.enqueueQuote(widget.eventId, text);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Quote queued for retry')));
+            }
+          } catch (_) {
+            failure = error;
+          }
+        } else {
+          failure = error;
+        }
       }
+
+      if (failure != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to share quote: $failure')));
+        }
+        return;
+      }
+
+      if (mounted) Navigator.of(context).maybePop();
     } finally {
       if (mounted) setState(() => sending = false);
     }

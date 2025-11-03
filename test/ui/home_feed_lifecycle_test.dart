@@ -51,6 +51,9 @@ class _RelayStub implements RelayService {
   }) async {}
 
   @override
+  Future<void> quote({required String eventId, required String content}) async {}
+
+  @override
   Future<void> repost({required String eventId, String? originalJson}) async {}
 
   @override
