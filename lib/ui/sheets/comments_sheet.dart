@@ -46,22 +46,45 @@ class _CommentsSheetState extends State<CommentsSheet> {
     setState(() => _sending = true);
 
     try {
-      // Optimistic increment on the feed model
       final fc = Locator.I.get<FeedController>();
-      final idx = fc.posts.indexWhere((p) => p.id == widget.post.id);
-      if (idx >= 0) {
-        final p = fc.posts[idx];
-        fc.posts[idx] = p.copyWith(commentCount: p.commentCount + 1);
-        fc.refresh();
+      final incremented = fc.incrementCommentCount(widget.post.id);
+      Object? failure;
+      try {
+        await Locator.I.get<RelayService>().reply(
+          parentId: widget.post.id,
+          parentPubkey: widget.post.author.pubkey,
+          content: text,
+          rootId: widget.post.id,
+          rootPubkey: widget.post.author.pubkey,
+        );
+      } catch (error) {
+        try {
+          await fc.enqueueReply(
+            widget.post.id,
+            text,
+            parentPubkey: widget.post.author.pubkey,
+            rootId: widget.post.id,
+            rootPubkey: widget.post.author.pubkey,
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('Reply queued for retry')));
+          }
+        } catch (_) {
+          failure = error;
+        }
       }
 
-      await Locator.I.get<RelayService>().reply(
-        parentId: widget.post.id,
-        parentPubkey: widget.post.author.pubkey,
-        content: text,
-        rootId: widget.post.id,
-        rootPubkey: widget.post.author.pubkey,
-      );
+      if (failure != null) {
+        if (incremented) {
+          fc.decrementCommentCount(widget.post.id);
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Failed to send: $failure')));
+        }
+        return;
+      }
 
       _ctrl.clear();
       // Scroll to bottom after a short delay so the layout settles
@@ -71,11 +94,7 @@ class _CommentsSheetState extends State<CommentsSheet> {
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOut);
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to send: $e')));
-      }
+
     } finally {
       if (mounted) setState(() => _sending = false);
     }
