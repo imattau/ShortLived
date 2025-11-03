@@ -11,8 +11,12 @@ class ThreadRepository {
 
   final Map<String, ThreadComment> _byId = {};
   StreamSubscription<Map<String, dynamic>>? _sub;
+  StreamSubscription<AuthorMeta>? _metaSub;
 
-  Future<void> dispose() async => _sub?.cancel();
+  Future<void> dispose() async {
+    await _sub?.cancel();
+    await _metaSub?.cancel();
+  }
 
   Stream<List<ThreadComment>> watchThread({required String rootEventId}) {
     late final StreamController<List<ThreadComment>> ctrl;
@@ -20,9 +24,37 @@ class ThreadRepository {
 
     ctrl = StreamController<List<ThreadComment>>.broadcast(
       onListen: () async {
+        await _metaSub?.cancel();
+        _metaSub = _meta.stream.listen((meta) {
+          bool changed = false;
+          for (final entry in _byId.entries.toList()) {
+            final comment = entry.value;
+            if (comment.pubkey != meta.pubkey) continue;
+            final nextName =
+                meta.name.isNotEmpty ? meta.name : comment.authorName;
+            final nextAvatar = meta.picture;
+            if (comment.authorName == nextName &&
+                comment.authorAvatar == nextAvatar) {
+              continue;
+            }
+            _byId[entry.key] = comment.copyWith(
+              authorName: nextName,
+              authorAvatar: nextAvatar,
+            );
+            changed = true;
+          }
+          if (changed && !ctrl.isClosed) {
+            ctrl.add(_sortedComments());
+          }
+        });
         // Listen before subscribing so early events aren't missed.
         _sub = _relay.events.listen((evt) {
-          if (evt['kind'] != 1) return;
+          final kind = evt['kind'] as int? ?? -1;
+          if (kind == 0) {
+            _meta.handleEvent(evt);
+            return;
+          }
+          if (kind != 1) return;
           final tags =
               (evt['tags'] as List?)?.whereType<List>().toList() ?? const [];
           final hasRoot = tags.any((t) =>
@@ -62,10 +94,9 @@ class ThreadRepository {
             createdAt: created,
           );
 
-          final list = _byId.values.toList()
-            ..sort((a, b) =>
-                a.createdAt.compareTo(b.createdAt)); // oldest → newest
-          ctrl.add(list);
+          if (!ctrl.isClosed) {
+            ctrl.add(_sortedComments());
+          }
         });
 
         // Subscribe for kind:1 replies that reference the root
@@ -82,10 +113,17 @@ class ThreadRepository {
           await _relay.close(subId!);
         }
         await _sub?.cancel();
+        await _metaSub?.cancel();
       },
     );
 
     return ctrl.stream;
+  }
+
+  List<ThreadComment> _sortedComments() {
+    final list = _byId.values.toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return list;
   }
 }
 
@@ -104,4 +142,20 @@ class ThreadComment {
     required this.content,
     required this.createdAt,
   });
+
+  ThreadComment copyWith({
+    String? authorName,
+    String? authorAvatar,
+    String? content,
+    DateTime? createdAt,
+  }) {
+    return ThreadComment(
+      id: id,
+      pubkey: pubkey,
+      authorName: authorName ?? this.authorName,
+      authorAvatar: authorAvatar ?? this.authorAvatar,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
