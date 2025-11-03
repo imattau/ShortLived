@@ -4,6 +4,7 @@ import 'package:nostr_video/data/repos/feed_repository.dart';
 import 'package:nostr_video/services/nostr/relay_service.dart';
 import 'package:nostr_video/services/cache/cache_service.dart';
 import 'package:nostr_video/data/models/post.dart';
+import 'package:nostr_video/data/models/author.dart';
 import 'package:nostr_video/services/nostr/metadata_service.dart';
 
 class _RelayFake implements RelayService {
@@ -114,5 +115,46 @@ void main() {
 
     final first = await stream.firstWhere((l) => l.isNotEmpty);
     expect(first.first.id, 'same');
+  });
+
+  test('fetchInitial yields cached posts when relay offline', () async {
+    final r = _RelayFake();
+    final c = _CacheNoop()
+      ..posts = [
+        Post(
+          id: 'a',
+          author: const Author(pubkey: 'pk', name: 'name', avatarUrl: ''),
+          caption: 'older',
+          tags: const [],
+          url: 'https://cdn/older.mp4',
+          thumb: '',
+          mime: 'video/mp4',
+          width: 1,
+          height: 1,
+          duration: 1,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(10, isUtc: true),
+        ),
+        Post(
+          id: 'b',
+          author: const Author(pubkey: 'pk', name: 'name', avatarUrl: ''),
+          caption: 'newer',
+          tags: const [],
+          url: 'https://cdn/newer.mp4',
+          thumb: '',
+          mime: 'video/mp4',
+          width: 1,
+          height: 1,
+          duration: 1,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(20, isUtc: true),
+        ),
+      ];
+
+    final repo = RealFeedRepository(r, c, MetadataService());
+    final initial = await repo.fetchInitial();
+
+    expect(initial.map((p) => p.id), ['b', 'a']);
+
+    final streamed = await repo.watchFeed().first;
+    expect(streamed.map((p) => p.id), ['b', 'a']);
   });
 }

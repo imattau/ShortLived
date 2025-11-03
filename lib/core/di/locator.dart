@@ -1,5 +1,5 @@
 import '../../services/cache/cache_service.dart';
-import '../../data/models/post.dart';
+import '../../services/cache/cache_service_hive.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../services/keys/signer.dart';
 import '../../services/keys/local_signer.dart';
@@ -9,7 +9,7 @@ import '../../services/settings/settings_service.dart';
 
 class Locator {
   Locator._() {
-    final cache = _MemoryCacheService();
+    final cache = CacheServiceHive();
     cache.init();
     put<CacheService>(cache);
   }
@@ -36,24 +36,6 @@ extension SignerRegistration on Locator {
       }
     }
     put<Signer>(LocalSigner(get<KeyService>()));
-  }
-}
-
-class _MemoryCacheService implements CacheService {
-  List<Post> _posts = [];
-
-  @override
-  Future<void> cacheThumb(String postId, String url) async {}
-
-  @override
-  Future<void> init() async {}
-
-  @override
-  Future<List<Post>> loadCachedPosts() async => List<Post>.from(_posts);
-
-  @override
-  Future<void> savePosts(List<Post> posts) async {
-    _posts = List<Post>.from(posts);
   }
 }
 

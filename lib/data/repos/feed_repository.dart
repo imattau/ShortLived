@@ -183,8 +183,7 @@ class RealFeedRepository implements FeedRepository {
             final list = _sorted();
             yield list;
             try {
-              final latest = list.take(50).toList();
-              await _cache.savePosts(latest);
+              await _cache.savePosts(list);
             } catch (_) {}
             break;
           case 7: // like reaction
